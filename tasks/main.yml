@@ -14,9 +14,6 @@
     state: present
   when: ansible_distribution == "Fedora"
 
-- name: Drop all local modifications first
-  shell: echo "{{drop_local_modifications}}" | /usr/sbin/semanage -i -
-
 - name: Set permanent SELinux mode
   selinux: policy={{ SELinux_type }} state={{ SELinux_mode }}
   when: SELinux_mode is defined
@@ -24,6 +21,13 @@
 - name: Set running SELinux mode
   command: /usr/sbin/setenforce {{ SELinux_mode }}
   when: SELinux_mode is defined and SELinux_change_running is defined
+
+- name: Drop all local modifications
+  shell: echo "{{drop_local_modifications}}" | /usr/sbin/semanage -i -
+
+- name: Reload SELinux policy
+  command: semodule -R
+  when: ansible_selinux.status != "disabled"
 
 - name: Set SELinux booleans
   seboolean:
