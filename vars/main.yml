@@ -1,6 +1,6 @@
 ---
 drop_local_modifications: |
-  boolean -D
-  login -D
-  port -D
-  fcontext -D
+  boolean -D -N
+  login -D -N
+  port -D -N
+  fcontext -D -N
