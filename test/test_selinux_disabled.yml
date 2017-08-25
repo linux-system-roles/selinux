@@ -1,0 +1,48 @@
+
+- name: Ensure the default is targeted, enforcing, without local modifications
+  hosts: all
+  become: true
+  vars:
+    SELinux_type: targeted
+    SELinux_mode: enforcing
+
+  pre_tasks:
+    - name: Backup original /etc/selinux/config
+      copy:
+        remote_src: true
+        src: /etc/selinux/config
+        dest: /etc/selinux/config.test_selinux_disabled
+    - name: Upload testing /etc/selinux/config
+      copy:
+        src: selinux.config
+        dest: /etc/selinux/config
+    - name: Switch to permissive to allow login when selinuxfs is not mounted
+      command: setenforce 0
+      when: ansible_selinux.status != "disabled"
+    - name: Get selinuxfs mountpoint
+      shell: findmnt -n -t selinuxfs --output=target
+      register: selinux_mountpoint
+    - name: Umount {{ selinux_mountpoint.stdout }} to emulate SELinux disabled system
+      command: umount {{ selinux_mountpoint.stdout }}
+
+  roles:
+    - selinux
+
+  tasks:
+    - name: Mount {{ selinux_mountpoint.stdout }} back to system
+      command: mount -t selinuxfs selinuxfs {{ selinux_mountpoint.stdout }}
+    - name: Switch back to enforcing
+      command: setenforce 1
+    - name: Gather facts again
+      setup:
+    - name: Check SELinux config mode
+      assert:
+        that: "{{ ansible_selinux.config_mode == 'enforcing' }}"
+        mgs: "SELinux config mode should be enforcing instead of {{ ansible_selinux.config_mode }}"
+    - name: Restore original /etc/selinux/config
+      copy:
+        remote_src: true
+        dest: /etc/selinux/config
+        src: /etc/selinux/config.test_selinux_disabled
+    - name: Remove /etc/selinux/config backup
+      command: rm /etc/selinux/config.test_selinux_disabled
