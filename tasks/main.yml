@@ -23,7 +23,7 @@
   when: SELinux_mode is defined and SELinux_change_running is defined
 
 - name: Drop all local modifications
-  shell: echo "{{drop_local_modifications}}" | /usr/sbin/semanage -i -
+  shell: echo -e -n "{{drop_local_modifications}}" | /usr/sbin/semanage -i -
 
 - name: Reload SELinux policy
   command: semodule -R
