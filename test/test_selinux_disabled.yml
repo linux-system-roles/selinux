@@ -5,8 +5,26 @@
   vars:
     SELinux_type: targeted
     SELinux_mode: enforcing
+    semanage_change: |
+      boolean -m --on samba_enable_home_dirs
+      port -a -p tcp -t ssh_port_t 22100
+      fcontext -a -t user_home_dir_t /tmp/test_dir
+      login -a -s staff_u sar-user
 
   pre_tasks:
+    - name: Install SELinux tool semanage on Fedora
+      package:
+        name:
+          - policycoreutils-python-utils
+        state: present
+      when: ansible_distribution == "Fedora"
+
+    - name: Add a System Api Roles SELinux User
+      user:
+        comment: System Api Roles SELinux User
+        name: sar-user
+    - name: Add some mapping
+      shell: echo -e -n "{{ semanage_change }}" | /usr/sbin/semanage -i -
     - name: Backup original /etc/selinux/config
       copy:
         remote_src: true
@@ -46,3 +64,8 @@
         src: /etc/selinux/config.test_selinux_disabled
     - name: Remove /etc/selinux/config backup
       command: rm /etc/selinux/config.test_selinux_disabled
+    - name: Remove System Api Roles SELinux User
+      user:
+        name: sar-user
+        remove: yes
+        state: absent
