@@ -15,3 +15,5 @@
     - name: Check if there are SELinux fcontext mapping changes
       assert:
         that: "{{ selinux_role_fcontext.stdout != '' }}"
+    - name: Cleanup file contexts
+      command: /usr/sbin/semanage fcontext -D
