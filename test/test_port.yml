@@ -15,3 +15,5 @@
     - name: Check if there are SELinux port mapping changes
       assert:
         that: "{{ selinux_role_port.stdout != '' }}"
+    - name: Cleanup port mappings
+      command: /usr/sbin/semanage port -D

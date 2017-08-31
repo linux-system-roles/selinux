@@ -28,4 +28,6 @@
         comment: System Api Roles SELinux User
         name: sar-user
         state: absent
+    - name: Cleanup login mappings
+      command: /usr/sbin/semanage login -D
 
