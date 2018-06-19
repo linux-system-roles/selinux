@@ -36,11 +36,11 @@ The general usage is demonstrated in [selinux-playbook.yml](selinux-playbook.yml
 
 ### selinux role
 
-This role can be configured using variables as it is described bellow.
+This role can be configured using variables as it is described below.
 
 ```yaml
 vars:
-  [ see bellow ]
+  [ see below ]
 roles:
   - role: selinux
     become: true
