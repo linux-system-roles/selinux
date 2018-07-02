@@ -66,7 +66,7 @@ selinux_booleans:
 #### Set SELinux file contexts
 
 ```yaml
-selinux_file_contexts:
+selinux_fcontexts:
   - { target: '/tmp/test_dir(/.*)?', setype: 'user_home_dir_t', ftype: 'd' }
 ```
 

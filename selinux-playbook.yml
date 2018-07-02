@@ -10,7 +10,7 @@
     selinux_booleans:
       - { name: 'samba_enable_home_dirs', state: 'on' }
       - { name: 'ssh_sysadm_login', state: 'on', persistent: 'yes' }
-    selinux_file_contexts:
+    selinux_fcontexts:
       - { target: '/tmp/test_dir(/.*)?', setype: 'user_home_dir_t', ftype: 'd' }
     selinux_restore_dirs:
       - /tmp/test_dir

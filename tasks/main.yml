@@ -43,7 +43,7 @@
     ftype:  "{{ item.ftype | default('a') }}"
     state:  'present'
     # FIXME: selevel, seuser
-  with_items: "{{ selinux_file_contexts | default([]) }}"
+  with_items: "{{ selinux_fcontexts | default([]) }}"
 
 - name: Restore SELinux labels on filesystem tree
   command: /sbin/restorecon -R {{ item }}
