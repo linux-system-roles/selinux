@@ -20,8 +20,7 @@ SELinux mode and policy.
 
 [sefcontext](http://docs.ansible.com/ansible/sefcontext_module.html): Manages
 SELinux file context mapping definitions Similar to the `semanage fcontext`
-command.  Currently it doesn't work due to
-[bug #1405110](https://bugzilla.redhat.com/show_bug.cgi?id=1405110).
+command.
 
 [seport](http://docs.ansible.com/ansible/seport_module.html): Manages SELinux
 network port type definitions.
@@ -69,8 +68,6 @@ SELinux_booleans:
 SELinux_file_contexts:
   - { target: '/tmp/test_dir(/.*)?', setype: 'user_home_dir_t', ftype: 'd' }
 ```
-
-Note: it doesn't work right now due to [bug #1405110](https://bugzilla.redhat.com/show_bug.cgi?id=1405110).
 
 #### run restorecon on filesystem trees
 
