@@ -4,19 +4,19 @@
   become_method: sudo
   become_user: root
   vars:
-    SELinux_type: targeted
-    SELinux_mode: enforcing
-    SELinux_change_running: 1
-    SELinux_booleans:
+    selinux_policy: targeted
+    selinux_state: enforcing
+    selinux_change_running: 1
+    selinux_booleans:
       - { name: 'samba_enable_home_dirs', state: 'on' }
       - { name: 'ssh_sysadm_login', state: 'on', persistent: 'yes' }
-    SELinux_file_contexts:
+    selinux_fcontexts:
       - { target: '/tmp/test_dir(/.*)?', setype: 'user_home_dir_t', ftype: 'd' }
-    SELinux_restore_dirs:
+    selinux_restore_dirs:
       - /tmp/test_dir
-    SELinux_ports:
+    selinux_ports:
       - { ports: '22100', proto: 'tcp', setype: 'ssh_port_t', state: 'present' }
-    SELinux_logins:
+    selinux_logins:
       - { login: 'sar-user', seuser: 'staff_u', serange: 's0-s0:c0.c1023', state: 'present' }
 
   # prepare prerequisites which is used in this playbook

@@ -49,15 +49,15 @@ roles:
 #### set SELinux mode permanently and in running system
 
 ```yaml
-SELinux_type: targeted
-SELinux_mode: enforcing
-SELinux_change_running: 1
+selinux_policy: targeted
+selinux_state: enforcing
+selinux_change_running: 1
 ```
 
 #### set SELinux booleans
 
 ```yaml
-SELinux_booleans:
+selinux_booleans:
   - { name: 'samba_enable_home_dirs', state: 'on' }
   - { name: 'ssh_sysadm_login', state: 'on', persistent: 'yes' }
 ```
@@ -65,21 +65,21 @@ SELinux_booleans:
 #### Set SELinux file contexts
 
 ```yaml
-SELinux_file_contexts:
+selinux_fcontexts:
   - { target: '/tmp/test_dir(/.*)?', setype: 'user_home_dir_t', ftype: 'd' }
 ```
 
 #### run restorecon on filesystem trees
 
 ```yaml
-SELinux_restore_dirs:
+selinux_restore_dirs:
   - /tmp/test_dir
 ```
 
 #### Set linux user to SELinux user mapping
 
 ```yaml
-    SELinux_logins:
+    selinux_logins:
       - { login: 'plautrba', seuser: 'staff_u', state: 'absent' }
       - { login: '__default__', seuser: 'staff_u', serange: 's0-s0:c0.c1023', state: 'present' }
 ```

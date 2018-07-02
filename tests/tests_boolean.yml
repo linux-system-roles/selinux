@@ -4,7 +4,7 @@
   become: true
 
   vars:
-    SELinux_booleans:
+    selinux_booleans:
       - { name: 'samba_enable_home_dirs', state: 'on', persistent: 'yes' }
 
   roles:
