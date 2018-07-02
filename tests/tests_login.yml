@@ -4,7 +4,7 @@
   become: true
 
   vars:
-    SELinux_logins:
+    selinux_logins:
       - { login: 'sar-user', seuser: 'staff_u', serange: 's0-s0:c0.c1023', state: 'present' }
 
   pre_tasks:

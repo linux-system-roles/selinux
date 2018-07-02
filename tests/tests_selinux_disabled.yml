@@ -3,8 +3,8 @@
   hosts: all
   become: true
   vars:
-    SELinux_type: targeted
-    SELinux_mode: enforcing
+    selinux_policy: targeted
+    selinux_state: enforcing
     semanage_change: |
       boolean -m --on samba_enable_home_dirs
       port -a -p tcp -t ssh_port_t 22100
