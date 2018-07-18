@@ -14,8 +14,13 @@
     state: present
   when: ansible_distribution == "Fedora"
 
+- name: validate selinux_policy
+  fail:
+    msg: selinux_policy must be provided if selinux_state is not "disabled"
+  when: selinux_state != "disabled" and selinux_policy is not defined
+
 - name: Set permanent SELinux state
-  selinux: policy={{ selinux_policy }} state={{ selinux_state }}
+  selinux: policy={{ selinux_policy | d() }} state={{ selinux_state }}
   when: selinux_state is defined
 
 - name: Set running SELinux state
