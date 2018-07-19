@@ -10,3 +10,5 @@ galaxy_info:
     versions: [ 24, 25 ]
   - name: EL
     versions: [ 6, 7 ]
+
+allow_duplicates: true
