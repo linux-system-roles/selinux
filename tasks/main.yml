@@ -2,7 +2,6 @@
 - name: Install SELinux tools
   package:
     name:
-      - libselinux-utils
       - libselinux-python
       - policycoreutils-python
     state: present
