@@ -47,7 +47,7 @@
     target: "{{ item.target }}"
     setype: "{{ item.setype }}"
     ftype:  "{{ item.ftype | default('a') }}"
-    state:  'present'
+    state:  "{{ item.state | default('present') }}"
     # FIXME: selevel, seuser
   with_items: "{{ selinux_fcontexts | default([]) }}"
 
