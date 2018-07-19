@@ -18,10 +18,6 @@
   selinux: policy={{ selinux_policy }} state={{ selinux_state }}
   when: selinux_state is defined
 
-- name: Set running SELinux state
-  command: /usr/sbin/setenforce {{ selinux_state }}
-  when: selinux_state is defined and selinux_change_running is defined
-
 - name: Drop all local modifications
   shell: echo -e -n "{{drop_local_modifications}}" | /usr/sbin/semanage -i -
 
