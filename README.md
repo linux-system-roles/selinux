@@ -46,12 +46,11 @@ roles:
 ```
 
 
-#### set SELinux mode permanently and in running system
+#### set SELinux policy type and mode
 
 ```yaml
 selinux_policy: targeted
 selinux_state: enforcing
-selinux_change_running: 1
 ```
 
 #### set SELinux booleans
