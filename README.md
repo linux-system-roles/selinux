@@ -45,6 +45,20 @@ roles:
     become: true
 ```
 
+#### purge local modifications using appropriate variable
+
+```yaml
+selinux_booleans_purge: true
+selinux_fcontexts_purge: true
+selinux_ports_purge: true
+selinux_logins_purge: true
+```
+
+#### purge all local modifications using variable
+
+```yaml
+selinux_all_purge: true
+```
 
 #### set SELinux policy type and mode
 
