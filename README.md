@@ -96,3 +96,9 @@ selinux_restore_dirs:
       - { login: 'plautrba', seuser: 'staff_u', state: 'absent' }
       - { login: '__default__', seuser: 'staff_u', serange: 's0-s0:c0.c1023', state: 'present' }
 ```
+
+## Ansible Facts
+
+### selinux\_reboot\_required
+
+This custom fact is set to `true` if system reboot is necessary when SELinux is set from `disabled` to `enabled` or vice versa.  Otherwise the fact is set to `false`.
