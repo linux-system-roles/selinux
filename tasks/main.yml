@@ -24,6 +24,11 @@
     ( ansible_distribution_major_version > "7" and
       ( ansible_distribution == "CentOS" or ansible_distribution == "RedHat" ))
 
+- name: validate selinux_state
+  fail:
+    msg: selinux_state must be always provided
+  when: selinux_state is not defined
+
 - name: Set permanent SELinux state
   selinux: policy={{ selinux_policy }} state={{ selinux_state }}
   when: selinux_state is defined
