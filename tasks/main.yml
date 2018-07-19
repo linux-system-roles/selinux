@@ -1,17 +1,28 @@
 ---
-- name: Install SELinux tools
+- name: Install SELinux python2 tools
   package:
     name:
       - libselinux-python
       - policycoreutils-python
     state: present
+  when: "ansible_python_version is version('3', '<')"
+
+- name: Install SELinux python3 tools
+  package:
+    name:
+      - libselinux-python3
+      - policycoreutils-python3
+    state: present
+  when: "ansible_python_version is version('3', '>=')"
 
 - name: Install SELinux tool semanage on Fedora
   package:
     name:
       - policycoreutils-python-utils
     state: present
-  when: ansible_distribution == "Fedora"
+  when: ansible_distribution == "Fedora" or
+    ( ansible_distribution_major_version > "7" and
+      ( ansible_distribution == "CentOS" or ansible_distribution == "RedHat" ))
 
 - name: Set permanent SELinux state
   selinux: policy={{ selinux_policy }} state={{ selinux_state }}
