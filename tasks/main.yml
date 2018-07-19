@@ -30,6 +30,23 @@
 
 - name: Drop all local modifications
   shell: echo -e -n "{{drop_local_modifications}}" | /usr/sbin/semanage -i -
+  when: selinux_all_purge | default(False)
+
+- name: Purge all SELinux boolean local modifications
+  shell: /usr/sbin/semanage boolean -D
+  when: selinux_booleans_purge | default(False)
+
+- name: Purge all SELinux file context local modifications
+  shell: /usr/sbin/semanage fcontext -D
+  when: selinux_fcontexts_purge | default(False)
+
+- name: Purge all SELinux port local modifications
+  shell: /usr/sbin/semanage port -D
+  when: selinux_ports_purge | default(False)
+
+- name: Purge all SELinux login local modifications
+  shell: /usr/sbin/semanage login -D
+  when: selinux_logins_purge | default(False)
 
 - name: Reload SELinux policy
   command: semodule -R
