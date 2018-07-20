@@ -28,19 +28,21 @@
   selinux:
     state: "{{ selinux_state | default(ansible_selinux.config_mode) }}"
     policy: "{{ selinux_policy | default(ansible_selinux.type) }}"
-  register: selinux_mod_output
+  register: selinux_mod_output_enabled
   when: ansible_selinux.status == "enabled"
 
 - name: Set permanent SELinux state if disabled
   selinux:
     state: "{{ selinux_state }}"
     policy: "{{ selinux_policy | default('targeted') }}"
-  register: selinux_mod_output
+  register: selinux_mod_output_disabled
   when: ansible_selinux.status == "disabled" and selinux_state is defined
 
 - name: Set ansible facts if needed
   set_fact:
-    selinux_reboot_required: "{{ selinux_mod_output.reboot_required | default(False) }}"
+    selinux_reboot_required: "{{ selinux_mod_output_enabled.reboot_required
+  if ( selinux_mod_output_enabled.reboot_required is defined ) else (
+  selinux_mod_output_disabled.reboot_required | default(false) ) }}"
 
 - name: Fail if reboot is required
   fail:
