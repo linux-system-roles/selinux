@@ -15,6 +15,10 @@
     state: present
   when: "ansible_python_version is version('3', '>=')"
 
+- name: refresh facts
+  setup:
+    filter: ansible_selinux
+
 - name: Install SELinux tool semanage on Fedora
   package:
     name:
