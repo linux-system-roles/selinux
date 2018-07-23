@@ -82,6 +82,13 @@ selinux_fcontexts:
   - { target: '/tmp/test_dir(/.*)?', setype: 'user_home_dir_t', ftype: 'd' }
 ```
 
+#### Set SELinux ports
+
+```yaml
+selinux_ports:
+  - { ports: '22100', proto: 'tcp', setype: 'ssh_port_t', state: 'present' }
+```
+
 #### run restorecon on filesystem trees
 
 ```yaml
