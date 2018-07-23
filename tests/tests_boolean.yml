@@ -6,6 +6,7 @@
   vars:
     selinux_booleans:
       - { name: 'samba_enable_home_dirs', state: 'on', persistent: 'yes' }
+    selinux_booleans_purge: true
 
   roles:
     - selinux

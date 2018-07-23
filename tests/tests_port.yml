@@ -4,6 +4,7 @@
   become: true
 
   vars:
+    selinux_ports_purge: true
     selinux_ports:
       - { ports: '22100', proto: 'tcp', setype: 'ssh_port_t', state: 'present' }
 

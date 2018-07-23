@@ -4,6 +4,7 @@
   become: true
 
   vars:
+    selinux_logins_purge: true
     selinux_logins:
       - { login: 'sar-user', seuser: 'staff_u', serange: 's0-s0:c0.c1023', state: 'present' }
 
