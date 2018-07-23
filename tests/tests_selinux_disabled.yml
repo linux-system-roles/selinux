@@ -3,6 +3,7 @@
   hosts: all
   become: true
   vars:
+    selinux_all_purge: true
     selinux_policy: targeted
     selinux_state: enforcing
     semanage_change: |

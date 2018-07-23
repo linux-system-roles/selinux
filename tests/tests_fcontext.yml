@@ -4,6 +4,7 @@
   become: true
 
   vars:
+    selinux_all_purge: true
     selinux_fcontexts:
       - { target: '/tmp/test_dir(/.*)?', setype: 'user_home_dir_t', ftype: 'd' }
 

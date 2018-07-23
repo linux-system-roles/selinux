@@ -5,7 +5,8 @@
 
   roles:
     - selinux
-
+  vars:
+      selinux_all_purge: true
   tasks:
     - name: Gather facts again
       setup:
