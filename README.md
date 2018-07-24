@@ -108,4 +108,4 @@ selinux_restore_dirs:
 
 ### selinux\_reboot\_required
 
-This custom fact is set to `true` if system reboot is necessary when SELinux is set from `disabled` to `enabled` or vice versa.  Otherwise the fact is set to `false`.
+This custom fact is set to `true` if system reboot is necessary when SELinux is set from `disabled` to `enabled` or vice versa.  Otherwise the fact is set to `false`.  In the case that system reboot is needed, it will be indicated by returning failure from the role which needs to be handled using a `block:`...`rescue:` construct. The reboot needs to be performed in the playbook, the role itself never reboots the managed host. After the reboot the role needs to be reapplied to finish the changes.
