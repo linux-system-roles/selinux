@@ -33,7 +33,7 @@
     state: "{{ selinux_state | default(ansible_selinux.config_mode) }}"
     policy: "{{ selinux_policy | default(ansible_selinux.type) }}"
   register: selinux_mod_output_enabled
-  when: ansible_selinux.status == "enabled"
+  when: ansible_selinux.status == "enabled" and ( selinux_state is defined or selinux_policy is defined )
 
 - name: Set permanent SELinux state if disabled
   selinux:
