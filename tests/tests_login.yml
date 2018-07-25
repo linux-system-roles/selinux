@@ -23,6 +23,10 @@
       set_fact:
         login_before: "{{ selinux_role_login.stdout }}"
 
+    - name: Check if there are SELinux login mapping changes
+      assert:
+        that: "{{ login_before != '' }}"
+
     - name: subsequent changes
       include_role:
         name: selinux
