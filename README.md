@@ -41,7 +41,7 @@ This role can be configured using variables as it is described below.
 vars:
   [ see below ]
 roles:
-  - role: selinux
+  - role: linux-system-roles.selinux
     become: true
 ```
 
