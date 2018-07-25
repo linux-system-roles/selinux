@@ -17,6 +17,10 @@
       set_fact:
         port_before: "{{ selinux_role_port.stdout }}"
 
+    - name: Check if there are SELinux port mapping changes
+      assert:
+        that: "{{ port_before != '' }}"
+
     - name: subsequent changes
       include_role:
         name: selinux

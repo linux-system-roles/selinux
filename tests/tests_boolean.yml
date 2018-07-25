@@ -17,6 +17,10 @@
       set_fact:
         boolean_before: "{{ selinux_role_boolean.stdout_lines }}"
 
+    - name: Check if there are SELinux boolean changes
+      assert:
+        that: "{{ selinux_role_boolean.stdout != '' }}"
+
     - name: subsequent changes
       include_role:
         name: selinux

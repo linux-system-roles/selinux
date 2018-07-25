@@ -18,6 +18,10 @@
       set_fact:
         fcontext_before: "{{ selinux_role_fcontext.stdout }}"
 
+    - name: Check if there are SELinux fcontext mapping changes
+      assert:
+        that: "{{ fcontext_before != '' }}"
+
     - name: subsequent changes
       include_role:
         name: selinux
