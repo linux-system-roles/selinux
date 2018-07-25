@@ -30,7 +30,7 @@
       set_fact:
         boolean_after: "{{ selinux_role_boolean.stdout_lines }}"
 
-    - name: Check if there are SELinux boolean mapping changes
+    - name: Check if there are SELinux boolean changes
       assert:
         that: "{{ ( boolean_before | count ) < ( boolean_after | count ) }}"
 
