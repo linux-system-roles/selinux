@@ -20,9 +20,9 @@
         state: present
       when: ansible_distribution == "Fedora"
 
-    - name: Add a System Api Roles SELinux User
+    - name: Add a Linux System Roles SELinux User
       user:
-        comment: System Api Roles SELinux User
+        comment: Linux System Roles SELinux User
         name: sar-user
     - name: Add some mapping
       shell: echo -e -n "{{ semanage_change }}" | /usr/sbin/semanage -i -
