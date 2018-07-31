@@ -9,6 +9,13 @@
       login -a -s staff_u sar-user
 
   tasks:
+    - name: Install SELinux tool semanage on Fedora
+      package:
+        name:
+          - policycoreutils-python-utils
+        state: present
+      when: ansible_distribution == "Fedora"
+
     - name: Add a Linux System Roles SELinux User
       user:
         comment: Linux System Roles SELinux User
