@@ -45,16 +45,18 @@ roles:
     become: true
 ```
 
-#### purge local modifications using appropriate variable
+#### purge local modifications
 
-```yaml
-selinux_booleans_purge: true
-selinux_fcontexts_purge: true
-selinux_ports_purge: true
-selinux_logins_purge: true
-```
+By default, the modifications specified in `selinux_booleans`, `selinux_fcontexts`,
+`selinux_ports` and `selinux_logins` are applied on top of pre-existing modifications.
+To purge local modifications prior to setting new ones, set following variables to true:
 
-#### purge all local modifications using variable
+- SELinux booleans: `selinux_booleans_purge`
+- SELinux file contexts: `selinux_fcontexts_purge`
+- SELinux ports: `selinux_ports_purge`
+- SELinux user mapping: `selinux_logins_purge`
+
+You can purge all modifications by using shorthand:
 
 ```yaml
 selinux_all_purge: true
@@ -66,6 +68,9 @@ selinux_all_purge: true
 selinux_policy: targeted
 selinux_state: enforcing
 ```
+
+If `selinux_policy` or `selinux_state` is not set and SELinux is enabled, it is not changed.
+If `selinux_policy` is not set and SELinux is to be enabled, it defaults to `targeted`.
 
 #### set SELinux booleans
 
@@ -79,8 +84,10 @@ selinux_booleans:
 
 ```yaml
 selinux_fcontexts:
-  - { target: '/tmp/test_dir(/.*)?', setype: 'user_home_dir_t', ftype: 'd' }
+  - { target: '/tmp/test_dir(/.*)?', setype: 'user_home_dir_t', ftype: 'd', state: 'present' }
 ```
+
+Individual modifications can be dropped by setting `state` to `absent`.
 
 #### Set SELinux ports
 
