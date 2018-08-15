@@ -68,9 +68,11 @@ selinux_all_purge: true
 selinux_policy: targeted
 selinux_state: enforcing
 ```
+Allowed values for `selinux_state` are `disabled`, `enforcing` and `permissive`.
 
-If `selinux_policy` or `selinux_state` is not set and SELinux is enabled, it is not changed.
-If `selinux_policy` is not set and SELinux is to be enabled, it defaults to `targeted`.
+If `selinux_state` is not set, the SELinux state is not changed.
+If `selinux_policy` is not set and SELinux is to be enabled, it defaults to `targeted`. 
+If SELinux is already enabled, the policy is not changed.
 
 #### set SELinux booleans
 
