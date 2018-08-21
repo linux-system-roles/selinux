@@ -1,13 +1,13 @@
 galaxy_info:
   author: Petr Lautrbach <plautrba@redhat.com>
   description: Configure SELinux
-  galaxy_tags: [ 'system', 'beta' ]
+  galaxy_tags: [ 'system', 'selinux', 'redhat', 'rhel', 'fedora', 'centos' ]
   company: Red Hat, Inc.
   license: GPL-3.0+
-  min_ansible_version: 2.2
+  min_ansible_version: 2.5
   platforms:
   - name: Fedora
-    versions: [ 24, 25 ]
+    versions: [ 27, 28 ]
   - name: EL
     versions: [ 6, 7 ]
 
