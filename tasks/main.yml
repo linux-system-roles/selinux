@@ -88,6 +88,12 @@
     persistent: "{{ item.persistent | default('no') }}"
   with_items: "{{ selinux_booleans }}"
 
+- name: Set SELinux domains
+  selinux_permissive:
+    name: "{{ item.name }}"
+    permissive: "{{ item.state }}"
+  with_items: "{{ selinux_domains }}"
+  
 - name: Set SELinux file contexts
   sefcontext:
     target: "{{ item.target }}"

@@ -6,6 +6,7 @@ selinux_fcontexts: []
 selinux_logins: []
 selinux_ports: []
 selinux_restore_dirs: []
+selinux_domains: []
 
 # Purging local modifications is disabled by default.
 selinux_all_purge: no
