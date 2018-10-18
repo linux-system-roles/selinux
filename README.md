@@ -82,6 +82,19 @@ selinux_booleans:
   - { name: 'ssh_sysadm_login', state: 'on', persistent: 'yes' }
 ```
 
+#### set SELinux domains
+
+```yaml
+selinux_domains:
+  - { name: 'httpd_t', state: 'permissive' }
+```
+
+```yaml
+selinux_booleans:
+  - { name: 'http', state: 'on' }
+  - { name: 'ssh_sysadm_login', state: 'on', persistent: 'yes' }
+```
+
 #### Set SELinux file contexts
 
 ```yaml
