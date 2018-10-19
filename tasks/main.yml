@@ -91,7 +91,7 @@
 - name: Set SELinux domains
   selinux_permissive:
     name: "{{ item.name }}"
-    permissive: "{{ item.state }}"
+    permissive: "{{ item.permissive}}"
   with_items: "{{ selinux_domains }}"
   
 - name: Set SELinux file contexts
