@@ -1,4 +1,5 @@
 # SELinux
+[![Travis Build Status](https://travis-ci.org/linux-system-roles/selinux.svg?branch=master)](https://travis-ci.org/linux-system-roles/selinux)
 
 ## Expected functionality
 
