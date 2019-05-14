@@ -58,23 +58,25 @@
   when: ansible_selinux.status == "disabled"
 
 - name: Drop all local modifications
-  shell: echo -e -n "{{drop_local_modifications}}" | /usr/sbin/semanage -i -
+  command: /usr/sbin/semanage -i -
+  args:
+    stdin: "{{ drop_local_modifications }}"
   when: selinux_all_purge | bool
 
 - name: Purge all SELinux boolean local modifications
-  shell: /usr/sbin/semanage boolean -D
+  command: /usr/sbin/semanage boolean -D
   when: selinux_booleans_purge | bool
 
 - name: Purge all SELinux file context local modifications
-  shell: /usr/sbin/semanage fcontext -D
+  command: /usr/sbin/semanage fcontext -D
   when: selinux_fcontexts_purge | bool
 
 - name: Purge all SELinux port local modifications
-  shell: /usr/sbin/semanage port -D
+  command: /usr/sbin/semanage port -D
   when: selinux_ports_purge | bool
 
 - name: Purge all SELinux login local modifications
-  shell: /usr/sbin/semanage login -D
+  command: /usr/sbin/semanage login -D
   when: selinux_logins_purge | bool
 
 - name: Reload SELinux policy
@@ -92,14 +94,24 @@
   sefcontext:
     target: "{{ item.target }}"
     setype: "{{ item.setype }}"
-    ftype:  "{{ item.ftype | default('a') }}"
-    state:  "{{ item.state | default('present') }}"
+    ftype: "{{ item.ftype | default('a') }}"
+    state: "{{ item.state | default('present') }}"
     # FIXME: selevel, seuser
   with_items: "{{ selinux_fcontexts }}"
 
 - name: Restore SELinux labels on filesystem tree
-  command: /sbin/restorecon -R {{ item }}
+  command: /sbin/restorecon -R -v {{ item }}
   with_items: "{{ selinux_restore_dirs }}"
+  register: restorecon_cmd
+  changed_when: '"Relabeled" in restorecon_cmd.stdout'
+
+- name: Restore SELinux labels on filesystem tree in check mode
+  command: /sbin/restorecon -R -v -n {{ item }}
+  with_items: "{{ selinux_restore_dirs }}"
+  register: restorecon_cmd
+  changed_when: '"Would relabel" in restorecon_cmd.stdout'
+  check_mode: no
+  when: ansible_check_mode
 
 - name: Set an SELinux label on a port
   seport:
