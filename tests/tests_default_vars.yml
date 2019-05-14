@@ -1,0 +1,21 @@
+- name: Ensure that the role declares all paremeters in defaults
+  hosts: all
+
+  roles:
+    - selinux
+  tasks:
+    - assert:
+        that: "vars[item] is defined"
+      loop:
+        - selinux_state
+        - selinux_policy
+        - selinux_booleans
+        - selinux_fcontexts
+        - selinux_logins
+        - selinux_ports
+        - selinux_restore_dirs
+        - selinux_all_purge
+        - selinux_booleans_purge
+        - selinux_fcontexts_purge
+        - selinux_ports_purge
+        - selinux_logins_purge
