@@ -21,5 +21,5 @@
     - name: wait for managed host to come back
       wait_for_connection:
         delay: 10
-        timeout: 120
+        timeout: 300
   when: restoreconf is changed
