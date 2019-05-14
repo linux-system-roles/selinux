@@ -1,4 +1,6 @@
 ---
+selinux_state: null
+selinux_policy: null
 
 # Set up empty lists for SELinux changes.
 selinux_booleans: []
