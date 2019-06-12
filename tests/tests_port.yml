@@ -1,5 +1,6 @@
 
 - name: Check if selinux role sets SELinux port mapping
+  tags: tests::tier1
   hosts: all
   become: true
 
@@ -29,7 +30,7 @@
         selinux_ports:
           - { ports: '22022', proto: 'tcp', setype: 'ssh_port_t', state: 'present' }
 
-    - include: set_selinux_variables.yml
+    - import_tasks: set_selinux_variables.yml
     - name: save state after other changes
       set_fact:
         port_after: "{{ selinux_role_port.stdout }}"

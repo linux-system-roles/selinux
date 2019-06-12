@@ -1,5 +1,6 @@
 
 - name: Check if selinux role sets SELinux fcontext mappings
+  tags: tests::tier1
   hosts: all
   become: true
 
@@ -13,7 +14,7 @@
         selinux_fcontexts:
           - { target: '/tmp/test_dir1(/.*)?', setype: 'user_home_dir_t', ftype: 'd' }
 
-    - include: set_selinux_variables.yml
+    - import_tasks: set_selinux_variables.yml
     - name: save state after initial changes and before other changes
       set_fact:
         fcontext_before: "{{ selinux_role_fcontext.stdout }}"

@@ -1,5 +1,6 @@
 
 - name: Check if selinux role sets SELinux login mappings
+  tags: tests::tier1
   hosts: all
   become: true
 
@@ -18,7 +19,7 @@
           - { login: 'sar-user', seuser: 'staff_u', serange: 's0-s0:c0.c1023', state: 'present' }
 
 
-    - include: set_selinux_variables.yml
+    - import_tasks: set_selinux_variables.yml
     - name: save state after initial changes and before other changes
       set_fact:
         login_before: "{{ selinux_role_login.stdout }}"
