@@ -1,5 +1,6 @@
 
 - name: Check if selinux role sets SELinux booleans
+  tags: [ 'tests::tier1', 'tests::expfail' ]
   hosts: all
   become: true
 
@@ -12,7 +13,7 @@
         selinux_booleans:
           - { name: 'samba_enable_home_dirs', state: 'on', persistent: 'yes' }
 
-    - include: set_selinux_variables.yml
+    - import_tasks: set_selinux_variables.yml
     - name: save state after initial changes and before other changes
       set_fact:
         boolean_before: "{{ selinux_role_boolean.stdout_lines }}"
