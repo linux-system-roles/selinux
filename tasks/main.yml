@@ -62,26 +62,30 @@
   args:
     stdin: "{{ drop_local_modifications }}"
   when: selinux_all_purge | bool
+  notify: Reload SELinux policy
 
 - name: Purge all SELinux boolean local modifications
   command: /usr/sbin/semanage boolean -D
   when: selinux_booleans_purge | bool
+  notify: Reload SELinux policy
 
 - name: Purge all SELinux file context local modifications
   command: /usr/sbin/semanage fcontext -D
   when: selinux_fcontexts_purge | bool
+  notify: Reload SELinux policy
 
 - name: Purge all SELinux port local modifications
   command: /usr/sbin/semanage port -D
   when: selinux_ports_purge | bool
+  notify: Reload SELinux policy
 
 - name: Purge all SELinux login local modifications
   command: /usr/sbin/semanage login -D
   when: selinux_logins_purge | bool
+  notify: Reload SELinux policy
 
-- name: Reload SELinux policy
-  command: semodule -R
-  when: ansible_selinux.status != "disabled"
+- name: Reload SELinux policy if needed
+  meta: flush_handlers
 
 - name: Set SELinux booleans
   seboolean:
