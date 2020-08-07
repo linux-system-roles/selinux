@@ -7,20 +7,22 @@
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
-# 
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-ANSIBLE_METADATA = {'status': ['preview'],
-                    'supported_by': 'community',
-                    'version': '1.0'}
+ANSIBLE_METADATA = {
+    "status": ["preview"],
+    "supported_by": "community",
+    "version": "1.0",
+}
 
-DOCUMENTATION = '''
+DOCUMENTATION = """
 ---
 module: selogin
 short_description: Manages linux user to SELinux user mapping
@@ -40,7 +42,9 @@ options:
     default: null
   serange:
     description:
-      - MLS/MCS Security Range (MLS/MCS Systems only) SELinux Range for SELinux login mapping  defaults to the SELinux user record range.
+      - >-
+      MLS/MCS Security Range (MLS/MCS Systems only) SELinux Range for SELinux login
+      mapping - defaults to the SELinux user record range.
     required: false
     default: s0
   state:
@@ -60,9 +64,9 @@ notes:
 requirements: [ 'libselinux-python', 'policycoreutils-python' ]
 author: Dan Keder
 author: Petr Lautrbach
-'''
+"""
 
-EXAMPLES = '''
+EXAMPLES = """
 # Modify the default user on the system to the guest_u user
 - selogin:
     login: __default__
@@ -81,21 +85,23 @@ EXAMPLES = '''
     login: %engineering
     seuser: staff_u
     state: present
-'''
+"""
 
 try:
     import selinux
-    HAVE_SELINUX=True
+
+    HAVE_SELINUX = True
 except ImportError:
-    HAVE_SELINUX=False
+    HAVE_SELINUX = False
 
 try:
     import seobject
-    HAVE_SEOBJECT=True
-except ImportError:
-    HAVE_SEOBJECT=False
 
-from ansible.module_utils.basic import *
+    HAVE_SEOBJECT = True
+except ImportError:
+    HAVE_SEOBJECT = False
+
+from ansible.module_utils.basic import AnsibleModule
 from ansible.module_utils.pycompat24 import get_exception
 
 
@@ -134,7 +140,7 @@ def semanage_port_get_type(seport, port, proto):
     :rtype: tuple
     :return: Tuple containing the SELinux type and MLS/MCS level, or None if not found.
     """
-    ports = port.split('-', 1)
+    ports = port.split("-", 1)
     if len(ports) == 1:
         ports.extend(ports)
     key = (int(ports[0]), int(ports[1]), proto)
@@ -146,7 +152,7 @@ def semanage_port_get_type(seport, port, proto):
         return None
 
 
-def semanage_login_add(module, login, seuser, do_reload, serange='s0', sestore=''):
+def semanage_login_add(module, login, seuser, do_reload, serange="s0", sestore=""):
     """ Add linux user to SELinux user mapping
 
     :type module: AnsibleModule
@@ -169,7 +175,7 @@ def semanage_login_add(module, login, seuser, do_reload, serange='s0', sestore='
 
     :rtype: bool
     :return: True if the policy was changed, otherwise False
-    """
+    """  # noqa: E501
     try:
         selogin = seobject.loginRecords(sestore)
         selogin.set_reload(do_reload)
@@ -202,7 +208,7 @@ def semanage_login_add(module, login, seuser, do_reload, serange='s0', sestore='
     return change
 
 
-def semanage_login_del(module, login, seuser, do_reload, sestore=''):
+def semanage_login_del(module, login, seuser, do_reload, sestore=""):
     """ Delete linux user to SELinux user mapping
 
     :type module: AnsibleModule
@@ -222,7 +228,7 @@ def semanage_login_del(module, login, seuser, do_reload, sestore=''):
 
     :rtype: bool
     :return: True if the policy was changed, otherwise False
-    """
+    """  # noqa: E501
     try:
         selogin = seobject.loginRecords(sestore)
         selogin.set_reload(do_reload)
@@ -255,27 +261,16 @@ def semanage_login_del(module, login, seuser, do_reload, sestore=''):
 def main():
     module = AnsibleModule(
         argument_spec={
-                'login': {
-                    'required': True,
-                    # 'default': '__default__',
-                },
-                'seuser': {
-                    'required': True,
-                },
-                'serange': {
-                    'required': False
-                },
-                'state': {
-                    'choices': ['present', 'absent'],
-                    'default': 'present'
-                },
-                'reload': {
-                    'required': False,
-                    'type': 'bool',
-                    'default': 'yes',
-                },
+            "login": {
+                "required": True,
+                # 'default': '__default__',
             },
-        supports_check_mode=True
+            "seuser": {"required": True},
+            "serange": {"required": False},
+            "state": {"choices": ["present", "absent"], "default": "present"},
+            "reload": {"required": False, "type": "bool", "default": "yes"},
+        },
+        supports_check_mode=True,
     )
     if not HAVE_SELINUX:
         module.fail_json(msg="This module requires libselinux-python")
@@ -286,28 +281,30 @@ def main():
     if not selinux.is_selinux_enabled():
         module.fail_json(msg="SELinux is disabled on this host.")
 
-    login = module.params['login']
-    seuser = module.params['seuser']
-    serange = module.params['serange']
-    state = module.params['state']
-    do_reload = module.params['reload']
+    login = module.params["login"]
+    seuser = module.params["seuser"]
+    serange = module.params["serange"]
+    state = module.params["state"]
+    do_reload = module.params["reload"]
 
     result = {
-        'login': login,
-        'seuser': seuser,
-        'serange': serange,
-        'state': state,
+        "login": login,
+        "seuser": seuser,
+        "serange": serange,
+        "state": state,
     }
 
-    if state == 'present':
-        result['changed'] = semanage_login_add(module, login, seuser, do_reload, serange)
-    elif state == 'absent':
-        result['changed'] = semanage_login_del(module, login, seuser, do_reload)
+    if state == "present":
+        result["changed"] = semanage_login_add(
+            module, login, seuser, do_reload, serange
+        )
+    elif state == "absent":
+        result["changed"] = semanage_login_del(module, login, seuser, do_reload)
     else:
         module.fail_json(msg='Invalid value of argument "state": {0}'.format(state))
 
     module.exit_json(**result)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

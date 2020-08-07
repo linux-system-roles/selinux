@@ -11,4 +11,3 @@
 - name: Get local modifications - fcontext
   command: /usr/sbin/semanage fcontext -l -n -C
   register: selinux_role_fcontext
-

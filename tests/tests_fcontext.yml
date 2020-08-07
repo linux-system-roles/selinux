@@ -1,4 +1,3 @@
-
 - name: Check if selinux role sets SELinux fcontext mappings
   hosts: all
   become: true

@@ -22,4 +22,3 @@
 
     - name: restore config
       include_tasks: selinux_config_restore.yml
-
