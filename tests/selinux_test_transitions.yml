@@ -30,7 +30,7 @@
 - name: check that the run w/o parameters has not changed anything
   assert:
     that: "{{ ansible_selinux == initial_selinux_fact }}"
-  
+
 - name: apply the desired state if possible without reboot
   include_role:
     name: selinux
@@ -38,7 +38,7 @@
     selinux_state: "{{ selinux_desired_state }}"
 
   when: "selinux_initial_state == selinux_desired_state or
-  (selinux_initial_state != 'disabled' and 
+  (selinux_initial_state != 'disabled' and
   selinux_desired_state  != 'disabled' )"
 
 - name: apply the desired state if necessary with reboot
@@ -46,7 +46,7 @@
   vars:
     selinux_state: "{{ selinux_desired_state }}"
   when: "not (selinux_initial_state == selinux_desired_state or
-  (selinux_initial_state != 'disabled' and 
+  (selinux_initial_state != 'disabled' and
   selinux_desired_state  != 'disabled' ))"
 
 - name: refresh facts

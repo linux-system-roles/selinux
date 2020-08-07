@@ -1,4 +1,3 @@
-
 - name: Ensure the default is targeted, enforcing, without local modifications
   hosts: all
   become: true

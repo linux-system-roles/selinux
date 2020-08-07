@@ -1,4 +1,3 @@
-
 - name: Check if selinux role sets SELinux login mappings
   hosts: all
   become: true
@@ -17,7 +16,6 @@
         selinux_logins:
           - { login: 'sar-user', seuser: 'staff_u', serange: 's0-s0:c0.c1023', state: 'present' }
 
-
     - include: set_selinux_variables.yml
     - name: save state after initial changes and before other changes
       set_fact:
@@ -35,7 +33,6 @@
         selinux_logins:
           - { login: '__default__', seuser: 'staff_u', serange: 's0-s0:c0.c1023', state: 'present' }
 
-      
     - include: set_selinux_variables.yml
     - name: save state after other changes
       set_fact:
@@ -52,7 +49,6 @@
         selinux_logins_purge: false
         selinux_logins:
           - { login: '__default__', seuser: 'staff_u', serange: 's0-s0:c0.c1023', state: 'absent' }
-
 
     - include: set_selinux_variables.yml
     - name: save state after reverting other changes
@@ -78,5 +74,3 @@
         comment: System Api Roles SELinux User
         name: sar-user
         state: absent
-
-
