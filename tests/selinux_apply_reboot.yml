@@ -1,7 +1,7 @@
 - name: execute the role and catch errors
   block:
     - include_role:
-        name: selinux
+        name: linux-system-roles.selinux
   rescue:
     # Fail if failed for a different reason than selinux_reboot_required.
     - name: handle errors

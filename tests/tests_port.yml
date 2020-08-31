@@ -5,7 +5,7 @@
   tasks:
     - name: initial changes
       include_role:
-        name: selinux
+        name: linux-system-roles.selinux
       vars:
         selinux_ports_purge: true
         selinux_ports:
@@ -22,7 +22,7 @@
 
     - name: subsequent changes
       include_role:
-        name: selinux
+        name: linux-system-roles.selinux
       vars:
         selinux_ports_purge: false
         selinux_ports:
@@ -39,7 +39,7 @@
 
     - name: revert subsequent changes
       include_role:
-        name: selinux
+        name: linux-system-roles.selinux
       vars:
         selinux_ports_purge: false
         selinux_ports:
@@ -55,7 +55,7 @@
         that: "{{ port_before == port_after }}"
 
     - include_role:
-        name: selinux
+        name: linux-system-roles.selinux
       vars:
         selinux_ports_purge: true
 

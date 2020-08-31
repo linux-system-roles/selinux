@@ -6,7 +6,7 @@
 
     - name: initial changes
       include_role:
-        name: selinux
+        name: linux-system-roles.selinux
       vars:
         selinux_fcontexts_purge: true
         selinux_fcontexts:
@@ -23,7 +23,7 @@
 
     - name: subsequent changes
       include_role:
-        name: selinux
+        name: linux-system-roles.selinux
       vars:
         selinux_fcontexts_purge: false
         selinux_fcontexts:
@@ -40,7 +40,7 @@
 
     - name: revert subsequent changes
       include_role:
-        name: selinux
+        name: linux-system-roles.selinux
       vars:
         selinux_fcontexts_purge: false
         selinux_fcontexts:
@@ -56,7 +56,7 @@
         that: "{{ fcontext_before == fcontext_after }}"
 
     - include_role:
-        name: selinux
+        name: linux-system-roles.selinux
       vars:
         selinux_fcontexts_purge: true
 
