@@ -10,7 +10,7 @@
 
     - name: initial changes
       include_role:
-        name: selinux
+        name: linux-system-roles.selinux
       vars:
         selinux_logins_purge: true
         selinux_logins:
@@ -27,7 +27,7 @@
 
     - name: subsequent changes
       include_role:
-        name: selinux
+        name: linux-system-roles.selinux
       vars:
         selinux_logins_purge: false
         selinux_logins:
@@ -44,7 +44,7 @@
 
     - name: revert subsequent changes
       include_role:
-        name: selinux
+        name: linux-system-roles.selinux
       vars:
         selinux_logins_purge: false
         selinux_logins:
@@ -60,7 +60,7 @@
         that: "{{ login_before == login_after }}"
 
     - include_role:
-        name: selinux
+        name: linux-system-roles.selinux
       vars:
         selinux_logins_purge: true
 

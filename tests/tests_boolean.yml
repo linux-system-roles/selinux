@@ -5,7 +5,7 @@
   tasks:
     - name: initial changes
       include_role:
-        name: selinux
+        name: linux-system-roles.selinux
       vars:
         selinux_booleans_purge: true
         selinux_booleans:
@@ -22,7 +22,7 @@
 
     - name: subsequent changes
       include_role:
-        name: selinux
+        name: linux-system-roles.selinux
       vars:
         selinux_booleans_purge: false
         selinux_booleans:
@@ -38,7 +38,7 @@
         that: "{{ ( boolean_before | count ) < ( boolean_after | count ) }}"
 
     - include_role:
-        name: selinux
+        name: linux-system-roles.selinux
       vars:
         selinux_booleans_purge: true
 

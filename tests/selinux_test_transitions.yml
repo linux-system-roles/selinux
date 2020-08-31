@@ -21,7 +21,7 @@
 
 - name: apply the role without parameters
   include_role:
-    name: selinux
+    name: linux-system-roles.selinux
 
 - name: refresh facts
   setup:
@@ -33,7 +33,7 @@
 
 - name: apply the desired state if possible without reboot
   include_role:
-    name: selinux
+    name: linux-system-roles.selinux
   vars:
     selinux_state: "{{ selinux_desired_state }}"
 

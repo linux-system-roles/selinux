@@ -26,7 +26,7 @@
 
     - name: Apply role with defaults, should not drop local modifications
       include_role:
-        name: selinux
+        name: linux-system-roles.selinux
 
     - include: set_selinux_variables.yml
     - name: Check if local modifications are not empty - booleans
@@ -44,7 +44,7 @@
 
     - name: Apply the role to drop local modifications
       include_role:
-        name: selinux
+        name: linux-system-roles.selinux
       vars:
         selinux_all_purge: true
 
