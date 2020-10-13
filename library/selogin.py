@@ -106,7 +106,7 @@ from ansible.module_utils.pycompat24 import get_exception
 
 
 def semanage_port_get_ports(seport, setype, proto):
-    """ Get the list of ports that have the specified type definition.
+    """Get the list of ports that have the specified type definition.
 
     :param seport: Instance of seobject.portRecords
 
@@ -127,7 +127,7 @@ def semanage_port_get_ports(seport, setype, proto):
 
 
 def semanage_port_get_type(seport, port, proto):
-    """ Get the SELinux type of the specified port.
+    """Get the SELinux type of the specified port.
 
     :param seport: Instance of seobject.portRecords
 
@@ -153,7 +153,7 @@ def semanage_port_get_type(seport, port, proto):
 
 
 def semanage_login_add(module, login, seuser, do_reload, serange="s0", sestore=""):
-    """ Add linux user to SELinux user mapping
+    """Add linux user to SELinux user mapping
 
     :type module: AnsibleModule
     :param module: Ansible module
@@ -209,7 +209,7 @@ def semanage_login_add(module, login, seuser, do_reload, serange="s0", sestore="
 
 
 def semanage_login_del(module, login, seuser, do_reload, sestore=""):
-    """ Delete linux user to SELinux user mapping
+    """Delete linux user to SELinux user mapping
 
     :type module: AnsibleModule
     :param module: Ansible module
