@@ -28,7 +28,6 @@ network port type definitions.
 
 ### Modules provided by this repository
 
-* `selogin`: Manages linux user to SELinux user mapping
 * `selinux_modules_facts`: Gather state of SELinux modules
 
 ## Usage

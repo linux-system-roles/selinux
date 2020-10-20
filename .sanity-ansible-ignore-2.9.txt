@@ -1,2 +1,0 @@
-plugins/modules/selogin.py no-get-exception
-plugins/modules/selogin.py validate-modules!skip
