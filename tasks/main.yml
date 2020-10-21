@@ -79,10 +79,6 @@
   command: /usr/sbin/semanage login -D
   when: selinux_logins_purge | bool
 
-- name: Reload SELinux policy
-  command: semodule -R
-  when: ansible_selinux.status != "disabled"
-
 - name: Set SELinux booleans
   seboolean:
     name: "{{ item.name }}"
@@ -129,3 +125,20 @@
     state: "{{ item.state | default(present) }}"
     reload: "{{ item.reload | default(False) }}"
   with_items: "{{ selinux_logins }}"
+
+- name: Get SELinux modules facts
+  selinux_modules_facts:
+
+- include_tasks: selinux_load_module.yml
+  vars:
+    name: "{{ item.name | default('') }}"
+    state: "{{ item.state | default('enabled') }}"
+    priority: "{{ item.priority | default('0') }}"
+    current_state: "{{ selinux_installed_modules[name][priority] | default('absent') }}"
+    store: "{{ selinux_policy | default(ansible_selinux.type, true) }}"
+  when: selinux_modules is defined
+  loop: "{{ selinux_modules | flatten(levels=1) }}"
+
+- name: Reload SELinux policy
+  command: semodule -R
+  when: ansible_selinux.status != "disabled"

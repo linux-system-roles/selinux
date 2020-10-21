@@ -28,7 +28,8 @@ network port type definitions.
 
 ### Modules provided by this repository
 
-selogin: Manages linux user to SELinux user mapping
+* `selogin`: Manages linux user to SELinux user mapping
+* `selinux_modules_facts`: Gather state of SELinux modules
 
 ## Usage
 
@@ -114,8 +115,71 @@ selinux_restore_dirs:
       - { login: '__default__', seuser: 'staff_u', serange: 's0-s0:c0.c1023', state: 'present' }
 ```
 
+#### Manage SELinux modules
+
+It's possible to maintain SELinux modules using `selinux_modules` variable which would contain a list of dictionaries, e.g.:
+
+```yaml
+    selinux_modules:
+      - { path: 'localmodule.pp', state: 'enabled' }
+      - { path: 'localmodule.cil', priority: '350', state: 'enabled' }
+      - { name: 'unconfineduser', state: 'disabled' }
+      - { name: 'localmodule', priority: '350', state: 'absent' }
+```
+
+  - `path`: a local module file (either .cil or .pp) to be installed on a node, used for installing new modules
+  - `name`: module name, used for enabling disabled modules, disabling enabled modules, removing modules
+  - `priority`: SELinux module priority, default is *"400"*. *"100"* is used for modules installed from *selinux-policy* packages, *"200"* for other modules installed from 3rd party rpms, *"300"* is used by SETroubleshoot
+  - `state`:
+  * `enabled`: install or enable module
+  * `disabled`: disable module
+  * `absent`: remove module
+
+**Note:** Building modules from source on nodes is not supported.
+However, in many cases a binary *pp* or *cil* module could be used on different systems if all systems support
+types, classes and permissions used in the module.
+In case of *pp* module it also needs to be built with lowest supported policydb module version on target systems,
+i.e. on the oldest system.
+
+**Note:** Module priorities are ignored in Red Hat Enterprise Linux 6
+
 ## Ansible Facts
 
 ### selinux\_reboot\_required
 
 This custom fact is set to `true` if system reboot is necessary when SELinux is set from `disabled` to `enabled` or vice versa.  Otherwise the fact is set to `false`.  In the case that system reboot is needed, it will be indicated by returning failure from the role which needs to be handled using a `block:`...`rescue:` construct. The reboot needs to be performed in the playbook, the role itself never reboots the managed host. After the reboot the role needs to be reapplied to finish the changes.
+
+### selinux\_installed\_modules
+
+This custom fact represents SELinux module store structure
+
+``` json
+selinux_installed_modules = {
+  <module name>: {
+    <module priority>: ("enabled"|"disabled"),
+    ...
+  },
+  ...
+}
+```
+
+e.g.
+
+``` json
+"ansible_facts": {
+  "selinux_installed_modules": {
+    "abrt": {
+      "100": "enabled",
+      "400": "disabled"
+    },
+    "accountsd": {
+      "100": "enabled"
+    },
+    "acct": {
+      "100": "enabled"
+    }
+  }
+}
+```
+
+**NOTE:** Module priority is set to "0" when priorities are not supported, e.g. on Red Hat Enterprise Linux 6
