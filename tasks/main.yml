@@ -62,6 +62,7 @@
   args:
     stdin: "{{ drop_local_modifications }}"
   when: selinux_all_purge | bool
+  notify: __selinux_reload_policy
 
 - name: Purge all SELinux boolean local modifications
   command: /usr/sbin/semanage boolean -D
@@ -78,10 +79,6 @@
 - name: Purge all SELinux login local modifications
   command: /usr/sbin/semanage login -D
   when: selinux_logins_purge | bool
-
-- name: Reload SELinux policy
-  command: semodule -R
-  when: ansible_selinux.status != "disabled"
 
 - name: Set SELinux booleans
   seboolean:
@@ -129,3 +126,17 @@
     state: "{{ item.state | default(present) }}"
     reload: "{{ item.reload | default(False) }}"
   with_items: "{{ selinux_logins }}"
+  notify: __selinux_reload_policy
+
+- name: Get SELinux modules facts
+  selinux_modules_facts:
+
+- include_tasks: selinux_load_module.yml
+  vars:
+    name: "{{ item.name | default('') }}"
+    state: "{{ item.state | default('enabled') }}"
+    priority: "{{ item.priority | default('0') }}"
+    current_state: "{{ selinux_installed_modules[name][priority] | default('absent') }}"
+    store: "{{ selinux_policy | default(ansible_selinux.type, true) }}"
+  when: selinux_modules is defined
+  loop: "{{ selinux_modules | flatten(levels=1) }}"

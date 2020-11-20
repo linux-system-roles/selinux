@@ -1,0 +1,63 @@
+- name: Install module
+  block:
+    - name: Create temporary directory
+      tempfile:
+        state: directory
+        prefix: linux_system_role.selinux
+      register: tempdir
+
+    - name: Copy module file "{{ item.path }}"
+      copy:
+        dest: "{{ tempdir.path }}"
+        src: "{{ item.path }}"
+
+    - name: Install module with priority
+      command: "semodule -n -s {{ store }} -X {{ priority }} -i {{ tempdir.path }}/{{ item.path | basename }}"
+      when: priority != "0" and selinux_priorities
+      notify: __selinux_reload_policy
+
+    - name: Install module
+      command: "semodule -n -s {{ store }} -i {{ tempdir.path }}/{{ item.path | basename }}"
+      when: priority == "0" or not selinux_priorities
+      notify: __selinux_reload_policy
+
+  when:
+    state == "enabled" and item.path is defined
+  always:
+    - name: Clean temporary directory "{{ tempdir.path }}"
+      file:
+        path: "{{ tempdir.path }}"
+        state: "absent"
+
+- name: Enable module with priority
+  command: "semodule -n -s {{ store }} -X {{ priority }} -e {{ item.name }}"
+  when: state == "enabled" and item.path is not defined and current_state == "disabled" and (priority != "0" and selinux_priorities)
+  notify: __selinux_reload_policy
+
+- name: Disable module with priority
+  command: "semodule -n -s {{ store }} -X {{ priority }} -d {{ item.name }}"
+  when: state == "disabled" and current_state == "enabled" and (priority != "0" and selinux_priorities)
+  notify: __selinux_reload_policy
+
+- name: Remove module with priority
+  command: "semodule -n -s {{ store }} -X {{ priority }} -r {{ item.name }}"
+  when: state == "absent" and current_state != "absent" and (priority != "0" and selinux_priorities)
+  notify: __selinux_reload_policy
+
+- name: Enable module
+  command: "semodule -n -s {{ store }} -e {{ item.name }}"
+  when: state == "enabled" and item.path is not defined and (priority == "0" or not selinux_priorities)
+  notify: __selinux_reload_policy
+
+- name: Disable module
+  command: "semodule -n -s {{ store }} -d {{ item.name }}"
+  when: state == "disabled" and (priority == "0" or not selinux_priorities)
+  notify: __selinux_reload_policy
+
+- name: Remove module
+  command: "semodule -n -s {{ store }} -r {{ item.name }}"
+  when: state == "absent" and (priority == "0" or not selinux_priorities)
+  notify: __selinux_reload_policy
+
+- name: Refresh SELinux modules facts
+  selinux_modules_facts:

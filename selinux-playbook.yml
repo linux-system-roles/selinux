@@ -17,6 +17,10 @@
       - { ports: '22100', proto: 'tcp', setype: 'ssh_port_t', state: 'present' }
     selinux_logins:
       - { login: 'sar-user', seuser: 'staff_u', serange: 's0-s0:c0.c1023', state: 'present' }
+    selinux_modules:
+      - { path: "localpolicy.cil", priority: "300", state: "enabled" }
+      - { name: "unconfineduser", priority: "100", state: "disabled" }
+      - { name: "temporarypolicy", priority: "400", state: "absent" }
 
   # prepare prerequisites which are used in this playbook
   tasks:
