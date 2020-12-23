@@ -25,6 +25,7 @@
         name: sar-user
     - name: Add some mapping
       shell: echo -e -n "{{ semanage_change }}" | /usr/sbin/semanage -i -
+      changed_when: false
     - name: Backup original /etc/selinux/config
       copy:
         remote_src: true
@@ -36,12 +37,15 @@
         dest: /etc/selinux/config
     - name: Switch to permissive to allow login when selinuxfs is not mounted
       command: setenforce 0
+      changed_when: false
       when: ansible_selinux.status != "disabled"
-    - name: Get selinuxfs mountpoint
+    - name: Get selinuxfs mountpoint  # noqa 305
       shell: findmnt -n -t selinuxfs --output=target
+      changed_when: false
       register: selinux_mountpoint
-    - name: Umount {{ selinux_mountpoint.stdout }} to emulate SELinux disabled system
+    - name: Umount {{ selinux_mountpoint.stdout }} to emulate SELinux disabled system  # noqa 303
       command: umount {{ selinux_mountpoint.stdout }}
+      changed_when: false
 
     - name: execute the role and catch errors
       block:
@@ -56,10 +60,12 @@
       assert:
         that: "{{ test_selinux_reboot_required }}"
         msg: "test_selinux_reboot_required should be True instead of {{ test_selinux_reboot_required }}"
-    - name: Mount {{ selinux_mountpoint.stdout }} back to system
+    - name: Mount {{ selinux_mountpoint.stdout }} back to system  # noqa 303
       command: mount -t selinuxfs selinuxfs {{ selinux_mountpoint.stdout }}
+      changed_when: false
     - name: Switch back to enforcing
       command: setenforce 1
+      changed_when: false
     - name: Gather facts again
       setup:
     - name: Check SELinux config mode
