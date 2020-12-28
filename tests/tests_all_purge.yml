@@ -23,6 +23,7 @@
 
     - name: Add some mapping
       shell: echo -e -n "{{ semanage_change }}" | /usr/sbin/semanage -i -
+      changed_when: false
 
     - name: Apply role with defaults, should not drop local modifications
       include_role:
