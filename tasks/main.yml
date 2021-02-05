@@ -115,7 +115,7 @@
     ports: "{{ item.ports }}"
     proto: "{{ item.proto | default('tcp') }}"
     setype: "{{ item.setype }}"
-    state: "{{ item.state | default(present) }}"
+    state: "{{ item.state | default('present') }}"
   with_items: "{{ selinux_ports }}"
 
 - name: Set linux user to SELinux user mapping
@@ -123,7 +123,7 @@
     login: "{{ item.login }}"
     seuser: "{{ item.seuser }}"
     serange: "{{ item.serange | default('s0') }}"
-    state: "{{ item.state | default(present) }}"
+    state: "{{ item.state | default('present') }}"
     reload: "{{ item.reload | default(False) }}"
   with_items: "{{ selinux_logins }}"
   notify: __selinux_reload_policy
