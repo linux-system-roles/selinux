@@ -10,12 +10,8 @@
       when: not selinux_reboot_required
 
     - name: restart managed host
-      shell: sleep 2 && shutdown -r now "Ansible updates triggered"
-      async: 1
-      poll: 0
-      ignore_errors: true
-
-    - name: wait for managed host to come back
-      wait_for_connection:
-        delay: 10
-        timeout: 300
+      reboot:
+        msg: Ansible updates triggered
+        pre_reboot_delay: 2
+        post_reboot_delay: 10
+        reboot_timeout: 300
