@@ -15,6 +15,9 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
+from __future__ import absolute_import, division, print_function
+
+__metaclass__ = type
 
 ANSIBLE_METADATA = {
     "status": ["preview"],
@@ -22,13 +25,13 @@ ANSIBLE_METADATA = {
     "version": "1.0",
 }
 
-DOCUMENTATION = """
+DOCUMENTATION = r"""
 ---
 module: selogin
 short_description: Manages linux user to SELinux user mapping
 description:
      - Manages linux user to SELinux user mapping
-version_added: "1.0"
+version_added: '1.0'
 options:
   login:
     description:
@@ -41,8 +44,7 @@ options:
     required: true
     default: null
   serange:
-    description:
-      - >-
+    description: >
       MLS/MCS Security Range (MLS/MCS Systems only) SELinux Range for SELinux login
       mapping - defaults to the SELinux user record range.
     required: false
@@ -62,8 +64,9 @@ notes:
    - The changes are persistent across reboots
    - Not tested on any debian based system
 requirements: [ 'libselinux-python', 'policycoreutils-python' ]
-author: Dan Keder
-author: Petr Lautrbach
+author:
+    - Dan Keder (@dkeder)
+    - Petr Lautrbach (@bachradsusi)
 """
 
 EXAMPLES = """
@@ -82,7 +85,7 @@ EXAMPLES = """
 
 # Assign all users in the engineering group to the staff_u user
 - selogin:
-    login: %engineering
+    login: "%engineering"
     seuser: staff_u
     state: present
 """
@@ -198,9 +201,6 @@ def semanage_login_add(module, login, seuser, do_reload, serange="s0", sestore="
     except KeyError:
         e = get_exception()
         module.fail_json(msg="%s: %s\n" % (e.__class__.__name__, str(e)))
-    except OSError:
-        e = get_exception()
-        module.fail_json(msg="%s: %s\n" % (e.__class__.__name__, str(e)))
     except RuntimeError:
         e = get_exception()
         module.fail_json(msg="%s: %s\n" % (e.__class__.__name__, str(e)))
@@ -246,9 +246,6 @@ def semanage_login_del(module, login, seuser, do_reload, sestore=""):
         e = get_exception()
         module.fail_json(msg="%s: %s\n" % (e.__class__.__name__, str(e)))
     except KeyError:
-        e = get_exception()
-        module.fail_json(msg="%s: %s\n" % (e.__class__.__name__, str(e)))
-    except OSError:
         e = get_exception()
         module.fail_json(msg="%s: %s\n" % (e.__class__.__name__, str(e)))
     except RuntimeError:

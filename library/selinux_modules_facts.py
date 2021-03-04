@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/python
 
 # Copyright: (c) 2020, Petr Lautrbach <plautrba@redhat.com>
 # GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
@@ -12,12 +12,16 @@ module: selinux_modules_facts
 
 short_description: Gather state of SELinux modules
 
-version_added: "0.0.1"
+version_added: '0.0.1'
 
 description: Gather state of SELinux modules
 
 author:
-    - Petr Lautrbach <plautrba@redhat.com>
+    - Petr Lautrbach (@bachradsusi)
+"""
+
+# placeholder - ansible-test requires EXAMPLES
+EXAMPLES = r"""
 """
 
 from subprocess import PIPE, Popen
