@@ -30,7 +30,8 @@ DOCUMENTATION = r"""
 module: selogin
 short_description: Manages linux user to SELinux user mapping
 description:
-     - Manages linux user to SELinux user mapping
+    - "WARNING: Do not use this module directly! It is only for role internal use."
+    - Manages linux user to SELinux user mapping
 version_added: '1.0'
 options:
   login:

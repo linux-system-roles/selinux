@@ -14,7 +14,9 @@ short_description: Gather state of SELinux modules
 
 version_added: '0.0.1'
 
-description: Gather state of SELinux modules
+description:
+    - "WARNING: Do not use this module directly! It is only for role internal use."
+    - Gather state of SELinux modules
 
 author:
     - Petr Lautrbach (@bachradsusi)
