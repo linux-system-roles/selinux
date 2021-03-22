@@ -29,7 +29,7 @@
       include_role:
         name: linux-system-roles.selinux
 
-    - include: set_selinux_variables.yml
+    - include_tasks: set_selinux_variables.yml
     - name: Check if local modifications are not empty - booleans
       assert:
         that: "{{ selinux_role_boolean.stdout != '' }}"
@@ -49,7 +49,7 @@
       vars:
         selinux_all_purge: true
 
-    - include: set_selinux_variables.yml
+    - include_tasks: set_selinux_variables.yml
     - name: Check if local modifications are empty - booleans
       assert:
         that: "{{ selinux_role_boolean.stdout == '' }}"
