@@ -1,4 +1,5 @@
 # SELinux
+
 ![CI Testing](https://github.com/linux-system-roles/selinux/workflows/tox/badge.svg)
 
 ## Expected functionality
