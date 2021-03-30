@@ -10,6 +10,7 @@
       copy:
         dest: "{{ tempdir.path }}"
         src: "{{ item.path }}"
+        mode: preserve
 
     # yamllint disable rule:line-length
     - name: Install module with priority

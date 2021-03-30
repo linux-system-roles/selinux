@@ -22,7 +22,9 @@
         name: sar-user
 
     - name: Add some mapping
-      shell: echo -e -n "{{ semanage_change }}" | /usr/sbin/semanage -i -
+      shell: |-
+        set -euo pipefail
+        echo -e -n "{{ semanage_change }}" | /usr/sbin/semanage -i -
       changed_when: false
 
     - name: Apply role with defaults, should not drop local modifications
@@ -32,16 +34,16 @@
     - include: set_selinux_variables.yml
     - name: Check if local modifications are not empty - booleans
       assert:
-        that: "{{ selinux_role_boolean.stdout != '' }}"
+        that: selinux_role_boolean.stdout | length > 0
     - name: Check if local modifications are not empty - port
       assert:
-        that: "{{ selinux_role_port.stdout != '' }}"
+        that: selinux_role_port.stdout | length > 0
     - name: Check if local modifications are not empty - login
       assert:
-        that: "{{ selinux_role_login.stdout != '' }}"
+        that: selinux_role_login.stdout | length > 0
     - name: Check if local modifications are not empty - fcontext
       assert:
-        that: "{{ selinux_role_fcontext.stdout != '' }}"
+        that: selinux_role_fcontext.stdout | length > 0
 
     - name: Apply the role to drop local modifications
       include_role:
@@ -52,16 +54,16 @@
     - include: set_selinux_variables.yml
     - name: Check if local modifications are empty - booleans
       assert:
-        that: "{{ selinux_role_boolean.stdout == '' }}"
+        that: selinux_role_boolean.stdout | length == 0
     - name: Check if local modifications are empty - port
       assert:
-        that: "{{ selinux_role_port.stdout == '' }}"
+        that: selinux_role_port.stdout | length == 0
     - name: Check if local modifications are empty - login
       assert:
-        that: "{{ selinux_role_login.stdout == '' }}"
+        that: selinux_role_login.stdout | length == 0
     - name: Check if local modifications are empty - fcontext
       assert:
-        that: "{{ selinux_role_fcontext.stdout == '' }}"
+        that: selinux_role_fcontext.stdout | length == 0
 
     - name: Remove Linux System Roles SELinux User
       user:

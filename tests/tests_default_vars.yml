@@ -4,8 +4,9 @@
   roles:
     - linux-system-roles.selinux
   tasks:
-    - assert:
-        that: "vars[item] is defined"
+    - name: Assert that the role declares all paremeters in defaults
+      assert:
+        that: vars[item] is defined
       loop:
         - selinux_state
         - selinux_policy

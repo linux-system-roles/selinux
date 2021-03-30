@@ -3,3 +3,4 @@
     remote_src: true
     src: /etc/selinux/config
     dest: /etc/selinux/config.test_selinux_save
+    mode: preserve

@@ -32,7 +32,8 @@
             - "semodule -X 500 -r linux-system-roles-selinux-test-b"
             - "semodule -X 600 -r linux-system-roles-selinux-test-c"
           ignore_errors: true
-        - fail:
+        - name: linux-system-roles.selinux failed
+          fail:
             msg: "linux-system-roles.selinux failed"
 
     - name: Check module states
@@ -96,7 +97,8 @@
             - "semodule -r linux-system-roles-selinux-test-b"
             - "semodule -r linux-system-roles-selinux-test-c"
           ignore_errors: true
-        - fail:
+        - name: linux-system-roles.selinux failed
+          fail:
             msg: "linux-system-roles.selinux failed"
 
     - name: Check module states

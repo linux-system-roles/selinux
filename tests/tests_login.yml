@@ -24,7 +24,7 @@
 
     - name: Check if there are SELinux login mapping changes
       assert:
-        that: "{{ login_before != '' }}"
+        that: login_before | length > 0
 
     - name: subsequent changes
       include_role:
@@ -70,7 +70,7 @@
     - include: set_selinux_variables.yml
     - name: Check if there are no SELinux login mapping changes
       assert:
-        that: "{{ selinux_role_login.stdout == '' }}"
+        that: selinux_role_login.stdout | length == 0
 
     - name: Remove a System Api Roles SELinux User
       user:

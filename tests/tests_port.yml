@@ -19,7 +19,7 @@
 
     - name: Check if there are SELinux port mapping changes
       assert:
-        that: "{{ port_before != '' }}"
+        that: port_before | length > 0
 
     - name: subsequent changes
       include_role:
@@ -65,4 +65,4 @@
     - include: set_selinux_variables.yml
     - name: Check if there are no SELinux port mapping changes
       assert:
-        that: "{{ selinux_role_port.stdout == '' }}"
+        that: selinux_role_port.stdout | length == 0

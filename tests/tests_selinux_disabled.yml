@@ -24,17 +24,21 @@
         comment: Linux System Roles SELinux User
         name: sar-user
     - name: Add some mapping
-      shell: echo -e -n "{{ semanage_change }}" | /usr/sbin/semanage -i -
+      shell: |-
+        set -euo pipefail
+        echo -e -n "{{ semanage_change }}" | /usr/sbin/semanage -i -
       changed_when: false
     - name: Backup original /etc/selinux/config
       copy:
         remote_src: true
         src: /etc/selinux/config
         dest: /etc/selinux/config.test_selinux_disabled
+        mode: preserve
     - name: Upload testing /etc/selinux/config
       copy:
         src: selinux.config
         dest: /etc/selinux/config
+        mode: preserve
     - name: Switch to permissive to allow login when selinuxfs is not mounted
       command: setenforce 0
       changed_when: false
@@ -81,6 +85,7 @@
         remote_src: true
         dest: /etc/selinux/config
         src: /etc/selinux/config.test_selinux_disabled
+        mode: preserve
     - name: Remove /etc/selinux/config backup
       file:
         path: /etc/selinux/config.test_selinux_disabled

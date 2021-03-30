@@ -44,6 +44,7 @@
       file:
         path: /tmp/test_dir
         state: directory
+        mode: "0755"
     - name: Add a Linux System Roles SELinux User
       user:
         comment: Linux System Roles SELinux User
