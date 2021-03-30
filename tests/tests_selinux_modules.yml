@@ -11,16 +11,19 @@
           - { name: "linux-system-roles-selinux-test-a", state: "disabled" }
           - { name: "linux-system-roles-selinux-test-a", state: "enabled" }
           - { path: "linux-system-roles-selinux-test-b.pp", priority: "500" }
-          - { name: "linux-system-roles-selinux-test-b", priority: "500", state: "disabled" }
+          - { name: "linux-system-roles-selinux-test-b", priority: "500",
+              state: "disabled" }
           - { path: "linux-system-roles-selinux-test-c.pp", priority: "600" }
-          - { name: "linux-system-roles-selinux-test-c", priority: "600", state: "absent" }
+          - { name: "linux-system-roles-selinux-test-c", priority: "600",
+              state: "absent" }
 
       block:
         - include_role:
             name: linux-system-roles.selinux
       when: ansible_distribution == "Fedora" or
         ( ansible_distribution_major_version >= "7" and
-        ( ansible_distribution == "CentOS" or ansible_distribution == "RedHat" ))
+        ( ansible_distribution == "CentOS" or
+          ansible_distribution == "RedHat" ))
       rescue:
         - name: Cleanup modules
           command: "{{ item }}"
@@ -34,22 +37,31 @@
 
     - name: Check module states
       vars:
-        test_module_c: "{{ selinux_installed_modules['linux-system-roles-selinux-test-c']['600'] | default('absent') }}"
+        test_module_c: "{{ selinux_installed_modules
+          ['linux-system-roles-selinux-test-c']['600']
+          | default('absent') }}"
       block:
-        - name: Check if linux-system-roles-selinux-test-a is installed and enabled
+        - name: "Check if linux-system-roles-selinux-test-a is installed and
+          enabled"
           assert:
-            that: selinux_installed_modules['linux-system-roles-selinux-test-a']['400'] == 'enabled'
+            that:
+              selinux_installed_modules['linux-system-roles-selinux-test-a']['400']
+              == 'enabled'
 
-        - name: Check if linux-system-roles-selinux-test-b is installed and disabled
+        - name: "Check if linux-system-roles-selinux-test-b is installed and
+          disabled"
           assert:
-            that: selinux_installed_modules['linux-system-roles-selinux-test-b']['500'] == 'disabled'
+            that:
+              selinux_installed_modules['linux-system-roles-selinux-test-b']['500']
+              == 'disabled'
 
         - name: Check if linux-system-roles-selinux-test-c is absent
           assert:
             that: test_module_c == 'absent'
       when: ansible_distribution == "Fedora" or
         ( ansible_distribution_major_version >= "7" and
-        ( ansible_distribution == "CentOS" or ansible_distribution == "RedHat" ))
+        ( ansible_distribution == "CentOS" or
+          ansible_distribution == "RedHat" ))
       always:
         - name: Cleanup modules
           command: "{{ item }}"
@@ -68,7 +80,8 @@
           - { path: "linux-system-roles-selinux-test-b.pp", priority: "400" }
           - { name: "linux-system-roles-selinux-test-b", state: "disabled" }
           - { path: "linux-system-roles-selinux-test-c.pp", priority: "200" }
-          - { name: "linux-system-roles-selinux-test-c", priority: "300", state: "absent" }
+          - { name: "linux-system-roles-selinux-test-c", priority: "300",
+              state: "absent" }
 
       block:
         - include_role:
@@ -88,15 +101,23 @@
 
     - name: Check module states
       vars:
-        test_module_c: "{{ selinux_installed_modules['linux-system-roles-selinux-test-c']['0'] | default('absent') }}"
+        test_module_c: "{{ selinux_installed_modules
+          ['linux-system-roles-selinux-test-c']['0']
+          | default('absent') }}"
       block:
-        - name: Check if linux-system-roles-selinux-test-a is installed and enabled
+        - name: "Check if linux-system-roles-selinux-test-a is installed and
+          enabled"
           assert:
-            that: selinux_installed_modules['linux-system-roles-selinux-test-a']['0'] == 'enabled'
+            that:
+              selinux_installed_modules['linux-system-roles-selinux-test-a']['0']
+              == 'enabled'
 
-        - name: Check if linux-system-roles-selinux-test-b is installed and disabled
+        - name: "Check if linux-system-roles-selinux-test-b is installed
+          and disabled"
           assert:
-            that: selinux_installed_modules['linux-system-roles-selinux-test-b']['0'] == 'disabled'
+            that:
+              selinux_installed_modules['linux-system-roles-selinux-test-b']['0']
+              == 'disabled'
 
         - name: Check if linux-system-roles-selinux-test-c is absent
           assert:

@@ -10,7 +10,8 @@
       vars:
         selinux_fcontexts_purge: true
         selinux_fcontexts:
-          - { target: '/tmp/test_dir1(/.*)?', setype: 'user_home_dir_t', ftype: 'd' }
+          - { target: '/tmp/test_dir1(/.*)?', setype: 'user_home_dir_t',
+              ftype: 'd' }
 
     - include: set_selinux_variables.yml
     - name: save state after initial changes and before other changes
@@ -27,7 +28,8 @@
       vars:
         selinux_fcontexts_purge: false
         selinux_fcontexts:
-          - { target: '/tmp/test_dir2(/.*)?', setype: 'user_home_dir_t', ftype: 'd' }
+          - { target: '/tmp/test_dir2(/.*)?', setype: 'user_home_dir_t',
+              ftype: 'd' }
 
     - include: set_selinux_variables.yml
     - name: save state after other changes
@@ -44,7 +46,8 @@
       vars:
         selinux_fcontexts_purge: false
         selinux_fcontexts:
-          - { target: '/tmp/test_dir2(/.*)?', setype: 'user_home_dir_t', ftype: 'd', state: absent }
+          - { target: '/tmp/test_dir2(/.*)?', setype: 'user_home_dir_t',
+              ftype: 'd', state: absent }
 
     - include: set_selinux_variables.yml
     - name: save state after reverting other changes

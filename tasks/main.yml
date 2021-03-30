@@ -33,7 +33,8 @@
     state: "{{ selinux_state | default(ansible_selinux.config_mode, true) }}"
     policy: "{{ selinux_policy | default(ansible_selinux.type, true) }}"
   register: selinux_mod_output_enabled
-  when: ansible_selinux.status == "enabled" and ( selinux_state or selinux_policy )
+  when: ansible_selinux.status == "enabled" and
+        ( selinux_state or selinux_policy )
 
 - name: Set permanent SELinux state if disabled
   selinux:
@@ -136,7 +137,8 @@
     name: "{{ item.name | default('') }}"
     state: "{{ item.state | default('enabled') }}"
     priority: "{{ item.priority | default('0') }}"
-    current_state: "{{ selinux_installed_modules[name][priority] | default('absent') }}"
+    current_state: "{{ selinux_installed_modules[name][priority] |
+                       default('absent') }}"
     store: "{{ selinux_policy | default(ansible_selinux.type, true) }}"
   when: selinux_modules is defined
   loop: "{{ selinux_modules | flatten(levels=1) }}"

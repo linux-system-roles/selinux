@@ -26,7 +26,8 @@
       vars:
         selinux_booleans_purge: false
         selinux_booleans:
-          - { name: 'httpd_can_network_connect', state: 'on', persistent: 'yes' }
+          - { name: 'httpd_can_network_connect', state: 'on',
+              persistent: 'yes' }
 
     - include: set_selinux_variables.yml
     - name: save state after other changes
