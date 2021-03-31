@@ -1,4 +1,12 @@
 ---
+- name: Ensure SELinux tool semanage
+  package:
+    name:
+      - policycoreutils-python-utils
+    state: present
+  when: ansible_distribution == "Fedora" or
+    ( ansible_distribution_major_version | int > 7 and
+      ansible_distribution in ["CentOS", "RedHat"] )
 - name: Get local modifications - boolean
   command: /usr/sbin/semanage boolean -l -n -C
   changed_when: false

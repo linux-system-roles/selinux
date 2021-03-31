@@ -18,7 +18,8 @@
               state: "absent" }
 
       block:
-        - include_role:
+        - name: execute the role
+          include_role:
             name: linux-system-roles.selinux
       when: ansible_distribution == "Fedora" or
         ( ansible_distribution_major_version >= "7" and
@@ -85,7 +86,8 @@
               state: "absent" }
 
       block:
-        - include_role:
+        - name: execute the role
+          include_role:
             name: linux-system-roles.selinux
       when: ansible_distribution_major_version < "7" and
         ( ansible_distribution == "CentOS" or ansible_distribution == "RedHat" )

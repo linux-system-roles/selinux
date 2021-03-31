@@ -1,6 +1,8 @@
 - name: Test all the possible selinux_state transitions
   hosts: all
   become: true
+  tags:
+    - tests::reboot
   vars:
     states:
       - permissive

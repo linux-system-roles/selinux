@@ -12,12 +12,14 @@
       login -a -s staff_u sar-user
 
   tasks:
-    - name: Install SELinux tool semanage on Fedora
+    - name: Ensure SELinux tool semanage
       package:
         name:
           - policycoreutils-python-utils
         state: present
-      when: ansible_distribution == "Fedora"
+      when: ansible_distribution == "Fedora" or
+        ( ansible_distribution_major_version | int > 7 and
+          ansible_distribution in ["CentOS", "RedHat"] )
 
     - name: Add a Linux System Roles SELinux User
       user:
@@ -80,18 +82,29 @@
         that: "{{ ansible_selinux.config_mode == 'enforcing' }}"
         msg: "SELinux config mode should be enforcing instead of
               {{ ansible_selinux.config_mode }}"
-    - name: Restore original /etc/selinux/config
-      copy:
-        remote_src: true
-        dest: /etc/selinux/config
-        src: /etc/selinux/config.test_selinux_disabled
-        mode: preserve
-    - name: Remove /etc/selinux/config backup
-      file:
-        path: /etc/selinux/config.test_selinux_disabled
-        state: absent
-    - name: Remove Linux System Roles SELinux User
-      user:
-        name: sar-user
-        remove: yes
-        state: absent
+
+    - name: Cleanup
+      tags: [ 'tests::cleanup' ]
+      block:
+        - name: Restore original /etc/selinux/config
+          copy:
+            remote_src: true
+            dest: /etc/selinux/config
+            src: /etc/selinux/config.test_selinux_disabled
+            mode: preserve
+
+        - name: Remove /etc/selinux/config backup
+          file:
+            path: /etc/selinux/config.test_selinux_disabled
+            state: absent
+
+        - name: Remove Linux System Roles SELinux User
+          user:
+            name: sar-user
+            remove: yes
+            state: absent
+
+        - include_role:
+            name: linux-system-roles.selinux
+          vars:
+            selinux_all_purge: true

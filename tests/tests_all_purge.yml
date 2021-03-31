@@ -9,12 +9,14 @@
       login -a -s staff_u sar-user
 
   tasks:
-    - name: Install SELinux tool semanage on Fedora
+    - name: Ensure SELinux tool semanage
       package:
         name:
           - policycoreutils-python-utils
         state: present
-      when: ansible_distribution == "Fedora"
+      when: ansible_distribution == "Fedora" or
+        ( ansible_distribution_major_version | int > 7 and
+          ansible_distribution in ["CentOS", "RedHat"] )
 
     - name: Add a Linux System Roles SELinux User
       user:
@@ -31,7 +33,9 @@
       include_role:
         name: linux-system-roles.selinux
 
-    - include: set_selinux_variables.yml
+    - name: include test variables
+      import_tasks: set_selinux_variables.yml
+
     - name: Check if local modifications are not empty - booleans
       assert:
         that: selinux_role_boolean.stdout | length > 0
@@ -51,7 +55,9 @@
       vars:
         selinux_all_purge: true
 
-    - include: set_selinux_variables.yml
+    - name: include test variables
+      import_tasks: set_selinux_variables.yml
+
     - name: Check if local modifications are empty - booleans
       assert:
         that: selinux_role_boolean.stdout | length == 0
