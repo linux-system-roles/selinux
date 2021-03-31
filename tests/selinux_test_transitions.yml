@@ -1,6 +1,7 @@
 - name: display transition name
   debug:
-    msg: "testing transition {{ selinux_initial_state }} -> {{ selinux_desired_state }}"
+    msg: "testing transition {{ selinux_initial_state }} ->
+          {{ selinux_desired_state }}"
 
 - name: setup the initial state
   include_tasks: selinux_apply_reboot.yml
@@ -11,9 +12,12 @@
   setup:
     filter: ansible_selinux
 
+# yamllint disable rule:line-length
 - name: check that initial state has been set up properly
   assert:
-    that: "{{ selinux_initial_state == (ansible_selinux.mode | d(ansible_selinux.status)) }}"
+    that:
+      selinux_initial_state == (ansible_selinux.mode | d(ansible_selinux.status))
+# yamllint enable rule:line-length
 
 - name: save the initial state
   set_fact:
@@ -65,8 +69,12 @@
 
 - name: check that desired state has been applied properly
   assert:
-    that: "{{ selinux_desired_state == (ansible_selinux.mode | d(ansible_selinux.status)) }}"
+    that:
+      selinux_desired_state == ansible_selinux.mode | d(ansible_selinux.status)
 
+# yamllint disable rule:line-length
 - name: check that desired state has been saved properly
   assert:
-    that: "{{ selinux_desired_state == (ansible_selinux.config_mode | d(ansible_selinux.status)) }}"
+    that:
+      selinux_desired_state == (ansible_selinux.config_mode | d(ansible_selinux.status))
+# yamllint enable rule:line-length

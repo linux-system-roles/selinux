@@ -10,11 +10,13 @@
     selinux_state: enforcing
     # Switch some SELinux booleans
     selinux_booleans:
-      # Set the 'samba_enable_home_dirs' boolean to 'on' in the current session only
+      # Set the 'samba_enable_home_dirs' boolean to 'on' in the current
+      # session only
       - { name: 'samba_enable_home_dirs', state: 'on' }
       # Set the 'ssh_sysadm_login' boolean to 'on' permanently
       - { name: 'ssh_sysadm_login', state: 'on', persistent: 'yes' }
-    # Map '/tmp/test_dir' and its subdirectories to the 'user_home_dir_t' SELinux file type
+    # Map '/tmp/test_dir' and its subdirectories to the 'user_home_dir_t'
+    # SELinux file type
     selinux_fcontexts:
       - { target: '/tmp/test_dir(/.*)?', setype: 'user_home_dir_t', ftype: 'd' }
     # Restore SELinux file contexts in '/tmp/test_dir'
@@ -25,7 +27,8 @@
       - { ports: '22100', proto: 'tcp', setype: 'ssh_port_t', state: 'present' }
     # Map the 'sar-user' Linux user to the 'staff_u' SELinux user
     selinux_logins:
-      - { login: 'sar-user', seuser: 'staff_u', serange: 's0-s0:c0.c1023', state: 'present' }
+      - { login: 'sar-user', seuser: 'staff_u', serange: 's0-s0:c0.c1023',
+          state: 'present' }
     # Manage modules
     selinux_modules:
       # Install the 'localpolicy.cil' with priority 300
@@ -41,6 +44,7 @@
       file:
         path: /tmp/test_dir
         state: directory
+        mode: "0755"
     - name: Add a Linux System Roles SELinux User
       user:
         comment: Linux System Roles SELinux User

@@ -3,6 +3,7 @@
     remote_src: true
     dest: /etc/selinux/config
     src: /etc/selinux/config.test_selinux_save
+    mode: preserve
   register: restoreconf
 
 - name: Remove /etc/selinux/config backup

@@ -24,17 +24,21 @@
         comment: Linux System Roles SELinux User
         name: sar-user
     - name: Add some mapping
-      shell: echo -e -n "{{ semanage_change }}" | /usr/sbin/semanage -i -
+      shell: |-
+        set -euo pipefail
+        echo -e -n "{{ semanage_change }}" | /usr/sbin/semanage -i -
       changed_when: false
     - name: Backup original /etc/selinux/config
       copy:
         remote_src: true
         src: /etc/selinux/config
         dest: /etc/selinux/config.test_selinux_disabled
+        mode: preserve
     - name: Upload testing /etc/selinux/config
       copy:
         src: selinux.config
         dest: /etc/selinux/config
+        mode: preserve
     - name: Switch to permissive to allow login when selinuxfs is not mounted
       command: setenforce 0
       changed_when: false
@@ -43,7 +47,8 @@
       shell: findmnt -n -t selinuxfs --output=target
       changed_when: false
       register: selinux_mountpoint
-    - name: Umount {{ selinux_mountpoint.stdout }} to emulate SELinux disabled system  # noqa 303
+    - name: "Umount {{ selinux_mountpoint.stdout }} to emulate SELinux
+      disabled system  # noqa 303"
       command: umount {{ selinux_mountpoint.stdout }}
       changed_when: false
 
@@ -59,9 +64,11 @@
     - name: check that the role has failed and set the correct variable
       assert:
         that: "{{ test_selinux_reboot_required }}"
-        msg: "test_selinux_reboot_required should be True instead of {{ test_selinux_reboot_required }}"
+        msg: "test_selinux_reboot_required should be True instead of
+              {{ test_selinux_reboot_required }}"
     - name: Mount {{ selinux_mountpoint.stdout }} back to system  # noqa 303
-      command: mount -t selinuxfs selinuxfs {{ selinux_mountpoint.stdout }}
+      command: >-
+        mount -t selinuxfs selinuxfs {{ selinux_mountpoint.stdout }}
       changed_when: false
     - name: Switch back to enforcing
       command: setenforce 1
@@ -71,12 +78,14 @@
     - name: Check SELinux config mode
       assert:
         that: "{{ ansible_selinux.config_mode == 'enforcing' }}"
-        msg: "SELinux config mode should be enforcing instead of {{ ansible_selinux.config_mode }}"
+        msg: "SELinux config mode should be enforcing instead of
+              {{ ansible_selinux.config_mode }}"
     - name: Restore original /etc/selinux/config
       copy:
         remote_src: true
         dest: /etc/selinux/config
         src: /etc/selinux/config.test_selinux_disabled
+        mode: preserve
     - name: Remove /etc/selinux/config backup
       file:
         path: /etc/selinux/config.test_selinux_disabled
