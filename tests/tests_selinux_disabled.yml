@@ -51,7 +51,7 @@
       register: selinux_mountpoint
     - name: "Umount {{ selinux_mountpoint.stdout }} to emulate SELinux
       disabled system  # noqa 303"
-      command: umount {{ selinux_mountpoint.stdout }}
+      command: umount -l {{ selinux_mountpoint.stdout }}
       changed_when: false
 
     - name: execute the role and catch errors
