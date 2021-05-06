@@ -49,6 +49,7 @@
   include_tasks: selinux_apply_reboot.yml
   vars:
     selinux_state: "{{ selinux_desired_state }}"
+
   when: "not (selinux_initial_state == selinux_desired_state or
   (selinux_initial_state != 'disabled' and
   selinux_desired_state  != 'disabled' ))"

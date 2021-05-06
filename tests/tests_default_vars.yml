@@ -1,10 +1,10 @@
-- name: Ensure that the role declares all paremeters in defaults
+- name: Ensure that the role declares all parameters in defaults
   hosts: all
 
   roles:
     - linux-system-roles.selinux
   tasks:
-    - name: Assert that the role declares all paremeters in defaults
+    - name: Assert that the role declares all parameters in defaults
       assert:
         that: vars[item] is defined
       loop:
