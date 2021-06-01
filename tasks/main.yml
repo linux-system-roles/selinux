@@ -19,7 +19,7 @@
   setup:
     filter: ansible_selinux
 
-- name: Install SELinux tool semanage on Fedora
+- name: Install SELinux tool semanage
   package:
     name:
       - policycoreutils-python-utils
