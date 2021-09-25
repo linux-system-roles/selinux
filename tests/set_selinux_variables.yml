@@ -6,7 +6,7 @@
     state: present
   when: ansible_distribution == "Fedora" or
     ( ansible_distribution_major_version | int > 7 and
-      ansible_distribution in ["CentOS", "RedHat"] )
+      ansible_distribution in ["CentOS", "RedHat", "Rocky"] )
 - name: Get local modifications - boolean
   command: /usr/sbin/semanage boolean -l -n -C
   changed_when: false
