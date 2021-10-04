@@ -20,7 +20,7 @@ SELinux mode and policy.
 [seboolean](http://docs.ansible.com/ansible/seboolean_module.html): Toggles SELinux booleans.
 
 [sefcontext](http://docs.ansible.com/ansible/sefcontext_module.html): Manages
-SELinux file context mapping definitions Similar to the `semanage fcontext`
+SELinux file context mapping definitions similar to the `semanage fcontext`
 command.
 
 [seport](http://docs.ansible.com/ansible/seport_module.html): Manages SELinux
@@ -32,7 +32,7 @@ network port type definitions.
 
 ## Usage
 
-The general usage is demonstrated in [selinux-playbook.yml](selinux-playbook.yml) playbook.
+The general usage is demonstrated in [selinux-playbook.yml](examples/selinux-playbook.yml) playbook.
 
 ### selinux role
 
@@ -116,7 +116,7 @@ selinux_restore_dirs:
 
 #### Manage SELinux modules
 
-It's possible to maintain SELinux modules using `selinux_modules` variable which would contain a list of dictionaries, e.g.:
+It is possible to maintain SELinux modules using `selinux_modules` variable which would contain a list of dictionaries, e.g.:
 
 ```yaml
     selinux_modules:
@@ -137,7 +137,7 @@ It's possible to maintain SELinux modules using `selinux_modules` variable which
 **Note:** Building modules from source on nodes is not supported.
 However, in many cases a binary *pp* or *cil* module could be used on different systems if all systems support
 types, classes and permissions used in the module.
-In case of *pp* module it also needs to be built with lowest supported policydb module version on target systems,
+In case of *pp* module it also needs to be built with the lowest supported policydb module version on target systems,
 i.e. on the oldest system.
 
 **Note:** Module priorities are ignored in Red Hat Enterprise Linux 6
