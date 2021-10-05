@@ -22,7 +22,7 @@
           include_role:
             name: linux-system-roles.selinux
       when: ansible_distribution == "Fedora" or
-        ( ansible_distribution_major_version >= "7" and
+        ( ansible_distribution_major_version | int >= 7 and
           ansible_distribution in ["CentOS", "RedHat", "Rocky"] )
       rescue:
         - name: Cleanup modules
@@ -60,7 +60,7 @@
           assert:
             that: test_module_c == 'absent'
       when: ansible_distribution == "Fedora" or
-        ( ansible_distribution_major_version >= "7" and
+        ( ansible_distribution_major_version | int >= 7 and
           ansible_distribution in ["CentOS", "RedHat", "Rocky"] )
       always:
         - name: Cleanup modules
@@ -87,7 +87,7 @@
         - name: execute the role
           include_role:
             name: linux-system-roles.selinux
-      when: ansible_distribution_major_version < "7" and
+      when: ansible_distribution_major_version | int < 7 and
         ansible_distribution in ["CentOS", "RedHat"]
       rescue:
         - name: Cleanup modules
@@ -124,7 +124,7 @@
         - name: Check if linux-system-roles-selinux-test-c is absent
           assert:
             that: test_module_c == 'absent'
-      when: ansible_distribution_major_version < "7" and
+      when: ansible_distribution_major_version | int < 7 and
         ansible_distribution in ["CentOS", "RedHat"]
       always:
         - name: Cleanup modules
