@@ -26,6 +26,15 @@ command.
 [seport](http://docs.ansible.com/ansible/seport_module.html): Manages SELinux
 network port type definitions.
 
+See `meta/requirements.yml` for the requirements.  You must install the
+requirements before using this role:
+```
+ansible-galaxy collection install -vv -r meta/requirements.yml
+```
+See
+https://docs.ansible.com/ansible/latest/galaxy/user_guide.html#using-meta-requirements-yml
+for more information.
+
 ### Modules provided by this repository
 
 * `selinux_modules_facts`: Gather state of SELinux modules
