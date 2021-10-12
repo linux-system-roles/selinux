@@ -54,7 +54,8 @@
     msg: "Reboot is required to apply changes. Re-execute the role after boot."
   when: selinux_reboot_required
 
-- debug:
+- name: Warn if SELinux is disabled
+  debug:
     msg: "SELinux is disabled on system - some SELinux modules can crash"
   when: ansible_selinux.status == "disabled"
 
