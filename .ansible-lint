@@ -1,5 +1,4 @@
 ---
 skip_list:
 - '106'  # role name does not match pattern
-- '502'  # All tasks should be named
 - '701'  # ignore meta/requirements.yml
