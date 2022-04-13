@@ -1,0 +1,36 @@
+---
+- name: Ensure ansible_facts used by role
+  setup:
+    gather_subset: min
+  when: not ansible_facts.keys() | list |
+    intersect(__selinux_required_facts) == __selinux_required_facts
+
+- name: Install SELinux python2 tools
+  package:
+    name:
+      - libselinux-python
+      - policycoreutils-python
+    state: present
+  when: "ansible_python_version is version('3', '<')"
+
+- name: Install SELinux python3 tools
+  package:
+    name:
+      - libselinux-python3
+      - policycoreutils-python3
+    state: present
+  when: "ansible_python_version is version('3', '>=')"
+
+- name: refresh facts
+  setup:
+    filter: ansible_selinux
+  when: not __selinux_setup_snapshot | d(false)
+
+- name: Install SELinux tool semanage
+  package:
+    name:
+      - policycoreutils-python-utils
+    state: present
+  when: ansible_distribution == "Fedora" or
+    ( ansible_distribution_major_version | int > 7 and
+      ansible_distribution in ["CentOS", "RedHat", "Rocky"] )
