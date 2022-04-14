@@ -1,0 +1,8 @@
+- hosts: all
+  tasks:
+    - name: Set ansible_facts and install packages
+      vars:
+        __selinux_setup_snapshot: true
+      include_role:
+        name: linux-system-roles.selinux
+        tasks_from: set_facts_packages.yml
