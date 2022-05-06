@@ -28,14 +28,14 @@ network port type definitions.
 
 ## Requirements
 
-See `meta/requirements.yml` for the requirements.  You must install the
-requirements before using this role:
+The role requires some SELinux modules.  If you are using `ansible-core`, you must
+get these from the `ansible.posix` and `community.general` collections.  Use the
+file `meta/collection-requirements.yml` to install these:
 ```
-ansible-galaxy collection install -vv -r meta/requirements.yml
+ansible-galaxy collection install -vv -r meta/collection-requirements.yml
 ```
-See
-https://docs.ansible.com/ansible/latest/galaxy/user_guide.html#using-meta-requirements-yml
-for more information.
+If you are using Ansible Engine 2.9, or are using an Ansible bundle which
+includes these collections/modules, you should have to do nothing.
 
 ### Modules provided by this repository
 
