@@ -3,6 +3,7 @@
   become: true
   become_method: sudo
   become_user: root
+  gather_facts: true
   tasks:
     - name: execute the role and catch errors
       vars:
