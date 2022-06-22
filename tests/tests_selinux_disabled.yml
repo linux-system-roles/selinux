@@ -1,6 +1,7 @@
 - name: Ensure the default is targeted, enforcing, without local modifications
   hosts: all
   become: true
+  gather_facts: true
   vars:
     selinux_all_purge: true
     selinux_policy: targeted
