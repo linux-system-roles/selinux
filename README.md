@@ -100,6 +100,9 @@ selinux_booleans:
 selinux_fcontexts:
   - { target: '/tmp/test_dir(/.*)?', setype: 'user_home_dir_t', ftype: 'd', state: 'present' }
 ```
+Users may also pass the following optional parameters:
+- `seuser`: to set the SELinux user
+- `selevel`: to set the MLS/MCS Security Range (MLS/MCS Systems only) SELinux Range for SELinux login mapping defaults to the SELinux user record range.
 
 Individual modifications can be dropped by setting `state` to `absent`.
 
