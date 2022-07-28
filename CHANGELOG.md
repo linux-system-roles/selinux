@@ -1,6 +1,41 @@
 Changelog
 =========
 
+[1.4.0] - 2022-07-28
+--------------------
+
+### New Features
+
+- Added setting of seuser and selevel for completeness (#108)
+
+Added setting of seuser and selevel for completeness
+See Issue #106 "RFE: Support for setting seuser in selinux_fcontexts"
+https://github.com/linux-system-roles/selinux/issues/106
+
+Added explanation of seuser and selevel parameters
+
+Added -F flag to restorecon to force reset
+See "man restorecon" for more detail on -F flag
+
+Authored-by: Benjamin Blasco <bblasco@redhat.com>
+
+### Bug Fixes
+
+- none
+
+### Other Changes
+
+- changelog_to_tag action - support other than "master" for the main branch name, as well (#117)
+
+- Use GITHUB_REF_NAME as name of push branch; fix error in branch detection [citest skip] (#118)
+
+We need to get the name of the branch to which CHANGELOG.md was pushed.
+For now, it looks as though `GITHUB_REF_NAME` is that name.  But don't
+trust it - first, check that it is `main` or `master`.  If not, then use
+a couple of other methods to determine what is the push branch.
+
+Signed-off-by: Rich Megginson <rmeggins@redhat.com>
+
 [1.3.7] - 2022-07-19
 --------------------
 
