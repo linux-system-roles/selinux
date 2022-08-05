@@ -11,7 +11,7 @@
         selinux_fcontexts_purge: true
         selinux_fcontexts:
           - { target: '/tmp/test_dir1(/.*)?', setype: 'user_home_dir_t',
-              ftype: 'd' }
+              ftype: 'd', seuser: 'staff_u', selevel: 's0-s0:c0.c1023' }
 
     - name: include test variables
       import_tasks: set_selinux_variables.yml
@@ -31,7 +31,7 @@
         selinux_fcontexts_purge: false
         selinux_fcontexts:
           - { target: '/tmp/test_dir2(/.*)?', setype: 'user_home_dir_t',
-              ftype: 'd' }
+              ftype: 'd', seuser: 'staff_u', selevel: 's0-s0:c0.c1023' }
 
     - name: include test variables
       import_tasks: set_selinux_variables.yml
