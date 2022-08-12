@@ -1,8 +1,17 @@
 - name: Check if selinux role sets SELinux fcontext mappings
   hosts: all
   become: true
-
+  vars:
+    __str1: >-
+      /tmp/test_dir1[^ ]+[ ]+directory[
+      ]+staff_u:object_r:user_home_dir_t:s0-s0:c0.c1023
+    __str2: >-
+      /tmp/test_dir2[^ ]+[ ]+directory[
+      ]+staff_u:object_r:user_home_dir_t:s0-s0:c0.c1023
   tasks:
+
+    - name: include test variables
+      import_tasks: set_selinux_variables.yml
 
     - name: initial changes
       include_role:
@@ -11,7 +20,7 @@
         selinux_fcontexts_purge: true
         selinux_fcontexts:
           - { target: '/tmp/test_dir1(/.*)?', setype: 'user_home_dir_t',
-              ftype: 'd' }
+              ftype: 'd', seuser: 'staff_u', selevel: 's0-s0:c0.c1023' }
 
     - name: include test variables
       import_tasks: set_selinux_variables.yml
@@ -24,6 +33,10 @@
       assert:
         that: fcontext_before | length > 0
 
+    - name: Check if there's mapping to seuser/selevel context
+      assert:
+        that: fcontext_before is search(__str1)
+
     - name: subsequent changes
       include_role:
         name: linux-system-roles.selinux
@@ -31,7 +44,7 @@
         selinux_fcontexts_purge: false
         selinux_fcontexts:
           - { target: '/tmp/test_dir2(/.*)?', setype: 'user_home_dir_t',
-              ftype: 'd' }
+              ftype: 'd', seuser: 'staff_u', selevel: 's0-s0:c0.c1023' }
 
     - name: include test variables
       import_tasks: set_selinux_variables.yml
@@ -43,6 +56,12 @@
     - name: Check if there are SELinux fcontext mapping changes
       assert:
         that: "{{ fcontext_before != fcontext_after }}"
+
+    - name: Check if there's another mapping to seuser/selevel context
+      assert:
+        that:
+          - fcontext_after is search(__str1)
+          - fcontext_after is search(__str2)
 
     - name: revert subsequent changes
       include_role:
@@ -64,7 +83,14 @@
       assert:
         that: "{{ fcontext_before == fcontext_after }}"
 
-    - include_role:
+    - name: Check if the correct mapping was removed
+      assert:
+        that:
+          - fcontext_after is search(__str1)
+          - not fcontext_after is search(__str2)
+
+    - name: Purge all fcontexts
+      include_role:
         name: linux-system-roles.selinux
       vars:
         selinux_fcontexts_purge: true
@@ -72,6 +98,6 @@
     - name: include test variables
       import_tasks: set_selinux_variables.yml
 
-    - name: Check if there are no SELinux fcontext mapping changes
+    - name: Check if there are no SELinux fcontext mappings
       assert:
         that: selinux_role_fcontext.stdout | length == 0
