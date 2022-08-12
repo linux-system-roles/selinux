@@ -2,8 +2,6 @@
   hosts: all
   become: true
   vars:
-    __str_before: >-
-      staff_u:object_r:user_home_dir_t:s0-s0:c0.c1023
     __str1: >-
       /tmp/test_dir1[^ ]+[ ]+directory[
       ]+staff_u:object_r:user_home_dir_t:s0-s0:c0.c1023
@@ -14,10 +12,6 @@
 
     - name: include test variables
       import_tasks: set_selinux_variables.yml
-
-    - name: Ensure no mapping to seuser/selevel context
-      assert:
-        that: not __str_before in selinux_role_fcontext.stdout
 
     - name: initial changes
       include_role:
