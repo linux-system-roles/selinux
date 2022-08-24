@@ -11,6 +11,9 @@
         selinux_ports:
           - { ports: '22100', proto: 'tcp', setype: 'ssh_port_t',
               state: 'present' }
+          - { ports: 22101, setype: 'http_port_t' }
+          - { ports: '2049', proto: 'tcp', setype: 'nfs_port_t',
+              state: 'present' }
 
     - name: include test variables
       import_tasks: set_selinux_variables.yml
@@ -23,6 +26,9 @@
       assert:
         that: port_before | length > 0
 
+    - name: Show all port policy
+      command: semanage port -l
+
     - name: subsequent changes
       include_role:
         name: linux-system-roles.selinux
@@ -30,6 +36,9 @@
         selinux_ports_purge: false
         selinux_ports:
           - { ports: '22022', proto: 'tcp', setype: 'ssh_port_t',
+              state: 'present' }
+          - { ports: 22102, setype: 'http_port_t' }
+          - { ports: '2049', proto: 'tcp', setype: 'nfs_port_t',
               state: 'present' }
 
     - name: include test variables
@@ -41,7 +50,7 @@
 
     - name: Check if there are SELinux port mapping changes
       assert:
-        that: "{{ port_before != port_after }}"
+        that: port_before != port_after
 
     - name: revert subsequent changes
       include_role:
@@ -49,7 +58,9 @@
       vars:
         selinux_ports_purge: false
         selinux_ports:
-          - { ports: '22022', proto: 'tcp', setype: 'ssh_port_t',
+          - { ports: 22022, setype: 'ssh_port_t',
+              state: 'absent' }
+          - { ports: '22102', proto: 'tcp', setype: 'http_port_t',
               state: 'absent' }
 
     - name: include test variables
@@ -61,7 +72,52 @@
 
     - name: Check if SELinux port mapping is as before
       assert:
-        that: "{{ port_before == port_after }}"
+        that: port_before == port_after
+
+    - name: Catch error when removing built-in policy
+      block:
+        - name: Try to remove a built-in port policy
+          include_role:
+            name: linux-system-roles.selinux
+          vars:
+            selinux_ports:
+              - { ports: 2049, setype: 'nfs_port_t',
+                  state: 'absent' }
+              - { ports: '22022', proto: 'tcp', setype: 'ssh_port_t',
+                  state: 'absent' }
+              - { ports: 22102, setype: 'http_port_t' }
+
+        - name: Unreachable task
+          fail:
+            msg: UNREACHABLE
+      rescue:
+        - name: Check the error
+          assert:
+            that: ansible_failed_result.results | selectattr('msg', 'defined') |
+              map(attribute='msg') | select('search', __pat) | list | length > 0
+          vars:
+            __pat: Port tcp/2049 is defined in policy, cannot be deleted
+
+    - name: Ignore errors when removing built-in policy
+      include_role:
+        name: linux-system-roles.selinux
+      vars:
+        selinux_ports:
+          - { ports: 2049, setype: 'nfs_port_t',
+              state: 'absent' }
+          - { ports: '22022', proto: 'tcp', setype: 'ssh_port_t',
+              state: 'absent' }
+          - { ports: 22102, setype: 'http_port_t' }
+        selinux_ignore_builtin_removal: true
+
+    - name: include test variables
+      import_tasks: set_selinux_variables.yml
+
+    - name: Verify that the http port was added
+      assert:
+        that: selinux_role_port.stdout_lines |
+          select('match', '^http_port_t .* tcp .*22102.*') |
+          list | length > 0
 
     - include_role:
         name: linux-system-roles.selinux

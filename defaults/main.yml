@@ -15,3 +15,7 @@ selinux_booleans_purge: no
 selinux_fcontexts_purge: no
 selinux_ports_purge: no
 selinux_logins_purge: no
+
+# If this is set, ignore errors when attempting
+# to remove built-in policy
+selinux_ignore_builtin_removal: false

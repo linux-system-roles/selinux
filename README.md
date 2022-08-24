@@ -156,6 +156,33 @@ i.e. on the oldest system.
 
 **Note:** Module priorities are ignored in Red Hat Enterprise Linux 6
 
+#### Ignore errors when attempting to remove built-in policy
+
+If you attempt to remove built-in policy, you will get an error like this:
+```
+include_role:
+  name: linux-system-roles.selinux
+vars:
+  selinux_ports:
+    - { ports: '20514', proto: 'tcp', setype: 'syslogd_port_t',
+        state: 'absent' }
+...
+Port tcp/20514 is defined in policy, cannot be deleted
+```
+If you want the role to ignore errors like this, use `selinux_ignore_builtin_removal: true`
+```
+include_role:
+  name: linux-system-roles.selinux
+vars:
+  selinux_ignore_builtin_removal: true
+  selinux_ports:
+    - { ports: '20514', proto: 'tcp', setype: 'syslogd_port_t',
+        state: 'absent' }
+...
+ok
+```
+The default value is `false`.
+
 ## Ansible Facts
 
 ### selinux\_reboot\_required

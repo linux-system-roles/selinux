@@ -87,13 +87,67 @@
   check_mode: no
   when: ansible_check_mode
 
+- name: Get local modifications - port - to check for built-in policy
+  command: /usr/sbin/semanage port -l -n -C
+  changed_when: false
+  register: __selinux_port_local
+  when:
+    - selinux_ignore_builtin_removal | bool
+    - selinux_ports | selectattr("state", "defined") |
+      selectattr("state", "match", "^absent$") | list | length > 0
+
 - name: Set an SELinux label on a port
   seport:
     ports: "{{ item.ports }}"
     proto: "{{ item.proto | default('tcp') }}"
     setype: "{{ item.setype }}"
     state: "{{ item.state | default('present') }}"
-  with_items: "{{ selinux_ports }}"
+  with_items: "{{ __selinux_ports }}"
+  vars:
+    __selinux_local_items: |
+      {% set items = [] %}
+      {% for line in __selinux_port_local.stdout_lines | d([]) %}
+      {%  set ary = line.split(maxsplit=2) %}
+      {%  set ports = ary[2].split(", ") %}
+      {%  for port in ports %}
+      {%    set entry = {"state": "absent", "ports": port,
+                         "setype": ary[0], "proto": ary[1]} %}
+      {%    set _ = items.append(entry) %}
+      {%    set intport = port | int %}
+      {# port can be specified as a string "22" or int 22 #}
+      {%    if intport != 0 %}
+      {%      set entry = {"state": "absent", "ports": intport,
+                           "setype": ary[0], "proto": ary[1]} %}
+      {%      set _ = items.append(entry) %}
+      {%    endif %}
+      {# if proto is omitted, defaults to tcp #}
+      {%    if ary[1] == "tcp" %}
+      {%      set entry = {"state": "absent", "ports": port,
+                           "setype": ary[0]} %}
+      {%      set _ = items.append(entry) %}
+      {%      if intport != 0 %}
+      {%        set entry = {"state": "absent", "ports": intport,
+                             "setype": ary[0]} %}
+      {%        set _ = items.append(entry) %}
+      {%      endif %}
+      {%    endif %}
+      {%   endfor %}
+      {% endfor %}
+      {{ items }}
+    __selinux_ports: |
+      {% if selinux_ignore_builtin_removal %}
+      {%   set items = [] %}
+      {%   for item in selinux_ports %}
+      {%     if item.get("state", "present") == "present"
+                or item in __selinux_local_items %}
+      {%       set _ = items.append(item) %}
+      {#     else do not remove built-in policy #}
+      {%     endif %}
+      {%   endfor %}
+      {{ items }}
+      {% else %}
+      {{ selinux_ports }}
+      {% endif %}
 
 - name: Set linux user to SELinux user mapping
   selogin:
