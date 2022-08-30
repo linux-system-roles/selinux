@@ -31,6 +31,8 @@
         selinux_ports:
           - { ports: '22022', proto: 'tcp', setype: 'ssh_port_t',
               state: 'present' }
+          - { ports: '22023', proto: 'tcp', setype: 'ssh_port_t',
+              state: 'present', local: true }
 
     - name: include test variables
       import_tasks: set_selinux_variables.yml
@@ -51,6 +53,12 @@
         selinux_ports:
           - { ports: '22022', proto: 'tcp', setype: 'ssh_port_t',
               state: 'absent' }
+          - { ports: '22', proto: 'tcp', setype: 'ssh_port_t',
+              state: 'absent', local: true }
+          - { ports: '22023', proto: 'tcp', setype: 'ssh_port_t',
+              state: 'absent', local: true }
+          - { ports: '22023', proto: 'tcp', setype: 'ssh_port_t',
+              state: 'absent', local: true }
 
     - name: include test variables
       import_tasks: set_selinux_variables.yml
