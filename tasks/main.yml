@@ -88,11 +88,12 @@
   when: ansible_check_mode
 
 - name: Set an SELinux label on a port
-  seport:
+  local_seport:
     ports: "{{ item.ports }}"
     proto: "{{ item.proto | default('tcp') }}"
     setype: "{{ item.setype }}"
     state: "{{ item.state | default('present') }}"
+    local: "{{ item.local | default(False) }}"
   with_items: "{{ selinux_ports }}"
 
 - name: Set linux user to SELinux user mapping

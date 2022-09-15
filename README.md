@@ -14,16 +14,16 @@ Essentially provide mechanisms to manage local customizations:
 
 ## Available modules in Ansible
 
-[selinux](http://docs.ansible.com/ansible/selinux_module.html): Configures the
+[selinux](https://docs.ansible.com/ansible/latest/collections/ansible/posix/selinux_module.html#ansible-collections-ansible-posix-selinux-module): Configures the
 SELinux mode and policy.
 
-[seboolean](http://docs.ansible.com/ansible/seboolean_module.html): Toggles SELinux booleans.
+[seboolean](https://docs.ansible.com/ansible/latest/collections/ansible/posix/seboolean_module.html#ansible-collections-ansible-posix-seboolean-module): Toggles SELinux booleans.
 
-[sefcontext](http://docs.ansible.com/ansible/sefcontext_module.html): Manages
+[sefcontext](https://docs.ansible.com/ansible/latest/collections/community/general/sefcontext_module.html#ansible-collections-community-general-sefcontext-module): Manages
 SELinux file context mapping definitions similar to the `semanage fcontext`
 command.
 
-[seport](http://docs.ansible.com/ansible/seport_module.html): Manages SELinux
+[seport](https://docs.ansible.com/ansible/latest/collections/community/general/seport_module.html#ansible-collections-community-general-seport-module): Manages SELinux
 network port type definitions.
 
 ## Requirements
@@ -110,7 +110,7 @@ Individual modifications can be dropped by setting `state` to `absent`.
 
 ```yaml
 selinux_ports:
-  - { ports: '22100', proto: 'tcp', setype: 'ssh_port_t', state: 'present' }
+  - { ports: '22100', proto: 'tcp', setype: 'ssh_port_t', state: 'present', local: true }
 ```
 
 #### run restorecon on filesystem trees
