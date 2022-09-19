@@ -1,6 +1,34 @@
 Changelog
 =========
 
+[1.5.0] - 2022-09-19
+--------------------
+
+### New Features
+
+- add 'local' parameter to seport (#124)
+
+`community.general.seport` has recently added the `local` parameter
+which is now supported by the role.
+
+- `local: true`:
+  * `state: present` enforces change to be made even though the
+    port mapping could already exists in built in policy
+  * `state: absent` would remove only local modification and would not
+    try to remove builtin mapping.
+
+The role vendors-in the seport module as `local_seport`, because otherwise
+it is too difficult to support both Ansible 2.9 and ansible-core.  We will
+revisit this when Ansible 2.9 is EOL.
+
+### Bug Fixes
+
+- none
+
+### Other Changes
+
+- add test for fcontext seuser and selevel (#120)
+
 [1.4.0] - 2022-07-28
 --------------------
 
