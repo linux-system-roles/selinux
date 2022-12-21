@@ -53,14 +53,11 @@ Authored-by: Benjamin Blasco <bblasco@redhat.com>
 
 ### Other Changes
 
-- changelog_to_tag action - support other than "master" for the main branch name, as well (#117)
+- changelog_to_tag action - github action ansible test improvements
 
 - Use GITHUB_REF_NAME as name of push branch; fix error in branch detection [citest skip] (#118)
 
 We need to get the name of the branch to which CHANGELOG.md was pushed.
-For now, it looks as though `GITHUB_REF_NAME` is that name.  But don't
-trust it - first, check that it is `main` or `master`.  If not, then use
-a couple of other methods to determine what is the push branch.
 
 Signed-off-by: Rich Megginson <rmeggins@redhat.com>
 
@@ -232,7 +229,7 @@ must be a `string` value like `"2.9"`, not a `float` value like `2.9`.
 ### Other Changes
 
 - Remove python-26 environment from tox testing
-- update to tox-lsr 2.4.0 - add support for ansible-test sanity with docker
+- update to tox-lsr 2.4.0 - add support for ansible-test with docker
 - Add a note to each module Doc to indicate it is private
 - use tox-lsr 2.2.1
 - CI: Add support for RHEL-9
