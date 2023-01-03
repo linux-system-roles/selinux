@@ -1,21 +1,22 @@
+---
 - name: Check if selinux role sets SELinux port mapping
   hosts: all
   become: true
 
   tasks:
-    - name: initial changes
+    - name: Initial changes
       include_role:
         name: linux-system-roles.selinux
       vars:
         selinux_ports_purge: true
         selinux_ports:
-          - { ports: '22100', proto: 'tcp', setype: 'ssh_port_t',
-              state: 'present' }
+          - {ports: '22100', proto: 'tcp', setype: 'ssh_port_t',
+             state: 'present'}
 
-    - name: include test variables
+    - name: Include test variables
       import_tasks: set_selinux_variables.yml
 
-    - name: save state after initial changes and before other changes
+    - name: Save state after initial changes and before other changes
       set_fact:
         port_before: "{{ selinux_role_port.stdout }}"
 
@@ -23,21 +24,21 @@
       assert:
         that: port_before | length > 0
 
-    - name: subsequent changes
+    - name: Subsequent changes
       include_role:
         name: linux-system-roles.selinux
       vars:
         selinux_ports_purge: false
         selinux_ports:
-          - { ports: '22022', proto: 'tcp', setype: 'ssh_port_t',
-              state: 'present' }
-          - { ports: '22023', proto: 'tcp', setype: 'ssh_port_t',
-              state: 'present', local: true }
+          - {ports: '22022', proto: 'tcp', setype: 'ssh_port_t',
+             state: 'present'}
+          - {ports: '22023', proto: 'tcp', setype: 'ssh_port_t',
+             state: 'present', local: true}
 
-    - name: include test variables
+    - name: Include test variables
       import_tasks: set_selinux_variables.yml
 
-    - name: save state after other changes
+    - name: Save state after other changes
       set_fact:
         port_after: "{{ selinux_role_port.stdout }}"
 
@@ -45,25 +46,25 @@
       assert:
         that: "{{ port_before != port_after }}"
 
-    - name: revert subsequent changes
+    - name: Revert subsequent changes
       include_role:
         name: linux-system-roles.selinux
       vars:
         selinux_ports_purge: false
         selinux_ports:
-          - { ports: '22022', proto: 'tcp', setype: 'ssh_port_t',
-              state: 'absent' }
-          - { ports: '22', proto: 'tcp', setype: 'ssh_port_t',
-              state: 'absent', local: true }
-          - { ports: '22023', proto: 'tcp', setype: 'ssh_port_t',
-              state: 'absent', local: true }
-          - { ports: '22023', proto: 'tcp', setype: 'ssh_port_t',
-              state: 'absent', local: true }
+          - {ports: '22022', proto: 'tcp', setype: 'ssh_port_t',
+             state: 'absent'}
+          - {ports: '22', proto: 'tcp', setype: 'ssh_port_t',
+             state: 'absent', local: true}
+          - {ports: '22023', proto: 'tcp', setype: 'ssh_port_t',
+             state: 'absent', local: true}
+          - {ports: '22023', proto: 'tcp', setype: 'ssh_port_t',
+             state: 'absent', local: true}
 
-    - name: include test variables
+    - name: Include test variables
       import_tasks: set_selinux_variables.yml
 
-    - name: save state after reverting other changes
+    - name: Save state after reverting other changes
       set_fact:
         port_after: "{{ selinux_role_port.stdout }}"
 
@@ -71,12 +72,13 @@
       assert:
         that: "{{ port_before == port_after }}"
 
-    - include_role:
+    - name: Include role
+      include_role:
         name: linux-system-roles.selinux
       vars:
         selinux_ports_purge: true
 
-    - name: include test variables
+    - name: Include test variables
       import_tasks: set_selinux_variables.yml
 
     - name: Check if there are no SELinux port mapping changes

@@ -1,3 +1,4 @@
+---
 - name: Restore original /etc/selinux/config
   copy:
     remote_src: true
@@ -11,16 +12,17 @@
     path: /etc/selinux/config.test_selinux_save
     state: absent
 
-- name: reboot
+- name: Reboot
+  when: restoreconf is changed  # noqa no-handler
   block:
-    - name: restart managed host
+    - name: Restart managed host
       shell: sleep 2 && shutdown -r now "Ansible updates triggered"
       async: 1
       poll: 0
-      ignore_errors: true
+      ignore_errors: true  # noqa ignore-errors
+      changed_when: false
 
-    - name: wait for managed host to come back
+    - name: Wait for managed host to come back
       wait_for_connection:
         delay: 10
         timeout: 300
-  when: restoreconf is changed

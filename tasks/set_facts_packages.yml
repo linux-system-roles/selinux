@@ -21,7 +21,7 @@
     state: present
   when: "ansible_python_version is version('3', '>=')"
 
-- name: refresh facts
+- name: Refresh facts
   setup:
     filter: ansible_selinux
   when: not __selinux_setup_snapshot | d(false)
@@ -32,5 +32,5 @@
       - policycoreutils-python-utils
     state: present
   when: ansible_distribution == "Fedora" or
-    ( ansible_distribution_major_version | int > 7 and
-      ansible_distribution in ["CentOS", "RedHat", "Rocky"] )
+    (ansible_distribution_major_version | int > 7 and
+     ansible_distribution in ["CentOS", "RedHat", "Rocky"])

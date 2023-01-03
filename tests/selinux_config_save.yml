@@ -1,3 +1,4 @@
+---
 - name: Backup original /etc/selinux/config
   copy:
     remote_src: true

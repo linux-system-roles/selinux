@@ -1,5 +1,6 @@
 ---
-- hosts: all
+- name: Manage SELinux policy example
+  hosts: all
   become: true
   become_method: sudo
   become_user: root
@@ -12,31 +13,31 @@
     selinux_booleans:
       # Set the 'samba_enable_home_dirs' boolean to 'on' in the current
       # session only
-      - { name: 'samba_enable_home_dirs', state: 'on' }
+      - {name: 'samba_enable_home_dirs', state: 'on'}
       # Set the 'ssh_sysadm_login' boolean to 'on' permanently
-      - { name: 'ssh_sysadm_login', state: 'on', persistent: 'yes' }
+      - {name: 'ssh_sysadm_login', state: 'on', persistent: 'yes'}
     # Map '/tmp/test_dir' and its subdirectories to the 'user_home_dir_t'
     # SELinux file type
     selinux_fcontexts:
-      - { target: '/tmp/test_dir(/.*)?', setype: 'user_home_dir_t', ftype: 'd' }
+      - {target: '/tmp/test_dir(/.*)?', setype: 'user_home_dir_t', ftype: 'd'}
     # Restore SELinux file contexts in '/tmp/test_dir'
     selinux_restore_dirs:
       - /tmp/test_dir
     # Map tcp port 22100 to the 'ssh_port_t' SELinux port type
     selinux_ports:
-      - { ports: '22100', proto: 'tcp', setype: 'ssh_port_t', state: 'present' }
+      - {ports: '22100', proto: 'tcp', setype: 'ssh_port_t', state: 'present'}
     # Map the 'sar-user' Linux user to the 'staff_u' SELinux user
     selinux_logins:
-      - { login: 'sar-user', seuser: 'staff_u', serange: 's0-s0:c0.c1023',
-          state: 'present' }
+      - {login: 'sar-user', seuser: 'staff_u', serange: 's0-s0:c0.c1023',
+         state: 'present'}
     # Manage modules
     selinux_modules:
       # Install the 'localpolicy.cil' with priority 300
-      - { path: "localpolicy.cil", priority: "300", state: "enabled" }
+      - {path: "localpolicy.cil", priority: "300", state: "enabled"}
       # Disable the 'unconfineduser' module with priority 100
-      - { name: "unconfineduser", priority: "100", state: "disabled" }
+      - {name: "unconfineduser", priority: "100", state: "disabled"}
       # Remove the 'temporarypolicy' module with priority 400
-      - { name: "temporarypolicy", priority: "400", state: "absent" }
+      - {name: "temporarypolicy", priority: "400", state: "absent"}
 
   # Prepare the prerequisites required for this playbook
   tasks:
@@ -49,26 +50,26 @@
       user:
         comment: Linux System Roles SELinux User
         name: sar-user
-    - name: execute the role and catch errors
+    - name: Execute the role and catch errors
       block:
         - name: Include selinux role
           include_role:
             name: linux-system-roles.selinux
       rescue:
         # Fail if failed for a different reason than selinux_reboot_required.
-        - name: handle errors
+        - name: Handle errors
           fail:
             msg: "role failed"
           when: not selinux_reboot_required
 
-        - name: restart managed host
+        - name: Restart managed host
           reboot:
 
-        - name: wait for managed host to come back
+        - name: Wait for managed host to come back
           wait_for_connection:
             delay: 10
             timeout: 300
 
-        - name: reapply the role
+        - name: Reapply the role
           include_role:
             name: linux-system-roles.selinux
