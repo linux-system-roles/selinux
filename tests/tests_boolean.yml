@@ -1,20 +1,21 @@
+---
 - name: Check if selinux role sets SELinux booleans
   hosts: all
   become: true
 
   tasks:
-    - name: initial changes
+    - name: Initial changes
       include_role:
         name: linux-system-roles.selinux
       vars:
         selinux_booleans_purge: true
         selinux_booleans:
-          - { name: 'samba_enable_home_dirs', state: 'on', persistent: 'yes' }
+          - {name: 'samba_enable_home_dirs', state: 'on', persistent: 'yes'}
 
-    - name: include test variables
+    - name: Include test variables
       import_tasks: set_selinux_variables.yml
 
-    - name: save state after initial changes and before other changes
+    - name: Save state after initial changes and before other changes
       set_fact:
         boolean_before: "{{ selinux_role_boolean.stdout_lines }}"
 
@@ -22,32 +23,33 @@
       assert:
         that: selinux_role_boolean.stdout | length > 0
 
-    - name: subsequent changes
+    - name: Subsequent changes
       include_role:
         name: linux-system-roles.selinux
       vars:
         selinux_booleans_purge: false
         selinux_booleans:
-          - { name: 'httpd_can_network_connect', state: 'on',
-              persistent: 'yes' }
+          - {name: 'httpd_can_network_connect', state: 'on',
+             persistent: 'yes'}
 
-    - name: include test variables
+    - name: Include test variables
       import_tasks: set_selinux_variables.yml
 
-    - name: save state after other changes
+    - name: Save state after other changes
       set_fact:
         boolean_after: "{{ selinux_role_boolean.stdout_lines }}"
 
     - name: Check if there are SELinux boolean changes
       assert:
-        that: "{{ ( boolean_before | count ) < ( boolean_after | count ) }}"
+        that: "{{ (boolean_before | count) < (boolean_after | count) }}"
 
-    - include_role:
+    - name: Include role
+      include_role:
         name: linux-system-roles.selinux
       vars:
         selinux_booleans_purge: true
 
-    - name: include test variables
+    - name: Include test variables
       import_tasks: set_selinux_variables.yml
 
     - name: Check if there are no SELinux boolean mapping changes

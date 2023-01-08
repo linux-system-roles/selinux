@@ -3,14 +3,16 @@
   include_tasks: set_facts_packages.yml
 
 - name: Set permanent SELinux state if enabled
+  # noqa args[module] fqcn[action]
   selinux:
     state: "{{ selinux_state | default(ansible_selinux.config_mode, true) }}"
     policy: "{{ selinux_policy | default(ansible_selinux.type, true) }}"
   register: selinux_mod_output_enabled
   when: ansible_selinux.status == "enabled" and
-        ( selinux_state or selinux_policy )
+        (selinux_state or selinux_policy)
 
 - name: Set permanent SELinux state if disabled
+  # noqa args[module] fqcn[action]
   selinux:
     state: "{{ selinux_state }}"
     policy: "{{ selinux_policy | default('targeted', true) }}"
@@ -20,8 +22,8 @@
 - name: Set selinux_reboot_required
   set_fact:
     selinux_reboot_required: "{{ selinux_mod_output_enabled.reboot_required
-  if ( selinux_mod_output_enabled.reboot_required is defined ) else (
-  selinux_mod_output_disabled.reboot_required | default(false) ) }}"
+      if (selinux_mod_output_enabled.reboot_required is defined) else
+      (selinux_mod_output_disabled.reboot_required | default(false)) }}"
 
 - name: Fail if reboot is required
   fail:
@@ -57,6 +59,7 @@
   when: selinux_logins_purge | bool
 
 - name: Set SELinux booleans
+  # noqa fqcn[action]
   seboolean:
     name: "{{ item.name }}"
     state: "{{ item.state }}"
@@ -84,7 +87,7 @@
   with_items: "{{ selinux_restore_dirs }}"
   register: restorecon_cmd
   changed_when: '"Would relabel" in restorecon_cmd.stdout'
-  check_mode: no
+  check_mode: false
   when: ansible_check_mode
 
 - name: Set an SELinux label on a port
@@ -109,7 +112,8 @@
 - name: Get SELinux modules facts
   selinux_modules_facts:
 
-- include_tasks: selinux_load_module.yml
+- name: Load SELinux modules
+  include_tasks: selinux_load_module.yml
   vars:
     name: "{{ item.name | default('') }}"
     state: "{{ item.state | default('enabled') }}"

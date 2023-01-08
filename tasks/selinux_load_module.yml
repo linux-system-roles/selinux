@@ -1,4 +1,6 @@
+---
 - name: Install module
+  when: state == "enabled" and item.path is defined
   block:
     - name: Create temporary directory
       tempfile:
@@ -6,7 +8,7 @@
         prefix: linux_system_role.selinux
       register: tempdir
 
-    - name: Copy module file "{{ item.path }}"
+    - name: Copy module file {{ item.path }}
       copy:
         dest: "{{ tempdir.path }}"
         src: "{{ item.path }}"
@@ -25,11 +27,8 @@
       when: priority == "0" or not selinux_priorities
       notify: __selinux_reload_policy
       # yamllint enable rule:line-length
-
-  when:
-    state == "enabled" and item.path is defined
   always:
-    - name: Clean temporary directory "{{ tempdir.path }}"
+    - name: Clean temporary directory {{ tempdir.path }}
       file:
         path: "{{ tempdir.path }}"
         state: "absent"

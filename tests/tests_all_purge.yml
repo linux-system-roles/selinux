@@ -1,3 +1,4 @@
+---
 - name: Test that selinux_all_purge drops local modifications, defaults to no
   hosts: all
   become: true
@@ -16,8 +17,8 @@
           - policycoreutils-python-utils
         state: present
       when: ansible_distribution == "Fedora" or
-        ( ansible_distribution_major_version | int > 7 and
-          ansible_distribution in ["CentOS", "RedHat", "Rocky"] )
+        (ansible_distribution_major_version | int > 7 and
+         ansible_distribution in ["CentOS", "RedHat", "Rocky"])
 
     - name: Add a Linux System Roles SELinux User
       user:
@@ -34,7 +35,7 @@
       include_role:
         name: linux-system-roles.selinux
 
-    - name: include test variables
+    - name: Include test variables
       import_tasks: set_selinux_variables.yml
 
     - name: Check if local modifications are not empty - booleans
@@ -56,7 +57,7 @@
       vars:
         selinux_all_purge: true
 
-    - name: include test variables
+    - name: Include test variables
       import_tasks: set_selinux_variables.yml
 
     - name: Check if local modifications are empty - booleans
@@ -75,5 +76,5 @@
     - name: Remove Linux System Roles SELinux User
       user:
         name: sar-user
-        remove: yes
+        remove: true
         state: absent
