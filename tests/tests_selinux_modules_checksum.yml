@@ -1,0 +1,38 @@
+---
+- name: Test management of SELinux modules
+  hosts: all
+  become: true
+  tasks:
+    - name: Execute the role and catch errors
+      when: ansible_distribution == "Fedora" or
+        (ansible_distribution in ["CentOS", "RedHat", "Rocky"] and
+        ansible_distribution_version is version("8.6", ">="))
+      vars:
+        selinux_modules:
+          - {path: "linux-system-roles-selinux-test-a.pp"}
+      block:
+        - name: Execute the role
+          include_role:
+            name: linux-system-roles.selinux
+          register: role_result
+        - name: Get current commit_num
+          shell: cat /var/lib/selinux/targeted/active/commit_num
+          register: commit_num_before
+        - name: Execute the role
+          include_role:
+            name: linux-system-roles.selinux
+          register: role_result
+        - name: Get current commit_num
+          shell: cat /var/lib/selinux/targeted/active/commit_num
+          register: commit_num_after
+        - name: Check commit numbers
+          assert:
+            that:
+              commit_num_before.stdout == commit_num_after.stdout
+      always:
+        - name: Cleanup modules
+          command: "{{ item }}"
+          loop:
+            - "semodule -r linux-system-roles-selinux-test-a"
+          ignore_errors: true  # noqa ignore-errors
+          changed_when: false

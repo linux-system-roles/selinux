@@ -120,6 +120,5 @@
     priority: "{{ item.priority | default('0') }}"
     current_state: "{{ selinux_installed_modules[name][priority] |
                        default('absent') }}"
-    store: "{{ selinux_policy | default(ansible_selinux.type, true) }}"
   when: selinux_modules is defined
   loop: "{{ selinux_modules | flatten(levels=1) }}"
