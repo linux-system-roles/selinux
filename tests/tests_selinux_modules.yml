@@ -2,9 +2,6 @@
 - name: Test management of SELinux modules
   hosts: all
   become: true
-  become_method: sudo
-  become_user: root
-  gather_facts: true
   tasks:
     - name: Execute the role and catch errors
       vars:
