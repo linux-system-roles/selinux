@@ -56,7 +56,7 @@
 
     - name: Check if there are SELinux fcontext mapping changes
       assert:
-        that: "{{ fcontext_before != fcontext_after }}"
+        that: fcontext_before != fcontext_after
 
     - name: Check if there's another mapping to seuser/selevel context
       assert:
@@ -82,7 +82,7 @@
 
     - name: Check if SELinux fcontext mapping is as before
       assert:
-        that: "{{ fcontext_before == fcontext_after }}"
+        that: fcontext_before == fcontext_after
 
     - name: Check if the correct mapping was removed
       assert:

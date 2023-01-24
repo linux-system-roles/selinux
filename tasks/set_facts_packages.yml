@@ -11,7 +11,7 @@
       - libselinux-python
       - policycoreutils-python
     state: present
-  when: "ansible_python_version is version('3', '<')"
+  when: ansible_python_version is version('3', '<')
 
 - name: Install SELinux python3 tools
   package:
@@ -19,7 +19,7 @@
       - libselinux-python3
       - policycoreutils-python3
     state: present
-  when: "ansible_python_version is version('3', '>=')"
+  when: ansible_python_version is version('3', '>=')
 
 - name: Refresh facts
   setup:

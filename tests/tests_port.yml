@@ -44,7 +44,7 @@
 
     - name: Check if there are SELinux port mapping changes
       assert:
-        that: "{{ port_before != port_after }}"
+        that: port_before != port_after
 
     - name: Revert subsequent changes
       include_role:
@@ -70,7 +70,7 @@
 
     - name: Check if SELinux port mapping is as before
       assert:
-        that: "{{ port_before == port_after }}"
+        that: port_before == port_after
 
     - name: Include role
       include_role:

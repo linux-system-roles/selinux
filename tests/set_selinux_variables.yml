@@ -5,8 +5,16 @@
       - policycoreutils-python-utils
     state: present
   when: ansible_distribution == "Fedora" or
-    ( ansible_distribution_major_version | int > 7 and
-      ansible_distribution in ["CentOS", "RedHat", "Rocky"] )
+    (ansible_distribution_major_version | int > 7 and
+     ansible_distribution in ["CentOS", "RedHat", "Rocky"])
+- name: Ensure SELinux tool semanage on EL7
+  package:
+    name:
+      - policycoreutils-python
+    state: present
+  when:
+    - ansible_distribution_major_version | int == 7
+    - ansible_os_family == "RedHat"
 - name: Get local modifications - boolean
   command: /usr/sbin/semanage boolean -l -n -C
   changed_when: false

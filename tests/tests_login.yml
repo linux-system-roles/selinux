@@ -47,7 +47,7 @@
 
     - name: Check if there are SELinux login mapping changes
       assert:
-        that: "{{ login_before != login_after }}"
+        that: login_before != login_after
 
     - name: Revert subsequent changes
       include_role:
@@ -67,7 +67,7 @@
 
     - name: Check if SELinux login mapping is as before
       assert:
-        that: "{{ login_before == login_after }}"
+        that: login_before == login_after
 
     - name: Include role
       include_role:

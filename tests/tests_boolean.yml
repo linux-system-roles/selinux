@@ -41,7 +41,7 @@
 
     - name: Check if there are SELinux boolean changes
       assert:
-        that: "{{ (boolean_before | count) < (boolean_after | count) }}"
+        that: (boolean_before | count) < (boolean_after | count)
 
     - name: Include role
       include_role:
