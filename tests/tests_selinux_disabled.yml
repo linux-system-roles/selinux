@@ -23,6 +23,15 @@
         (ansible_distribution_major_version | int > 7 and
          ansible_distribution in ["CentOS", "RedHat", "Rocky"])
 
+    - name: Ensure SELinux tool semanage on EL7
+      package:
+        name:
+          - policycoreutils-python
+        state: present
+      when:
+        - ansible_distribution_major_version | int == 7
+        - ansible_os_family == "RedHat"
+
     - name: Add a Linux System Roles SELinux User
       user:
         comment: Linux System Roles SELinux User
@@ -69,7 +78,7 @@
 
     - name: Check that the role has failed and set the correct variable
       assert:
-        that: "{{ test_selinux_reboot_required }}"
+        that: test_selinux_reboot_required | bool
         msg: "test_selinux_reboot_required should be True instead of
               {{ test_selinux_reboot_required }}"
     - name: >-
