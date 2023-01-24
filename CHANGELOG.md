@@ -1,6 +1,23 @@
 Changelog
 =========
 
+[1.5.1] - 2023-01-24
+--------------------
+
+### New Features
+
+- none
+
+### Bug Fixes
+
+- ansible-lint 6.x fixes (#132)
+
+### Other Changes
+
+- Add check for non-inclusive language (#131)
+- cleanup non-inclusive words.
+- ensure semanage present on EL7 tests; fix jinja spacing, quoting (#139)
+
 [1.5.0] - 2022-09-19
 --------------------
 
