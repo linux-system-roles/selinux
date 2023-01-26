@@ -156,6 +156,8 @@ i.e. on the oldest system.
 
 **Note:** Module priorities are ignored in Red Hat Enterprise Linux 6
 
+**Note:** Managing modules is idempotent only on Fedora, and EL 8.6 and later. You can manage modules on older releases, but it will not be idempotent.
+
 ## Ansible Facts
 
 ### selinux\_reboot\_required
