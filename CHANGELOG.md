@@ -1,6 +1,24 @@
 Changelog
 =========
 
+[1.5.2] - 2023-01-26
+--------------------
+
+### New Features
+
+- none
+
+### Bug Fixes
+
+- Rewrite selinux_load_module.yml to use local_semodule  (#135)
+
+This makes module management idempotent on Fedora, and EL 8.6
+and later.
+
+### Other Changes
+
+- none
+
 [1.5.1] - 2023-01-24
 --------------------
 
