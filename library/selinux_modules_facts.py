@@ -28,8 +28,30 @@ EXAMPLES = r"""
 
 from subprocess import PIPE, Popen
 
+import traceback
+
+SEMANAGE_IMP_ERR = None
+try:
+    import semanage
+
+    HAVE_SEMANAGE = True
+except ImportError:
+    SEMANAGE_IMP_ERR = traceback.format_exc()
+    HAVE_SEMANAGE = False
+
 # https://docs.ansible.com/ansible/latest/dev_guide/developing_modules_general.html#creating-an-info-or-a-facts-module
 from ansible.module_utils.basic import AnsibleModule
+
+def init_libsemanage(store=""):
+    sh = semanage.semanage_handle_create()
+    if not sh:
+        raise ValueError("Could not create semanage handle")
+
+    if store != "":
+        semanage.semanage_select_store(sh, store, semanage.SEMANAGE_CON_DIRECT)
+    semanage.semanage_connect(sh)
+    semanage.semanage_set_reload(sh, 0)
+    return sh
 
 
 def run_module():
@@ -52,56 +74,78 @@ def run_module():
     # supports check mode
     module = AnsibleModule(argument_spec=module_args, supports_check_mode=True)
 
-    # if the user is working with this module in only check mode we do not
-    # want to make any changes to the environment, just return the current
-    # state with no modifications
-    if module.check_mode:
-        module.exit_json(**result)
-    # manipulate or modify the state as needed (this is going to be the
-    # part where your module will do what it needs to do)
+    if not HAVE_SEMANAGE:
+        module.fail_json(
+            msg=missing_required_lib("python3-libsemanage"),
+            exception=SEMANAGE_IMP_ERR
+        )
+
+    try:
+        sh = init_libsemanage()
+    except Exception:
+        module.fail_json(
+            msg="Could not connect to SELinux module store",
+            exception=traceback.format_exc(),
+        )
 
     priorities = True
-    semodule_l = Popen(
-        ["/usr/sbin/semodule", "-lfull"],
-        stdin=None,
-        stdout=PIPE,
-        stderr=PIPE,
-        universal_newlines=True,
-    ).communicate()
-    # most likely RHEL 6 with old SELinux userspace - no priorities
-    if "invalid option" in semodule_l[1]:
-        semodule_l = Popen(
-            ["/usr/sbin/semodule", "-l"],
-            stdin=None,
-            stdout=PIPE,
-            stderr=PIPE,
-            universal_newlines=True,
-        ).communicate()
+    checksums = True
+    try:
+        r, modinfo, num_modules = semanage.semanage_module_list_all(sh)
+    except AttributeError:
+        modinfo = None
         priorities = False
 
     result["ansible_facts"] = {"selinux_installed_modules": {}}
     selinux_modules = {}
-    for line in semodule_l[0].splitlines():
-        module_data = line.split()
-        if priorities:
-            # 100 zosremote         pp disabled
-            if module_data[1] not in selinux_modules:
-                selinux_modules[module_data[1]] = {}
+    if modinfo is not None:
+        for n in range(num_modules):
+            r, modkey = semanage.semanage_module_key_create(sh)
 
-            selinux_modules[module_data[1]][module_data[0]] = (
-                module_data[3] if len(module_data) > 3 else "enabled"
-            )
-        else:
-            # zosremote       1.1.0   Disabled
-            if module_data[0] not in selinux_modules:
-                selinux_modules[module_data[0]] = {}
-                selinux_modules[module_data[0]]["0"] = (
-                    "disabled" if len(module_data) > 2 else "enabled"
-                )
+            m = semanage.semanage_module_list_nth(modinfo, n)
+
+            rc, m_name = semanage.semanage_module_info_get_name(sh, m)
+            if rc < 0:
+                raise ValueError(_("Could not get module name"))
+            r = semanage.semanage_module_key_set_name(sh, modkey, m_name)
+            if r != 0:
+                raise Exception(r)
+
+            rc, m_enabled = semanage.semanage_module_info_get_enabled(sh, m)
+            if rc < 0:
+                raise ValueError(_("Could not get module enabled"))
+
+            rc, m_priority = semanage.semanage_module_info_get_priority(sh, m)
+            if rc < 0:
+                raise ValueError(_("Could not get module priority"))
+            r = semanage.semanage_module_key_set_priority(sh, modkey, m_priority)
+            if r != 0:
+                raise Exception(r)
+
+            rc, m_lang_ext = semanage.semanage_module_info_get_lang_ext(sh, m)
+            if rc < 0:
+                raise ValueError(_("Could not get module lang_ext"))
+
+            if m_lang_ext == "cil":
+                cil = 1
+            else:
+                cil = 0
+
+            try:
+                r, m_checksum, _len = semanage.semanage_module_compute_checksum(sh, modkey, cil)
+            except AttributeError:
+                r = 0
+                m_checksum = ""
+                checksums = False
+
+            if m_name not in selinux_modules:
+                selinux_modules[m_name] = {}
+            selinux_modules[m_name][m_priority] = { "enabled": m_enabled, "checksum": m_checksum }
 
     result["ansible_facts"] = {
         "selinux_installed_modules": selinux_modules,
         "selinux_priorities": priorities,
+        "selinux_checksums": checksums
     }
 
     # in the event of a successful module execution, you will want to
@@ -109,9 +153,5 @@ def run_module():
     module.exit_json(**result)
 
 
-def main():
-    run_module()
-
-
 if __name__ == "__main__":
-    main()
+    run_module()
