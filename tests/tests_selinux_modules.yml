@@ -48,15 +48,13 @@
           enabled"
           assert:
             that:
-              selinux_installed_modules['linux-system-roles-selinux-test-a']['400']
-              == 'enabled'
+              selinux_installed_modules['linux-system-roles-selinux-test-a']['400']['enabled']
 
         - name: "Check if linux-system-roles-selinux-test-b is installed and
           disabled"
           assert:
             that:
-              selinux_installed_modules['linux-system-roles-selinux-test-b']['500']
-              == 'disabled'
+              not selinux_installed_modules['linux-system-roles-selinux-test-b']['500']['enabled']
 
         - name: Check if linux-system-roles-selinux-test-c is absent
           assert:
@@ -114,15 +112,13 @@
           enabled"
           assert:
             that:
-              selinux_installed_modules['linux-system-roles-selinux-test-a']['0']
-              == 'enabled'
+              selinux_installed_modules['linux-system-roles-selinux-test-a']['0']['enabled']
 
         - name: "Check if linux-system-roles-selinux-test-b is installed
           and disabled"
           assert:
             that:
-              selinux_installed_modules['linux-system-roles-selinux-test-b']['0']
-              == 'disabled'
+              not selinux_installed_modules['linux-system-roles-selinux-test-b']['0']['enabled']
 
         - name: Check if linux-system-roles-selinux-test-c is absent
           assert:
