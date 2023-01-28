@@ -16,4 +16,3 @@ jobs:
           woke-args: "-c https://raw.githubusercontent.com/linux-system-roles/tox-lsr/main/src/tox_lsr/config_files/woke.yml"
           # Cause the check to fail on any broke rules
           fail-on-error: true
-          woke-version: v0.19.0
