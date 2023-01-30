@@ -115,10 +115,9 @@
 - name: Load SELinux modules
   include_tasks: selinux_load_module.yml
   vars:
-    name: "{{ item.name | default('') }}"
+    name: "{{ item.name | default( item.path | basename | splitext | first ) }}"
     state: "{{ item.state | default('enabled') }}"
-    priority: "{{ item.priority | default('0') }}"
-    current_state: "{{ selinux_installed_modules[name][priority] |
-                       default('absent') }}"
+    priority: "{{ item.priority | default('400') }}"
+    checksum: "{{ selinux_installed_modules[name][priority]['checksum'] | default('sha256:') }}"
   when: selinux_modules is defined
   loop: "{{ selinux_modules | flatten(levels=1) }}"
