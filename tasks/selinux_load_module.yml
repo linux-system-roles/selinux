@@ -2,7 +2,7 @@
 - name: Prepare module installation
   when: state == "enabled" and item.path is defined
   block:
-    - name: Get {{ item.path }} checksum
+    - name: Get checksum for {{ item.path }}
       stat:
         path: "{{ item.path }}"
         checksum_algorithm: sha256

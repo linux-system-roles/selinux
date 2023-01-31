@@ -26,8 +26,6 @@ author:
 EXAMPLES = r"""
 """
 
-from subprocess import PIPE, Popen
-
 import traceback
 
 SEMANAGE_IMP_ERR = None
@@ -40,7 +38,8 @@ except ImportError:
     HAVE_SEMANAGE = False
 
 # https://docs.ansible.com/ansible/latest/dev_guide/developing_modules_general.html#creating-an-info-or-a-facts-module
-from ansible.module_utils.basic import AnsibleModule
+from ansible.module_utils.basic import AnsibleModule, missing_required_lib
+
 
 def init_libsemanage(store=""):
     sh = semanage.semanage_handle_create()
@@ -76,8 +75,7 @@ def run_module():
 
     if not HAVE_SEMANAGE:
         module.fail_json(
-            msg=missing_required_lib("python3-libsemanage"),
-            exception=SEMANAGE_IMP_ERR
+            msg=missing_required_lib("python3-libsemanage"), exception=SEMANAGE_IMP_ERR
         )
 
     try:
@@ -106,25 +104,25 @@ def run_module():
 
             rc, m_name = semanage.semanage_module_info_get_name(sh, m)
             if rc < 0:
-                raise ValueError(_("Could not get module name"))
+                raise ValueError("Could not get module name")
             r = semanage.semanage_module_key_set_name(sh, modkey, m_name)
             if r != 0:
                 raise Exception(r)
 
             rc, m_enabled = semanage.semanage_module_info_get_enabled(sh, m)
             if rc < 0:
-                raise ValueError(_("Could not get module enabled"))
+                raise ValueError("Could not get module enabled")
 
             rc, m_priority = semanage.semanage_module_info_get_priority(sh, m)
             if rc < 0:
-                raise ValueError(_("Could not get module priority"))
+                raise ValueError("Could not get module priority")
             r = semanage.semanage_module_key_set_priority(sh, modkey, m_priority)
             if r != 0:
                 raise Exception(r)
 
             rc, m_lang_ext = semanage.semanage_module_info_get_lang_ext(sh, m)
             if rc < 0:
-                raise ValueError(_("Could not get module lang_ext"))
+                raise ValueError("Could not get module lang_ext")
 
             if m_lang_ext == "cil":
                 cil = 1
@@ -132,7 +130,9 @@ def run_module():
                 cil = 0
 
             try:
-                r, m_checksum, _len = semanage.semanage_module_compute_checksum(sh, modkey, cil)
+                r, m_checksum, _len = semanage.semanage_module_compute_checksum(
+                    sh, modkey, cil
+                )
             except AttributeError:
                 r = 0
                 m_checksum = ""
@@ -140,12 +140,15 @@ def run_module():
 
             if m_name not in selinux_modules:
                 selinux_modules[m_name] = {}
-            selinux_modules[m_name][m_priority] = { "enabled": m_enabled, "checksum": m_checksum }
+            selinux_modules[m_name][m_priority] = {
+                "enabled": m_enabled,
+                "checksum": m_checksum,
+            }
 
     result["ansible_facts"] = {
         "selinux_installed_modules": selinux_modules,
         "selinux_priorities": priorities,
-        "selinux_checksums": checksums
+        "selinux_checksums": checksums,
     }
 
     # in the event of a successful module execution, you will want to

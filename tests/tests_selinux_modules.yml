@@ -54,6 +54,7 @@
           disabled"
           assert:
             that:
+              # yamllint disable rule:line-length
               not selinux_installed_modules['linux-system-roles-selinux-test-b']['500']['enabled']
 
         - name: Check if linux-system-roles-selinux-test-c is absent
@@ -118,6 +119,7 @@
           and disabled"
           assert:
             that:
+              # yamllint disable rule:line-length
               not selinux_installed_modules['linux-system-roles-selinux-test-b']['0']['enabled']
 
         - name: Check if linux-system-roles-selinux-test-c is absent
