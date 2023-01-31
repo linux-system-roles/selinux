@@ -1,8 +1,6 @@
 ---
 - name: Check if selinux role sets SELinux login mappings
   hosts: all
-  become: true
-
   tasks:
     - name: Add a System Api Roles SELinux User
       user:

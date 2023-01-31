@@ -1,7 +1,6 @@
 ---
 - name: Test that selinux_all_purge drops local modifications, defaults to no
   hosts: all
-  become: true
   gather_facts: true
   vars:
     semanage_change: |

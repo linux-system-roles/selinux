@@ -1,9 +1,6 @@
 ---
 - name: Manage SELinux policy example
   hosts: all
-  become: true
-  become_method: sudo
-  become_user: root
   vars:
     # Use "targeted" SELinux policy type
     selinux_policy: targeted

@@ -1,7 +1,6 @@
 ---
 - name: Check if selinux role sets SELinux fcontext mappings
   hosts: all
-  become: true
   vars:
     __str1: >-
       /tmp/test_dir1[^ ]+[ ]+directory[
