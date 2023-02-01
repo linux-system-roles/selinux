@@ -1,7 +1,6 @@
 ---
 - name: Test management of SELinux modules
   hosts: all
-  become: true
   tasks:
     - name: Execute the role and catch errors
       vars:

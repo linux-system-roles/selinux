@@ -54,7 +54,6 @@ vars:
   [ see below ]
 roles:
   - role: linux-system-roles.selinux
-    become: true
 ```
 
 #### purge local modifications
