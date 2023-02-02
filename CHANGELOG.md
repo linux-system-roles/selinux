@@ -1,6 +1,21 @@
 Changelog
 =========
 
+[1.5.3] - 2023-02-02
+--------------------
+
+### New Features
+
+- none
+
+### Bug Fixes
+
+- Use selinux facts to compare module checksums before copying to a node (#144)
+
+### Other Changes
+
+- do not use 'become' in tests, examples (#145)
+
 [1.5.2] - 2023-01-26
 --------------------
 
