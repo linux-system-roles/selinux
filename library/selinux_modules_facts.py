@@ -91,12 +91,13 @@ def run_module():
     try:
         r, modinfo, num_modules = semanage.semanage_module_list_all(sh)
     except AttributeError:
-        modinfo = None
+        r, modinfo, num_modules = semanage.semanage_module_list(sh)
         priorities = False
+        checksums = False
 
     result["ansible_facts"] = {"selinux_installed_modules": {}}
     selinux_modules = {}
-    if modinfo is not None:
+    if priorities:
         for n in range(num_modules):
             r, modkey = semanage.semanage_module_key_create(sh)
 
@@ -143,6 +144,16 @@ def run_module():
             selinux_modules[m_name][m_priority] = {
                 "enabled": m_enabled,
                 "checksum": m_checksum,
+            }
+    else:
+        for n in range(num_modules):
+            m = semanage.semanage_module_list_nth(modinfo, n)
+            m_name = semanage.semanage_module_get_name(m)
+            m_enabled = semanage.semanage_module_get_enabled(m)
+            selinux_modules[m_name] = {}
+            selinux_modules[m_name][0] = {
+                "enabled": m_enabled,
+                "checksum": "",
             }
 
     result["ansible_facts"] = {
