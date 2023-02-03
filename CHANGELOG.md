@@ -1,6 +1,21 @@
 Changelog
 =========
 
+[1.5.4] - 2023-02-03
+--------------------
+
+### New Features
+
+- none
+
+### Bug Fixes
+
+- Fix idempotency - Use lookup file + sha256 to get hash of local policy file
+
+### Other Changes
+
+- none
+
 [1.5.3] - 2023-02-02
 --------------------
 
