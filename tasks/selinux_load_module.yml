@@ -1,19 +1,23 @@
 ---
-# NOTE: The use of `file` lookup is in order to
-# find and load files on the control node without using
-# modules and `local_action` or `delegate_to` which will
-# attempt to connect, become, etc. which the user may not
-# desire to do.
+# NOTE: The use of `become: false` in the
+# `stat` is to avoid using a become method,
+# in order to work like the `file` lookup,
+# which cannot be used on EL7.
 - name: Prepare module installation
   when:
     - state == "enabled"
     - item.path is defined
   block:
+    - name: Get checksum for {{ item.path }}
+      stat:
+        path: "{{ item.path }}"
+        checksum_algorithm: sha256
+      register: module_file
+      delegate_to: localhost
+      become: false
+
     - name: Install module
-      vars:
-        __chksum: "{{ lookup('file', item.path, rstrip=false) |
-          hash('sha256') }}"
-      when: not __chksum in checksum
+      when: not module_file.stat.checksum in checksum
       block:
         - name: Create temporary directory
           tempfile:
