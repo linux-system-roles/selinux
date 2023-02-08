@@ -1,6 +1,21 @@
 Changelog
 =========
 
+[1.5.5] - 2023-02-08
+--------------------
+
+### New Features
+
+- none
+
+### Bug Fixes
+
+- Use stat on localhost with become: false for module idempotency (#152)
+
+### Other Changes
+
+- none
+
 [1.5.4] - 2023-02-03
 --------------------
 
