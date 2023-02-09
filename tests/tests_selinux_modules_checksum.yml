@@ -8,7 +8,7 @@
         ansible_distribution_version is version("8.6", ">="))
       vars:
         selinux_modules:
-          - {path: "linux-system-roles-selinux-test-a.pp"}
+          - {path: "selinux_modules/linux-system-roles-selinux-test-a.pp"}
       block:
         - name: Execute the role
           include_role:

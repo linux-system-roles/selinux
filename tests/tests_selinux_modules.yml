@@ -5,13 +5,14 @@
     - name: Execute the role and catch errors
       vars:
         selinux_modules:
-          - {path: "linux-system-roles-selinux-test-a.pp"}
+          - {path: "selinux_modules/linux-system-roles-selinux-test-a.pp"}
           - {name: "linux-system-roles-selinux-test-a", state: "disabled"}
           - {name: "linux-system-roles-selinux-test-a", state: "enabled"}
           - {path: "linux-system-roles-selinux-test-b.pp", priority: "500"}
           - {name: "linux-system-roles-selinux-test-b", priority: "500",
              state: "disabled"}
-          - {path: "linux-system-roles-selinux-test-c.pp", priority: "600"}
+          # yamllint disable rule:line-length
+          - {path: "{{ playbook_dir }}/files/selinux_modules/linux-system-roles-selinux-test-c.pp", priority: "600"}
           - {name: "linux-system-roles-selinux-test-c", priority: "600",
              state: "absent"}
       when: ansible_distribution == "Fedora" or
@@ -73,12 +74,13 @@
     - name: Execute the role and catch errors
       vars:
         selinux_modules:
-          - {path: "linux-system-roles-selinux-test-a.pp"}
+          - {path: "selinux_modules/linux-system-roles-selinux-test-a.pp"}
           - {name: "linux-system-roles-selinux-test-a", state: "disabled"}
           - {name: "linux-system-roles-selinux-test-a", state: "enabled"}
           - {path: "linux-system-roles-selinux-test-b.pp", priority: "400"}
           - {name: "linux-system-roles-selinux-test-b", state: "disabled"}
-          - {path: "linux-system-roles-selinux-test-c.pp", priority: "200"}
+          # yamllint disable rule:line-length
+          - {path: "{{ playbook_dir }}/files/selinux_modules/linux-system-roles-selinux-test-c.pp", priority: "200"}
           - {name: "linux-system-roles-selinux-test-c", priority: "300",
              state: "absent"}
       when: ansible_distribution_major_version | int < 7 and
@@ -134,3 +136,19 @@
             - "semodule -r linux-system-roles-selinux-test-c"
           ignore_errors: true  # noqa ignore-errors
           changed_when: false
+    - name: Ensure file glob patterns do not work
+      block:
+        - name: Call the role with a fileglob pattern
+          include_role:
+            name: linux-system-roles.selinux
+          vars:
+            selinux_modules:
+              - {path: "selinux_modules/[lmno]?nux-system-roles-selinux-test-*.pp"}
+
+        - name: Should not get here
+          fail:
+            msg: UNREACH
+      rescue:
+        - name: Check the returned error
+          assert:
+            that: ansible_failed_result.msg != "UNREACH"
