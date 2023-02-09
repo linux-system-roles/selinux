@@ -1,8 +1,12 @@
 ---
 # NOTE: The use of `become: false` in the
-# `stat` is to avoid using a become method,
-# in order to work like the `file` lookup,
-# which cannot be used on EL7.
+# `stat` is to avoid using a become method.
+# NOTE: `fileglob` is the only lookup that will
+# look in the correct lookup path for files.  Yes,
+# I tried `first_file` and it did not work the same
+# way.  The wrinkle is that we do not want to match
+# file globs, so we escape any file glob patterns
+# in the string before using `fileglob`.
 - name: Prepare module installation
   when:
     - state == "enabled"
@@ -10,8 +14,14 @@
   block:
     - name: Get checksum for {{ item.path }}
       stat:
-        path: "{{ item.path }}"
+        path: "{{ __resolved_file }}"
         checksum_algorithm: sha256
+      vars:
+        __esc: \\
+        __glob_pat: "([*?[])"
+        __escaped_file: "{{ item.path |
+          regex_replace(__glob_pat, __esc ~ '\\1') }}"
+        __resolved_file: "{{ lookup('fileglob', __escaped_file) }}"
       register: module_file
       delegate_to: localhost
       become: false
