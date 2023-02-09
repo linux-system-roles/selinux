@@ -1,6 +1,21 @@
 Changelog
 =========
 
+[1.5.6] - 2023-02-09
+--------------------
+
+### New Features
+
+- none
+
+### Bug Fixes
+
+- use fileglob to lookup selinux module file - idempotency support (#155)
+
+### Other Changes
+
+- none
+
 [1.5.5] - 2023-02-08
 --------------------
 
