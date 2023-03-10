@@ -5,7 +5,7 @@
     dest: /etc/selinux/config
     src: /etc/selinux/config.test_selinux_save
     mode: preserve
-  register: restoreconf
+  register: restorecon
 
 - name: Remove /etc/selinux/config backup
   file:
@@ -13,7 +13,7 @@
     state: absent
 
 - name: Reboot
-  when: restoreconf is changed  # noqa no-handler
+  when: restorecon is changed  # noqa no-handler
   block:
     - name: Restart managed host
       shell: sleep 2 && shutdown -r now "Ansible updates triggered"
