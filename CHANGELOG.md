@@ -1,6 +1,14 @@
 Changelog
 =========
 
+[1.5.7] - 2023-04-06
+--------------------
+
+### Other Changes
+
+- s/restoreconf/restorecon/ (#160)
+- Add README-ansible.md to refer Ansible intro page on linux-system-roles.github.io (#161)
+
 [1.5.6] - 2023-02-09
 --------------------
 
