@@ -41,22 +41,27 @@
     stdin: "{{ drop_local_modifications }}"
   when: selinux_all_purge | bool
   notify: __selinux_reload_policy
+  changed_when: true
 
 - name: Purge all SELinux boolean local modifications
   command: /usr/sbin/semanage boolean -D
   when: selinux_booleans_purge | bool
+  changed_when: true
 
 - name: Purge all SELinux file context local modifications
   command: /usr/sbin/semanage fcontext -D
   when: selinux_fcontexts_purge | bool
+  changed_when: true
 
 - name: Purge all SELinux port local modifications
   command: /usr/sbin/semanage port -D
   when: selinux_ports_purge | bool
+  changed_when: true
 
 - name: Purge all SELinux login local modifications
   command: /usr/sbin/semanage login -D
   when: selinux_logins_purge | bool
+  changed_when: true
 
 - name: Set SELinux booleans
   # noqa fqcn[action]
