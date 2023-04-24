@@ -2,6 +2,16 @@
 - name: Test management of SELinux modules
   hosts: all
   tasks:
+    - name: Ensure facts, test variables used by role
+      set_fact:
+        __selinux_test_facts:
+          - distribution
+          - distribution_version
+    - name: Ensure ansible_facts used by test
+      setup:
+        gather_subset: min
+      when: not ansible_facts.keys() | list |
+        intersect(__selinux_test_facts) == __selinux_test_facts
     - name: Execute the role and catch errors
       when: ansible_distribution == "Fedora" or
         (ansible_distribution in ["CentOS", "RedHat", "Rocky"] and
@@ -10,6 +20,14 @@
         selinux_modules:
           - {path: "selinux_modules/linux-system-roles-selinux-test-a.pp"}
       block:
+        - name: Unset test facts
+          set_fact:
+            ansible_facts: "{{ ansible_facts | dict2items |
+              rejectattr('key', 'match', __selinux_test_facts_regex) |
+              list | items2dict }}"
+          vars:
+            __selinux_test_facts_regex: "{{ '^(' ~
+              (__selinux_test_facts | join('|')) ~ ')$' }}"
         - name: Execute the role
           include_role:
             name: linux-system-roles.selinux
