@@ -1,6 +1,14 @@
 Changelog
 =========
 
+[1.5.9] - 2023-04-27
+--------------------
+
+### Other Changes
+
+- test: ensure the test works with ANSIBLE_GATHERING=explicit
+- ci: Add commitlint GitHub action to ensure conventional commits with feedback
+
 [1.5.8] - 2023-04-13
 --------------------
 
