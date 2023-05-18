@@ -82,13 +82,13 @@
   with_items: "{{ selinux_fcontexts }}"
 
 - name: Restore SELinux labels on filesystem tree
-  command: /sbin/restorecon -R -F -v {{ item }}
+  command: /sbin/restorecon -R -F -v {{ restorecon_threads }} {{ item }}
   with_items: "{{ selinux_restore_dirs }}"
   register: restorecon_cmd
   changed_when: '"Relabeled" in restorecon_cmd.stdout'
 
 - name: Restore SELinux labels on filesystem tree in check mode
-  command: /sbin/restorecon -R -F -v -n {{ item }}
+  command: /sbin/restorecon -R -F -v -n {{ restorecon_threads }} {{ item }}
   with_items: "{{ selinux_restore_dirs }}"
   register: restorecon_cmd
   changed_when: '"Would relabel" in restorecon_cmd.stdout'
