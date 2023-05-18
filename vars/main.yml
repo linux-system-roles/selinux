@@ -10,3 +10,7 @@ __selinux_required_facts:
   - distribution
   - distribution_major_version
   - python_version
+
+restorecon_threads: "{{ '-T 0' if ansible_distribution == 'Fedora' or
+  (ansible_distribution_major_version | int > 8 and
+  ansible_distribution in ['CentOS', 'RedHat', 'Rocky']) else '' }}"
