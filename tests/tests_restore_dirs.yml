@@ -1,0 +1,54 @@
+---
+- name: Check if selinux role restores directory SELinux context
+  hosts: all
+  tasks:
+    - name: Create tempdir, set fcontext and relabel
+      block:
+        - name: Create temporary directory
+          tempfile:
+            state: directory
+            prefix: linux_system_role.selinux
+          register: tempdir
+
+        - name: Create temporary file
+          tempfile:
+            path: "{{ tempdir.path }}"
+            state: file
+            suffix: temp
+          register: tempfile
+
+        - name: Set default_t context to {{ tempdir.path }}
+          command: chcon -R -t default_t {{ tempdir.path }}
+          changed_when: true
+
+        - name: Run the role
+          include_role:
+            name: linux-system-roles.selinux
+          vars:
+            selinux_fcontexts:
+              - {target: "{{ tempdir.path }}(/.*)?", setype: "user_tmp_t"}
+            selinux_restore_dirs:
+              - "{{ tempdir.path }}"
+
+        - name: Get SELinux context of {{ tempfile.path }}
+          command: ls -Z {{ tempfile.path }}
+          register: tempfile_ls
+          changed_when: false
+
+        - name: Check whether SELinux label on {{ tempfile.path }}
+          assert:
+            that: >
+              "system_u:object_r:user_tmp_t:s0" in tempfile_ls.stdout
+
+      always:
+        - name: Clean temporary directory {{ tempdir.path }}
+          file:
+            path: "{{ tempdir.path }}"
+            state: absent
+        - name: Clean temporary fcontext
+          include_role:
+            name: linux-system-roles.selinux
+          vars:
+            selinux_fcontexts:
+              - {target: "{{ tempdir.path }}(/.*)?", setype: "user_tmp_t",
+                 state: "absent"}
