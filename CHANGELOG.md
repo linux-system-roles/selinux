@@ -1,6 +1,19 @@
 Changelog
 =========
 
+[1.6.0] - 2023-05-26
+--------------------
+
+### New Features
+
+- feat: Use `restorecon -T 0` on Fedora and RHEL > 8
+
+### Other Changes
+
+- docs: Consistent contributing.md for all roles - allow role specific contributing.md section
+- docs: add Collection requirements section to README
+- test: Add basic selinux_restore_dirs test
+
 [1.5.9] - 2023-04-27
 --------------------
 
