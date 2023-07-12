@@ -55,7 +55,7 @@
 
 - name: Remove module
   local_semodule:
-    name: "{{ item.name }}"
+    name: "{{ mod_name }}"
     state: absent
     priority: "{{ priority }}"
   when: state == "absent"
@@ -63,14 +63,14 @@
 
 - name: Enable module
   local_semodule:
-    name: "{{ item.name }}"
+    name: "{{ mod_name }}"
     state: enabled
   when: state == "enabled" and item.path is not defined
   notify: __selinux_reload_policy
 
 - name: Disable module
   local_semodule:
-    name: "{{ item.name }}"
+    name: "{{ mod_name }}"
     state: "disabled"
   when: state == "disabled" and item.path is not defined
   notify: __selinux_reload_policy
