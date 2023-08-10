@@ -21,7 +21,7 @@ The role requires some SELinux modules.  If you are using `ansible-core`, you
 must get these from the `ansible.posix` and `community.general` collections.
 Use the file `meta/collection-requirements.yml` to install these:
 
-```
+```bash
 ansible-galaxy collection install -vv -r meta/collection-requirements.yml
 ```
 
@@ -162,9 +162,9 @@ selinux_modules:
   modules installed from *selinux-policy* packages, *"200"* for other modules
   installed from 3rd party rpms, *"300"* is used by SETroubleshoot
 * `state`: one of the following values
-   * `enabled`: install or enable module
-   * `disabled`: disable module
-   * `absent`: remove module
+  * `enabled`: install or enable module
+  * `disabled`: disable module
+  * `absent`: remove module
 
 **Note:** Building modules from source on nodes is not supported.
 However, in many cases a binary *pp* or *cil* module could be used on different
