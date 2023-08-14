@@ -193,7 +193,7 @@ role needs to be reapplied to finish the changes.
 
 This custom fact represents SELinux module store structure
 
-```json
+```yaml
 "selinux_installed_modules": {
   <module name>: {
     <module priority>: ("enabled"|"disabled"),
@@ -205,7 +205,7 @@ This custom fact represents SELinux module store structure
 
 e.g.
 
-```json
+```yaml
 "ansible_facts": {
   "selinux_installed_modules": {
     "abrt": {
