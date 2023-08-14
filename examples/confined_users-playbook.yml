@@ -1,0 +1,126 @@
+---
+- name: Manage SELinux policy example
+  hosts: all
+  become: true
+  vars:
+    # Use "targeted" SELinux policy type
+    selinux_policy: targeted
+    # Set "enforcing" mode
+    selinux_state: enforcing
+    # Set SELinux booleans
+    selinux_booleans:
+      # Allow ssh logins as sysadm_r:sysadm_t
+      # - {name: 'ssh_sysadm_login', state: 'on', persistent: 'yes'}
+      # Allow sysadm_u/staff_u to execute applications in their
+      # home directories and /tmp
+      - {name: 'sysadm_exec_content', state: 'on', persistent: 'yes'}
+      - {name: 'staff_exec_content', state: 'on', persistent: 'yes'}
+      # But block normal users from the same
+      - {name: 'user_exec_content', state: 'off', persistent: 'yes'}
+      # Allow staff user to create and transition to svirt domains
+      # - {name: 'staff_use_svirt', state: 'on', persistent: 'yes'}
+      # Allow confined users the ability to execute the ping and traceroute
+      # - {name: 'selinuxuser_ping', state: 'on', persistent: 'yes'}
+      # Allow users to connect to the local mysql server
+      # - {name: 'selinuxuser_mysql_connect_enabled', state: 'on',
+      #    persistent: 'yes'}
+      # Allow samba and winbind-rpcd to share users home directories
+      # - {name: 'samba_enable_home_dirs', state: 'on', persistent: 'yes'}
+      # Disallow programs, such as newrole, from transitioning to administrative
+      # user domains
+      # - {name: 'secure_mode', state: 'on', persistent: 'yes'}
+
+    # List of existing users to be mapped to staff_u and allowed to use sudo
+    existing_privileged_users:
+      - "Lizzy"
+      - "Tarja"
+
+    # The following section specifies mapping of EXISTING system users
+    # to SELinux users
+    selinux_logins:
+      # Map all new users to SElinux user "user_u" (instead of "unconfined_u")
+      - {login: '__default__', seuser: 'user_u', serange: 's0',
+         state: 'present'}
+      # Alternatively map all new users to SElinux user "staff_u" (instead of
+      # "unconfined_u")
+      # - {login: '__default__', seuser: 'staff_u', serange: 's0-s0:c0.c1023',
+      #    state: 'present'}
+      # Map admin users to SElinux user "staff_u"
+      # Map select non-admin privileged users to SELinux user "staff_u"
+      # - {login: '<existing_user>', seuser: 'staff_u', serange: 's0',
+      #    state: 'present'}
+      # - {login: 'Lizzy', seuser: 'staff_u', serange: 's0',
+      #    state: 'present'}
+
+  # Prepare the prerequisites required for this playbook
+  tasks:
+    # Enable kiosk mode -- add extremely limited users "guest" and "xguest"
+    # - name: Install xguest package
+    #  yum:
+    #    name: xguest
+    #    state: present
+
+    # Create login mappings for "existing_privileged_users"
+    - name: Build list of selinux logins
+      set_fact:
+        selinux_logins: "{{ selinux_logins + login_helper | list }}"
+      with_items: "{{ existing_privileged_users }}"
+      vars:
+        login_helper:
+          - {login: "{{ item }}", seuser: 'staff_u', serange: 's0',
+             state: 'present'}
+
+    # Users that get assigned a new SELinux user need to have their homedirs
+    # relabeled.
+    # Gather homedirs of each user with a new login mapping
+    - name: Gather homedirs of users with new login mapping
+      shell: >-
+        # exit in case of errors in the following command ("-o pipefail"
+        # cannot be used since "getent passwd __default__" is expected to fail)
+        set -eu;
+        getent passwd "{{ item.login }}" | awk -F: '{ print $6 }'
+      register: __login_homedirs
+      with_items: "{{ selinux_logins }}"
+      changed_when: false
+
+    # Relabel the gathered homedirs using "selinux_restore_dirs" variable
+    - name: Relabel homedirs of users with new login mapping
+      set_fact:
+        selinux_restore_dirs: "{{ selinux_restore_dirs | default([])
+                                  + [item.stdout] }}"
+      when: item.stdout != ""
+      with_items: "{{ __login_homedirs.results if __login_homedirs.results is
+                   iterable else [] }}"
+
+    # Allow existing_privileged_users to use sudo
+    - name: Allow privileged users to use sudo
+      copy:
+        dest: /etc/sudoers.d/{{ item }}
+        content: "{{ item }} ALL=(ALL) TYPE=sysadm_t ROLE=sysadm_r ALL"
+        mode: "0640"
+      loop: "{{ existing_privileged_users | list }}"
+
+    # Run selinux role to apply changes described in "vars" section
+    - name: Execute the role and catch errors
+      block:
+        - name: Include selinux role
+          include_role:
+            name: linux-system-roles.selinux
+      rescue:
+        # Fail if failed for a different reason than selinux_reboot_required.
+        - name: Handle errors
+          fail:
+            msg: "role failed"
+          when: not selinux_reboot_required
+
+        - name: Restart managed host
+          reboot:
+
+        - name: Wait for managed host to come back
+          wait_for_connection:
+            delay: 10
+            timeout: 300
+
+        - name: Reapply the role
+          include_role:
+            name: linux-system-roles.selinux
