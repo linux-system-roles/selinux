@@ -1,8 +1,6 @@
-Contributing to the selinux Linux System Role
-=============================================
+# Contributing to the selinux Linux System Role
 
-Where to start
---------------
+## Where to start
 
 The first place to go is [Contribute](https://linux-system-roles.github.io/contribute.html).
 This has all of the common information that all role developers need:
@@ -22,7 +20,7 @@ are likely to be suitable for new contributors!
 **Code** is managed on [Github](https://github.com/linux-system-roles/selinux), using
 [Pull Requests](https://help.github.com/en/github/collaborating-with-issues-and-pull-requests/about-pull-requests).
 
-### Python Code
+## Python Code
 
 The Python code needs to be **compatible with the Python versions supported by
 the role platform**.

@@ -1,6 +1,8 @@
 # SELinux
 
-![CI Testing](https://github.com/linux-system-roles/selinux/workflows/tox/badge.svg)
+[![ansible-lint.yml](https://github.com/linux-system-roles/selinux/actions/workflows/ansible-lint.yml/badge.svg)](https://github.com/linux-system-roles/selinux/actions/workflows/ansible-lint.yml) [![ansible-test.yml](https://github.com/linux-system-roles/selinux/actions/workflows/ansible-test.yml/badge.svg)](https://github.com/linux-system-roles/selinux/actions/workflows/ansible-test.yml) [![codeql.yml](https://github.com/linux-system-roles/selinux/actions/workflows/codeql.yml/badge.svg)](https://github.com/linux-system-roles/selinux/actions/workflows/codeql.yml) [![python-unit-test.yml](https://github.com/linux-system-roles/selinux/actions/workflows/python-unit-test.yml/badge.svg)](https://github.com/linux-system-roles/selinux/actions/workflows/python-unit-test.yml) [![markdownlint.yml](https://github.com/linux-system-roles/selinux/actions/workflows/markdownlint.yml/badge.svg)](https://github.com/linux-system-roles/selinux/actions/workflows/markdownlint.yml) [![woke.yml](https://github.com/linux-system-roles/selinux/actions/workflows/woke.yml/badge.svg)](https://github.com/linux-system-roles/selinux/actions/workflows/woke.yml)
+
+---
 
 ## Expected functionality
 
