@@ -1,6 +1,44 @@
 Changelog
 =========
 
+[1.6.2] - 2023-09-07
+--------------------
+
+### Other Changes
+
+- ci: Add markdownlint, test_converting_readme, and build_docs workflows (#182)
+
+  - markdownlint runs against README.md to avoid any issues with
+    converting it to HTML
+  - test_converting_readme converts README.md > HTML and uploads this test
+    artifact to ensure that conversion works fine
+  - build_docs converts README.md > HTML and pushes the result to the
+    docs branch to publish dosc to GitHub pages site.
+  - Fix markdown issues in README.md
+  
+  Signed-off-by: Sergei Petrosian <spetrosi@redhat.com>
+
+- docs: Fix highlighting for code blocks to look nice (#183)
+
+  For given code blocks yaml looks nicer, json marks some parts as errors.
+
+- docs: Make badges consistent, run markdownlint on all .md files (#185)
+
+  - Consistently generate badges for GH workflows in README RHELPLAN-146921
+  - Run markdownlint on all .md files
+  - Add custom-woke-action if not used already
+  - Rename woke action to Woke for a pretty badge
+  
+  Signed-off-by: Sergei Petrosian <spetrosi@redhat.com>
+
+- ci: Remove badges from README.md prior to converting to HTML (#186)
+
+  - Remove thematic break after badges
+  - Remove badges from README.md prior to converting to HTML
+  
+  Signed-off-by: Sergei Petrosian <spetrosi@redhat.com>
+
+
 [1.6.1] - 2023-07-19
 --------------------
 
