@@ -103,6 +103,7 @@
     state: "{{ item.state | default('present') }}"
     local: "{{ item.local | default(False) }}"
   with_items: "{{ selinux_ports }}"
+  when: selinux_state != "disabled"
 
 - name: Set linux user to SELinux user mapping
   selogin:
