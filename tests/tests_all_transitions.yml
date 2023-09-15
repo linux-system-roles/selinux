@@ -10,6 +10,19 @@
       - disabled
 
   tasks:
+    - name: Check if test is supported
+      vars:
+        ostree_booted_file: /run/ostree-booted
+      block:
+        - name: Check if system is ostree
+          stat:
+            path: "{{ ostree_booted_file }}"
+          register: __ostree_booted_stat
+
+        - name: Skip if not supported
+          meta: end_host
+          when: __ostree_booted_stat.stat.exists
+
     - name: Save config
       include_tasks: selinux_config_save.yml
 

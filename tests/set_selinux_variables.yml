@@ -14,43 +14,51 @@
       when: not ansible_facts.keys() | list |
         intersect(__selinux_test_facts) == __selinux_test_facts
 
-    - name: Ensure SELinux tool semanage
+    - name: Ensure SELinux testing packages
+      include_role:
+        name: linux-system-roles.selinux
+        tasks_from: ensure_selinux_packages.yml
+
+    - name: Ensure selinux-policy-targeted
       package:
-        name:
-          - policycoreutils-python-utils
+        name: selinux-policy-targeted
         state: present
-      when: ansible_distribution == "Fedora" or
-        (ansible_distribution_major_version | int > 7 and
-        ansible_distribution in ["CentOS", "RedHat", "Rocky"])
+      when: __selinux_need_policy_targeted | d(false)
 
-    - name: Ensure SELinux tool semanage on EL7
+    - name: Ensure findmnt
       package:
-        name:
-          - policycoreutils-python
+        name: "{{ findmnt_pkg }}"
         state: present
-      when:
-        - ansible_distribution_major_version | int == 7
-        - ansible_os_family == "RedHat"
+      when: __selinux_need_findmnt | d(false)
+      vars:
+        findmnt_pkg: "{{ 'util-linux-core'
+          if (ansible_facts['os_family'] == 'RedHat' and
+              ansible_facts['distribution_major_version'] is version('8', '>'))
+          else 'util-linux' if ansible_facts['os_family'] == 'RedHat'
+          else 'util-linux' }}"
 
-    - name: Get local modifications - boolean
-      command: /usr/sbin/semanage boolean -l -n -C
-      changed_when: false
-      register: selinux_role_boolean
+    - name: Get test facts
+      when: __selinux_get_test_facts | d(true)
+      block:
+        - name: Get local modifications - boolean
+          command: /usr/sbin/semanage boolean -l -n -C
+          changed_when: false
+          register: selinux_role_boolean
 
-    - name: Get local modifications - port
-      command: /usr/sbin/semanage port -l -n -C
-      changed_when: false
-      register: selinux_role_port
+        - name: Get local modifications - port
+          command: /usr/sbin/semanage port -l -n -C
+          changed_when: false
+          register: selinux_role_port
 
-    - name: Get local modifications - login
-      command: /usr/sbin/semanage login -l -n -C
-      changed_when: false
-      register: selinux_role_login
+        - name: Get local modifications - login
+          command: /usr/sbin/semanage login -l -n -C
+          changed_when: false
+          register: selinux_role_login
 
-    - name: Get local modifications - fcontext
-      command: /usr/sbin/semanage fcontext -l -n -C
-      changed_when: false
-      register: selinux_role_fcontext
+        - name: Get local modifications - fcontext
+          command: /usr/sbin/semanage fcontext -l -n -C
+          changed_when: false
+          register: selinux_role_fcontext
   always:
     - name: Unset facts used above
       set_fact:

@@ -7,11 +7,13 @@
     selinux_logins_purge: true
 
   tasks:
-    - name: Ensure selinux-policy-targeted
-      package:
-        name:
-          - selinux-policy-targeted
-        state: present
+    - name: Ensure SELinux test packages
+      include_tasks:
+        file: set_selinux_variables.yml
+      vars:
+        __selinux_get_test_facts: false
+        __selinux_need_policy_targeted: true
+        __selinux_need_findmnt: true
 
     - name: Add a Linux System Roles SELinux User
       user:

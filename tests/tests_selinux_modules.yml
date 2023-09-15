@@ -29,14 +29,6 @@
         (ansible_distribution_major_version | int >= 7 and
          ansible_distribution in ["CentOS", "RedHat", "Rocky"])
       block:
-        - name: Unset test facts
-          set_fact:
-            ansible_facts: "{{ ansible_facts | dict2items |
-              rejectattr('key', 'match', __selinux_test_facts_regex) |
-              list | items2dict }}"
-          vars:
-            __selinux_test_facts_regex: "{{ '^(' ~
-              (__selinux_test_facts | join('|')) ~ ')$' }}"
         - name: Execute the role
           include_role:
             name: linux-system-roles.selinux

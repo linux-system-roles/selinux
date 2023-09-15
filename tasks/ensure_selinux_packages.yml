@@ -1,0 +1,60 @@
+---
+- name: Ensure correct package manager for ostree systems
+  vars:
+    ostree_pkg_mgr: ansible.posix.rhel_rpm_ostree
+    ostree_booted_file: /run/ostree-booted
+  when: ansible_facts.pkg_mgr | d("") != ostree_pkg_mgr
+  block:
+    - name: Check if system is ostree
+      stat:
+        path: "{{ ostree_booted_file }}"
+      register: __ostree_booted_stat
+
+    - name: Set package manager to use for ostree
+      ansible.utils.update_fact:
+        updates:
+          - path: ansible_facts.pkg_mgr
+            value: "{{ ostree_pkg_mgr }}"
+      when: __ostree_booted_stat.stat.exists
+
+- name: Install SELinux python2 tools
+  package:
+    name:
+      - libselinux-python
+      - policycoreutils-python
+    state: present
+  when: ansible_python_version is version('3', '<')
+
+- name: Install SELinux python3 tools
+  package:
+    name:
+      - python3-libselinux
+      - python3-policycoreutils
+    state: present
+  when:
+    - ansible_python_version is version('3', '>=')
+    - ansible_os_family == "RedHat"
+
+- name: Install SELinux python3 tools
+  package:
+    name:
+      - python3-selinux
+      - python3-policycoreutils
+    state: present
+  when:
+    - ansible_python_version is version('3', '>=')
+    - ansible_os_family == "Suse"
+
+- name: Install SELinux tool semanage
+  package:
+    name:
+      - policycoreutils-python-utils
+    state: present
+  when: ansible_distribution == "Fedora" or
+    (ansible_distribution_major_version | int > 7 and
+     ansible_distribution in ["CentOS", "RedHat", "Rocky"])
+
+- name: Refresh facts
+  setup:
+    filter: ansible_selinux
+  when: not __selinux_setup_snapshot | d(false)

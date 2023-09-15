@@ -23,5 +23,6 @@ exclude_paths:
 mock_modules:
   - sefcontext
   - selogin
+  - ansible.utils.update_fact
 mock_roles:
   - linux-system-roles.selinux
