@@ -17,18 +17,16 @@ Essentially provide mechanisms to manage local customizations:
 
 ## Requirements
 
+See below
+
 ### Collection requirements
 
-The role requires some SELinux modules.  If you are using `ansible-core`, you
-must get these from the `ansible.posix` and `community.general` collections.
-Use the file `meta/collection-requirements.yml` to install these:
+The role requires external collections.  Use the following command to install
+them:
 
 ```bash
 ansible-galaxy collection install -vv -r meta/collection-requirements.yml
 ```
-
-If you are using Ansible Engine 2.9, or are using an Ansible bundle which
-includes these collections/modules, you should have to do nothing.
 
 ## Modules provided by this repository
 
@@ -231,3 +229,7 @@ on Red Hat Enterprise Linux 6
 
 The general usage is demonstrated in
 [selinux-playbook.yml](examples/selinux-playbook.yml) playbook.
+
+## rpm-ostree
+
+See README-ostree.md

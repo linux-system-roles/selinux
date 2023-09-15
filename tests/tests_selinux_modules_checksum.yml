@@ -20,20 +20,18 @@
         selinux_modules:
           - {path: "selinux_modules/linux-system-roles-selinux-test-a.pp"}
       block:
-        - name: Unset test facts
-          set_fact:
-            ansible_facts: "{{ ansible_facts | dict2items |
-              rejectattr('key', 'match', __selinux_test_facts_regex) |
-              list | items2dict }}"
-          vars:
-            __selinux_test_facts_regex: "{{ '^(' ~
-              (__selinux_test_facts | join('|')) ~ ')$' }}"
         - name: Execute the role
           include_role:
             name: linux-system-roles.selinux
           register: role_result
+        - name: Get commit_num file
+          set_fact:
+            commit_num_file: "{{
+              (ansible_facts.pkg_mgr == 'ansible.posix.rhel_rpm_ostree') |
+              ternary('/etc/selinux/targeted/active/commit_num',
+                      '/var/lib/selinux/targeted/active/commit_num') }}"
         - name: Get current commit_num
-          command: cat /var/lib/selinux/targeted/active/commit_num
+          command: cat {{ commit_num_file | quote }}
           register: commit_num_before
           changed_when: false
         - name: Execute the role
@@ -41,7 +39,7 @@
             name: linux-system-roles.selinux
           register: role_result
         - name: Get current commit_num
-          command: cat /var/lib/selinux/targeted/active/commit_num
+          command: cat {{ commit_num_file | quote }}
           register: commit_num_after
           changed_when: false
         - name: Check commit numbers
