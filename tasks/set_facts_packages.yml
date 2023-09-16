@@ -16,8 +16,8 @@
 - name: Install SELinux python3 tools
   package:
     name:
-      - libselinux-python3
-      - policycoreutils-python3
+      - python3-libselinux
+      - python3-policycoreutils
     state: present
   when: ansible_python_version is version('3', '>=')
 
