@@ -1,6 +1,13 @@
 Changelog
 =========
 
+[1.6.3] - 2023-09-19
+--------------------
+
+### Other Changes
+
+- refactor: use primary package names instead of aliases (#192)
+
 [1.6.2] - 2023-09-07
 --------------------
 
