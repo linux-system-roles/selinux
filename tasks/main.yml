@@ -68,7 +68,9 @@
   seboolean:
     name: "{{ item.name }}"
     state: "{{ item.state }}"
-    persistent: "{{ item.persistent | default('no') }}"
+    persistent: "{{ item.persistent |
+                  default(ansible_selinux.status == 'disabled') }}"
+    ignore_selinux_state: "{{ ansible_selinux.status == 'disabled' }}"
   with_items: "{{ selinux_booleans }}"
 
 - name: Set SELinux file contexts
@@ -79,6 +81,7 @@
     state: "{{ item.state | default('present') }}"
     selevel: "{{ item.selevel | default(omit) }}"
     seuser: "{{ item.seuser | default(omit) }}"
+    ignore_selinux_state: "{{ ansible_selinux.status == 'disabled' }}"
   with_items: "{{ selinux_fcontexts }}"
 
 - name: Restore SELinux labels on filesystem tree
@@ -102,6 +105,7 @@
     setype: "{{ item.setype }}"
     state: "{{ item.state | default('present') }}"
     local: "{{ item.local | default(False) }}"
+    ignore_selinux_state: "{{ ansible_selinux.status == 'disabled' }}"
   with_items: "{{ selinux_ports }}"
 
 - name: Set linux user to SELinux user mapping
@@ -111,6 +115,7 @@
     serange: "{{ item.serange | default('s0') }}"
     state: "{{ item.state | default('present') }}"
     reload: "{{ item.reload | default(False) }}"
+    ignore_selinux_state: "{{ ansible_selinux.status == 'disabled' }}"
   with_items: "{{ selinux_logins }}"
   notify: __selinux_reload_policy
 
