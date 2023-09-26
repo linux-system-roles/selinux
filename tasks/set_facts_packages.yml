@@ -19,7 +19,19 @@
       - python3-libselinux
       - python3-policycoreutils
     state: present
-  when: ansible_python_version is version('3', '>=')
+  when:
+    - ansible_python_version is version('3', '>=')
+    - ansible_os_family == "RedHat"
+
+- name: Install SELinux python3 tools
+  package:
+    name:
+      - python3-selinux
+      - python3-policycoreutils
+    state: present
+  when:
+    - ansible_python_version is version('3', '>=')
+    - ansible_os_family == "Suse"
 
 - name: Refresh facts
   setup:
