@@ -1,6 +1,13 @@
 Changelog
 =========
 
+[1.6.4] - 2023-09-26
+--------------------
+
+### Bug Fixes
+
+- fix: make role work again on Suse - not officially supported (#195)
+
 [1.6.3] - 2023-09-19
 --------------------
 
