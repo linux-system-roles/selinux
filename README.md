@@ -13,6 +13,8 @@ Essentially provide mechanisms to manage local customizations:
 * Manage logins
 * Manage ports
 
+**Note:** If you want to manage SELinux customizations in `disabled` mode, you need SELinux `targeted` policy installed.
+
 ## Requirements
 
 ### Collection requirements
