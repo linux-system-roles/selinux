@@ -1,0 +1,78 @@
+---
+- name: Ensure the default is targeted, enforcing, without local modifications
+  hosts: all
+  gather_facts: true
+  vars:
+    selinux_all_purge: true
+    selinux_logins_purge: true
+
+  tasks:
+    - name: Ensure selinux-policy-targeted
+      package:
+        name:
+          - selinux-policy-targeted
+        state: present
+
+    - name: Add a Linux System Roles SELinux User
+      user:
+        comment: Linux System Roles SELinux User
+        name: sar-user
+    - name: Switch to permissive to allow login when selinuxfs is not mounted
+      command: setenforce 0
+      changed_when: true
+      when: ansible_selinux.status != "disabled" and
+        ansible_selinux.mode != "permissive"
+      register: selinux_switch_to_enforcing
+    - name: Get selinuxfs mountpoint
+      command: findmnt -n -t selinuxfs --output=target
+      changed_when: false
+      register: selinux_mountpoint
+    - name: >-
+        Umount selinux mountpoint to emulate SELinux disabled
+        system {{ selinux_mountpoint.stdout }}
+      command: umount -l {{ selinux_mountpoint.stdout }}
+      changed_when: true
+      when: selinux_mountpoint.stdout != ""
+
+    - name: Execute the role
+      block:
+        - name: Include role
+          include_role:
+            name: linux-system-roles.selinux
+          vars:
+            # https://github.com/ansible-collections/ansible.posix/pull/496
+            # selinux_booleans:
+            #  - {name: 'ssh_sysadm_login', state: 'off', persistent: 'yes'}
+            selinux_fcontexts:
+              - {target: '/tmp/test_dir(/.*)?', setype: 'user_home_dir_t',
+                 ftype: 'd'}
+            selinux_ports:
+              - {ports: '22100', proto: 'tcp', setype: 'ssh_port_t',
+                 state: 'present'}
+            selinux_logins:
+              - {login: 'sar-user', seuser: 'staff_u',
+                 serange: 's0-s0:c0.c1023', state: 'present'}
+      always:
+        - name: >-
+            Mount selinux mountpoint back to
+            system {{ selinux_mountpoint.stdout }}
+          # noqa command-instead-of-module
+          command: >-
+            mount -t selinuxfs selinuxfs {{ selinux_mountpoint.stdout }}
+          changed_when: true
+        - name: Switch back to enforcing
+          command: setenforce 1
+          changed_when: true
+          when: selinux_switch_to_enforcing.skipped is not defined
+        - name: Gather facts again
+          setup:
+        - name: Remove Linux System Roles SELinux User
+          user:
+            name: sar-user
+            remove: true
+            state: absent
+        - name: Include role to purge everything
+          include_role:
+            name: linux-system-roles.selinux
+          vars:
+            selinux_all_purge: true
