@@ -84,20 +84,6 @@
     ignore_selinux_state: "{{ ansible_selinux.status == 'disabled' }}"
   with_items: "{{ selinux_fcontexts }}"
 
-- name: Restore SELinux labels on filesystem tree
-  command: /sbin/restorecon -R -F -v {{ restorecon_threads }} {{ item }}
-  with_items: "{{ selinux_restore_dirs }}"
-  register: restorecon_cmd
-  changed_when: '"Relabeled" in restorecon_cmd.stdout'
-
-- name: Restore SELinux labels on filesystem tree in check mode
-  command: /sbin/restorecon -R -F -v -n {{ restorecon_threads }} {{ item }}
-  with_items: "{{ selinux_restore_dirs }}"
-  register: restorecon_cmd
-  changed_when: '"Would relabel" in restorecon_cmd.stdout'
-  check_mode: false
-  when: ansible_check_mode
-
 - name: Set an SELinux label on a port
   local_seport:
     ports: "{{ item.ports }}"
@@ -133,3 +119,17 @@
     checksum: "{{ selinux_installed_modules[mod_name][priority]['checksum'] | default('sha256:') }}"
   when: selinux_modules is defined
   loop: "{{ selinux_modules | flatten(levels=1) }}"
+
+- name: Restore SELinux labels on filesystem tree
+  command: /sbin/restorecon -R -F -v {{ restorecon_threads }} {{ item }}
+  with_items: "{{ selinux_restore_dirs }}"
+  register: restorecon_cmd
+  changed_when: '"Relabeled" in restorecon_cmd.stdout'
+
+- name: Restore SELinux labels on filesystem tree in check mode
+  command: /sbin/restorecon -R -F -v -n {{ restorecon_threads }} {{ item }}
+  with_items: "{{ selinux_restore_dirs }}"
+  register: restorecon_cmd
+  changed_when: '"Would relabel" in restorecon_cmd.stdout'
+  check_mode: false
+  when: ansible_check_mode
