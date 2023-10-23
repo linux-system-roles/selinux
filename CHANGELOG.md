@@ -1,6 +1,21 @@
 Changelog
 =========
 
+[1.6.5] - 2023-10-23
+--------------------
+
+### Bug Fixes
+
+- fix: Use `ignore_selinux_state` module option (#194)
+
+### Other Changes
+
+- Bump actions/checkout from 3 to 4 (#197)
+- test: Add modifications in SELinux disabled mode (#201)
+- ci: ensure dependabot git commit message conforms to commitlint (#202)
+- ci: use dump_packages.py callback to get packages used by role (#204)
+- ci: tox-lsr version 3.1.1 (#207)
+
 [1.6.4] - 2023-09-26
 --------------------
 
