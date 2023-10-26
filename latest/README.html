@@ -177,6 +177,7 @@ id="toc-selinux_reboot_required">selinux_reboot_required</a></li>
 id="toc-selinux_installed_modules">selinux_installed_modules</a></li>
 </ul></li>
 <li><a href="#examples" id="toc-examples">Examples</a></li>
+<li><a href="#rpm-ostree" id="toc-rpm-ostree">rpm-ostree</a></li>
 </ul>
 </nav>
 <hr>
@@ -194,17 +195,12 @@ id="toc-selinux_installed_modules">selinux_installed_modules</a></li>
 in <code>disabled</code> mode, you need SELinux <code>targeted</code>
 policy installed.</p>
 <h1 id="requirements">Requirements</h1>
+<p>See below</p>
 <h2 id="collection-requirements">Collection requirements</h2>
-<p>The role requires some SELinux modules. If you are using
-<code>ansible-core</code>, you must get these from the
-<code>ansible.posix</code> and <code>community.general</code>
-collections. Use the file <code>meta/collection-requirements.yml</code>
-to install these:</p>
+<p>The role requires external collections. Use the following command to
+install them:</p>
 <div class="sourceCode" id="cb1"><pre
 class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">ansible-galaxy</span> collection install <span class="at">-vv</span> <span class="at">-r</span> meta/collection-requirements.yml</span></code></pre></div>
-<p>If you are using Ansible Engine 2.9, or are using an Ansible bundle
-which includes these collections/modules, you should have to do
-nothing.</p>
 <h1 id="modules-provided-by-this-repository">Modules provided by this
 repository</h1>
 <h2 id="selinux_modules_facts">selinux_modules_facts</h2>
@@ -375,6 +371,8 @@ are not supported, e.g. on Red Hat Enterprise Linux 6</p>
 <p>The general usage is demonstrated in <a
 href="examples/selinux-playbook.yml">selinux-playbook.yml</a>
 playbook.</p>
+<h1 id="rpm-ostree">rpm-ostree</h1>
+<p>See README-ostree.md</p>
 </article>
 </body>
 </html>
