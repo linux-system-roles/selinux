@@ -39,8 +39,7 @@
     # to SELinux users
     selinux_logins:
       # Map all new users to SElinux user "user_u" (instead of "unconfined_u")
-      - {login: '__default__', seuser: 'user_u', serange: 's0',
-         state: 'present'}
+      - {login: '__default__', seuser: 'user_u', serange: 's0', state: 'present'}  # noqa yaml[line-length]
       # Alternatively map all new users to SElinux user "staff_u" (instead of
       # "unconfined_u")
       # - {login: '__default__', seuser: 'staff_u', serange: 's0-s0:c0.c1023',
@@ -74,6 +73,7 @@
     # relabeled.
     # Gather homedirs of each user with a new login mapping
     - name: Gather homedirs of users with new login mapping
+      # noqa risky-shell-pipe
       shell: >-
         # exit in case of errors in the following command ("-o pipefail"
         # cannot be used since "getent passwd __default__" is expected to fail)
