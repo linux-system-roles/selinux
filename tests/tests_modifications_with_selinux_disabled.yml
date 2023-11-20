@@ -15,6 +15,10 @@
         __selinux_need_policy_targeted: true
         __selinux_need_findmnt: true
 
+    - name: Skip test on EL6
+      meta: end_host
+      when: __selinux_is_el6 | d(false)
+
     - name: Add a Linux System Roles SELinux User
       user:
         comment: Linux System Roles SELinux User

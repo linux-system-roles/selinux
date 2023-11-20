@@ -7,12 +7,14 @@
       - os_family
     __selinux_test_facts_regex: "{{ '^(' ~
       (__selinux_test_facts | join('|')) ~ ')$' }}"
+    __selinux_test_facts_subsets: "{{ ['!all', '!min'] +
+      __selinux_test_facts }}"
   block:
     - name: Ensure ansible_facts used by tests
       setup:
-        gather_subset: min
-      when: not ansible_facts.keys() | list |
-        intersect(__selinux_test_facts) == __selinux_test_facts
+        gather_subset: "{{ __selinux_test_facts_subsets }}"
+      when: __selinux_test_facts |
+        difference(ansible_facts.keys() | list) | length > 0
 
     - name: Ensure SELinux testing packages
       include_role:
@@ -36,6 +38,12 @@
               ansible_facts['distribution_major_version'] is version('8', '>'))
           else 'util-linux' if ansible_facts['os_family'] == 'RedHat'
           else 'util-linux' }}"
+
+    - name: Set is_el6 flag
+      set_fact:
+        __selinux_is_el6: "{{ ansible_facts['os_family'] == 'RedHat' and
+          ansible_facts['distribution_major_version'] is version('7', '<') }}"
+      when: not __selinux_is_el6 is defined
 
     - name: Get test facts
       when: __selinux_get_test_facts | d(true)
