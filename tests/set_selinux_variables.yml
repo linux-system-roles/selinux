@@ -25,12 +25,16 @@
       package:
         name: selinux-policy-targeted
         state: present
+        use: "{{ (__selinux_is_ostree | d(false)) |
+                 ternary('ansible.posix.rhel_rpm_ostree', omit) }}"
       when: __selinux_need_policy_targeted | d(false)
 
     - name: Ensure findmnt
       package:
         name: "{{ findmnt_pkg }}"
         state: present
+        use: "{{ (__selinux_is_ostree | d(false)) |
+                 ternary('ansible.posix.rhel_rpm_ostree', omit) }}"
       when: __selinux_need_findmnt | d(false)
       vars:
         findmnt_pkg: "{{ 'util-linux-core'
