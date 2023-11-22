@@ -2,7 +2,6 @@
 
 set -euo pipefail
 
-role_collection_dir="${ROLE_COLLECTION_DIR:-fedora/linux_system_roles}"
 ostree_dir="${OSTREE_DIR:-"$(dirname "$(realpath "$0")")"}"
 
 if [ -z "${4:-}" ] || [ "${1:-}" = help ] || [ "${1:-}" = -h ]; then
@@ -29,24 +28,40 @@ if [ "$pkgtype" = testing ]; then
 fi
 
 get_rolepath() {
-    local ostree_dir role rolesdir
+    local ostree_dir role rolesdir roles_parent_dir coll_path pth
     ostree_dir="$1"
     role="$2"
-    rolesdir="$(dirname "$(dirname "$ostree_dir")")/$role/.ostree"
+    roles_parent_dir="$(dirname "$(dirname "$ostree_dir")")"
+    rolesdir="$roles_parent_dir/$role/.ostree"
+    # assumes collection format
     if [ -d "$rolesdir" ]; then
         echo "$rolesdir"
         return 0
     fi
-    if [ -n "${ANSIBLE_COLLECTIONS_PATHS:-}" ]; then
-        for pth in ${ANSIBLE_COLLECTIONS_PATHS//:/ }; do
-            rolesdir="$pth/ansible_collections/$role_collection_dir/roles/$role/.ostree"
-            if [ -d "$rolesdir" ]; then
-                echo "$rolesdir"
-                return 0
-            fi
+    # assumes legacy role format like linux-system-roles.$role/
+    for rolesdir in "$roles_parent_dir"/*-system-roles."$role"/.ostree; do
+        if [ -d "$rolesdir" ]; then
+          echo "$rolesdir"
+          return 0
+        fi
+    done
+    # look elsewhere
+    coll_path="${ANSIBLE_COLLECTIONS_PATH:-}"
+    if [ -z "$coll_path" ]; then
+        coll_path="${ANSIBLE_COLLECTIONS_PATHS:-}"
+    fi
+    if [ -n "${coll_path}" ]; then
+        for pth in ${coll_path//:/ }; do
+            for rolesdir in "$pth"/ansible_collections/*/*_system_roles/roles/"$role"/.ostree; do
+                if [ -d "$rolesdir" ]; then
+                    echo "$rolesdir"
+                    return 0
+                fi
+            done
         done
     fi
-    return 1
+    1>&2 echo ERROR - could not find role "$role" - please use ANSIBLE_COLLECTIONS_PATH
+    exit 2
 }
 
 get_packages() {
@@ -65,6 +80,10 @@ get_packages() {
             roles="$(cat "$rolefile")"
             for role in $roles; do
                 rolepath="$(get_rolepath "$ostree_dir" "$role")"
+                if [ -z "$rolepath" ]; then
+                    1>&2 echo ERROR - could not find role "$role" - please use ANSIBLE_COLLECTIONS_PATH
+                    exit 2
+                fi
                 get_packages "$rolepath"
             done
         fi

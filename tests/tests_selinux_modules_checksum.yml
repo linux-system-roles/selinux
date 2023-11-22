@@ -26,8 +26,7 @@
           register: role_result
         - name: Get commit_num file
           set_fact:
-            commit_num_file: "{{
-              (ansible_facts.pkg_mgr == 'ansible.posix.rhel_rpm_ostree') |
+            commit_num_file: "{{ __selinux_is_ostree | d(false) |
               ternary('/etc/selinux/targeted/active/commit_num',
                       '/var/lib/selinux/targeted/active/commit_num') }}"
         - name: Get current commit_num
