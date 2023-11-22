@@ -1,6 +1,19 @@
 Changelog
 =========
 
+[1.7.1] - 2023-11-22
+--------------------
+
+### Bug Fixes
+
+- fix: fix ansible-lint issues (#210)
+
+### Other Changes
+
+- docs: Add example playbook and "readme" for confined users (#184)
+- test: skip tests_modifications_with_selinux_disabled on EL6 (#211)
+- refactor: improve support for ostree systems (#212)
+
 [1.7.0] - 2023-10-26
 --------------------
 
