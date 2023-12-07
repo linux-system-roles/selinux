@@ -66,44 +66,52 @@
 - name: Set SELinux booleans
   # noqa fqcn[action]
   seboolean:
-    name: "{{ item.name }}"
-    state: "{{ item.state }}"
-    persistent: "{{ item.persistent |
+    name: "{{ line_item.name }}"
+    state: "{{ line_item.state }}"
+    persistent: "{{ line_item.persistent |
                   default(ansible_selinux.status == 'disabled') }}"
     ignore_selinux_state: "{{ ansible_selinux.status == 'disabled' }}"
   with_items: "{{ selinux_booleans }}"
+  loop_control:
+    loop_var: line_item
 
 - name: Set SELinux file contexts
   sefcontext:
-    target: "{{ item.target }}"
-    setype: "{{ item.setype }}"
-    ftype: "{{ item.ftype | default('a') }}"
-    state: "{{ item.state | default('present') }}"
-    selevel: "{{ item.selevel | default(omit) }}"
-    seuser: "{{ item.seuser | default(omit) }}"
+    target: "{{ line_item.target }}"
+    setype: "{{ line_item.setype }}"
+    ftype: "{{ line_item.ftype | default('a') }}"
+    state: "{{ line_item.state | default('present') }}"
+    selevel: "{{ line_item.selevel | default(omit) }}"
+    seuser: "{{ line_item.seuser | default(omit) }}"
     ignore_selinux_state: "{{ ansible_selinux.status == 'disabled' }}"
   with_items: "{{ selinux_fcontexts }}"
+  loop_control:
+    loop_var: line_item
 
 - name: Set an SELinux label on a port
   local_seport:
-    ports: "{{ item.ports }}"
-    proto: "{{ item.proto | default('tcp') }}"
-    setype: "{{ item.setype }}"
-    state: "{{ item.state | default('present') }}"
-    local: "{{ item.local | default(False) }}"
+    ports: "{{ line_item.ports }}"
+    proto: "{{ line_item.proto | default('tcp') }}"
+    setype: "{{ line_item.setype }}"
+    state: "{{ line_item.state | default('present') }}"
+    local: "{{ line_item.local | default(False) }}"
     ignore_selinux_state: "{{ ansible_selinux.status == 'disabled' }}"
   with_items: "{{ selinux_ports }}"
+  loop_control:
+    loop_var: line_item
 
 - name: Set linux user to SELinux user mapping
   selogin:
-    login: "{{ item.login }}"
-    seuser: "{{ item.seuser }}"
-    serange: "{{ item.serange | default('s0') }}"
-    state: "{{ item.state | default('present') }}"
-    reload: "{{ item.reload | default(False) }}"
+    login: "{{ line_item.login }}"
+    seuser: "{{ line_item.seuser }}"
+    serange: "{{ line_item.serange | default('s0') }}"
+    state: "{{ line_item.state | default('present') }}"
+    reload: "{{ line_item.reload | default(False) }}"
     ignore_selinux_state: "{{ ansible_selinux.status == 'disabled' }}"
   with_items: "{{ selinux_logins }}"
   notify: __selinux_reload_policy
+  loop_control:
+    loop_var: line_item
 
 - name: Get SELinux modules facts
   selinux_modules_facts:
@@ -111,24 +119,30 @@
 - name: Load SELinux modules
   include_tasks: selinux_load_module.yml
   vars:
-    mod_name: "{{ item.name |
-      default(item.path | default('') | basename | splitext | first) }}"
-    state: "{{ item.state | default('enabled') }}"
-    priority: "{{ item.priority | default('400') }}"
+    mod_name: "{{ line_item.name |
+      default(line_item.path | default('') | basename | splitext | first) }}"
+    state: "{{ line_item.state | default('enabled') }}"
+    priority: "{{ line_item.priority | default('400') }}"
     # yamllint disable rule:line-length
     checksum: "{{ selinux_installed_modules[mod_name][priority]['checksum'] | default('sha256:') }}"
   when: selinux_modules is defined
   loop: "{{ selinux_modules | flatten(levels=1) }}"
+  loop_control:
+    loop_var: line_item
 
 - name: Restore SELinux labels on filesystem tree
-  command: /sbin/restorecon -R -F -v {{ restorecon_threads }} {{ item }}
+  command: /sbin/restorecon -R -F -v {{ restorecon_threads }} {{ line_item }}
   with_items: "{{ selinux_restore_dirs }}"
+  loop_control:
+    loop_var: line_item
   register: restorecon_cmd
   changed_when: '"Relabeled" in restorecon_cmd.stdout'
 
 - name: Restore SELinux labels on filesystem tree in check mode
-  command: /sbin/restorecon -R -F -v -n {{ restorecon_threads }} {{ item }}
+  command: /sbin/restorecon -R -F -v -n {{ restorecon_threads }} {{ line_item }}
   with_items: "{{ selinux_restore_dirs }}"
+  loop_control:
+    loop_var: line_item
   register: restorecon_cmd
   changed_when: '"Would relabel" in restorecon_cmd.stdout'
   check_mode: false
