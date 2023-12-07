@@ -120,7 +120,8 @@
   include_tasks: selinux_load_module.yml
   vars:
     mod_name: "{{ __selinux_item.name |
-      default(__selinux_item.path | default('') | basename | splitext | first) }}"
+      default(__selinux_item.path | default('') | basename | splitext |
+              first) }}"
     state: "{{ __selinux_item.state | default('enabled') }}"
     priority: "{{ __selinux_item.priority | default('400') }}"
     # yamllint disable rule:line-length
