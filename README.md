@@ -82,8 +82,11 @@ module.
 
 ```yaml
 selinux_booleans:
-  - {name: 'samba_enable_home_dirs', state: true}
-  - {name: 'ssh_sysadm_login', state: true, persistent: true}
+  - name: samba_enable_home_dirs
+    state: true
+  - name: ssh_sysadm_login
+    state: true
+    persistent: true
 ```
 
 ### selinux_fcontexts
@@ -95,7 +98,10 @@ module.
 
 ```yaml
 selinux_fcontexts:
-  - {target: '/tmp/test_dir(/.*)?', setype: 'user_home_dir_t', ftype: 'd', state: 'present'}
+  - target: '/tmp/test_dir(/.*)?'
+    setype: 'user_home_dir_t'
+    ftype: d
+    state: present
 ```
 
 Users may also pass the following optional parameters:
@@ -115,7 +121,11 @@ module.
 
 ```yaml
 selinux_ports:
-  - {ports: '22100', proto: 'tcp', setype: 'ssh_port_t', state: 'present', local: true}
+  - ports: 22100
+    proto: tcp
+    setype: ssh_port_t
+    state: present
+    local: true
 ```
 
 ### selinux_restore_dirs
@@ -137,8 +147,13 @@ module.
 
 ```yaml
 selinux_logins:
-  - {login: 'plautrba', seuser: 'staff_u', state: 'absent'}
-  - {login: '__default__', seuser: 'staff_u', serange: 's0-s0:c0.c1023', state: 'present'}
+  - login: plautrba
+    seuser: staff_u
+    state: absent
+  - login: default
+    seuser: staff_u
+    serange: s0-s0:c0.c1023
+    state: present
 ```
 
 ### selinux_modules
@@ -148,10 +163,16 @@ which would contain a `list` of `dict`, e.g.:
 
 ```yaml
 selinux_modules:
-  - {path: 'localmodule.pp', state: 'enabled'}
-  - {path: 'localmodule.cil', priority: '350', state: 'enabled'}
-  - {name: 'unconfineduser', state: 'disabled'}
-  - {name: 'localmodule', priority: '350', state: 'absent'}
+  - path: localmodule.pp
+    state: enabled
+  - path: localmodule.cil
+    priority: 350
+    state: enabled
+  - name: unconfineduser
+    state: disabled
+  - name: localmodule
+    priority: 350
+    state: absent
 ```
 
 * `path`: a local module file (either .cil or .pp) to be installed on a node,

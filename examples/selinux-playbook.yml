@@ -10,51 +10,68 @@
     selinux_booleans:
       # Set the 'samba_enable_home_dirs' boolean to 'on' in the current
       # session only
-      - {name: 'samba_enable_home_dirs', state: 'on'}
+      - name: samba_enable_home_dirs
+        state: true
       # Set the 'ssh_sysadm_login' boolean to 'on' permanently
-      - {name: 'ssh_sysadm_login', state: 'on', persistent: 'yes'}
+      - name: ssh_sysadm_login
+        state: true
+        persistent: true
     # Map '/tmp/test_dir' and its subdirectories to the 'user_home_dir_t'
     # SELinux file type
     selinux_fcontexts:
-      - {target: '/tmp/test_dir(/.*)?', setype: 'user_home_dir_t', ftype: 'd'}
+      - target: '/tmp/test_dir(/.*)?'
+        setype: user_home_dir_t
+        ftype: d
+        state: present
     # Restore SELinux file contexts in '/tmp/test_dir'
     selinux_restore_dirs:
       - /tmp/test_dir
     # Map tcp port 22100 to the 'ssh_port_t' SELinux port type
     selinux_ports:
-      - {ports: '22100', proto: 'tcp', setype: 'ssh_port_t', state: 'present'}
+      - ports: 22100
+        proto: tcp
+        setype: ssh_port_t
+        state: present
     # Map the 'sar-user' Linux user to the 'staff_u' SELinux user
     selinux_logins:
-      - {login: 'sar-user', seuser: 'staff_u', serange: 's0-s0:c0.c1023',
-         state: 'present'}
+      - login: sar-user
+        seuser: staff_u
+        serange: s0-s0:c0.c1023
+        state: present
     # Manage modules
     selinux_modules:
       # Install the 'localpolicy.cil' with priority 300
-      - {path: "localpolicy.cil", priority: "300", state: "enabled"}
+      - path: localpolicy.cil
+        priority: 300
+        state: enabled
       # Disable the 'unconfineduser' module with priority 100
-      - {name: "unconfineduser", priority: "100", state: "disabled"}
+      - name: unconfineduser
+        priority: 100
+        state: disabled
       # Remove the 'temporarypolicy' module with priority 400
-      - {name: "temporarypolicy", priority: "400", state: "absent"}
-
-  # Prepare the prerequisites required for this playbook
+      - name: temporarypolicy
+        priority: 400
+        state: absent
   tasks:
     - name: Creates directory
       file:
         path: /tmp/test_dir
         state: directory
         mode: "0755"
+
     - name: Add a Linux System Roles SELinux User
       user:
         comment: Linux System Roles SELinux User
         name: sar-user
-    - name: Execute the role and catch errors
+
+    - name: Execute the role and reboot in a rescue block
       block:
         - name: Include selinux role
           include_role:
             name: linux-system-roles.selinux
       rescue:
-        # Fail if failed for a different reason than selinux_reboot_required.
-        - name: Handle errors
+        - name: >-
+            Fail if failed for a different reason than selinux_reboot_required
           fail:
             msg: "role failed"
           when: not selinux_reboot_required
