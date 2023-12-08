@@ -26,6 +26,13 @@
       delegate_to: localhost
       become: false
 
+    - name: Raise an error when module file doesn't exist
+      fail:
+        msg: >-
+          The module that you try to install does not exist in
+          {{ __selinux_item.path }}
+      when: not module_file.stat.exists
+
     - name: Install module
       when: not module_file.stat.checksum in checksum
       block:
