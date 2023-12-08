@@ -10,16 +10,16 @@
 - name: Prepare module installation
   when:
     - state == "enabled"
-    - item.path is defined
+    - __selinux_item.path is defined
   block:
-    - name: Get checksum for {{ item.path }}
+    - name: Get checksum for {{ __selinux_item.path }}
       stat:
         path: "{{ __resolved_file }}"
         checksum_algorithm: sha256
       vars:
         __esc: \\
         __glob_pat: "([*?[])"
-        __escaped_file: "{{ item.path |
+        __escaped_file: "{{ __selinux_item.path |
           regex_replace(__glob_pat, __esc ~ '\\1') }}"
         __resolved_file: "{{ lookup('fileglob', __escaped_file) }}"
       register: module_file
@@ -35,15 +35,15 @@
             prefix: linux_system_role.selinux
           register: tempdir
 
-        - name: Copy module file {{ item.path }}
+        - name: Copy module file {{ __selinux_item.path }}
           copy:
             dest: "{{ tempdir.path }}"
-            src: "{{ item.path }}"
+            src: "{{ __selinux_item.path }}"
             mode: preserve
 
         - name: Install the module
           local_semodule:
-            path: "{{ tempdir.path }}/{{ item.path | basename }}"
+            path: "{{ tempdir.path }}/{{ __selinux_item.path | basename }}"
             priority: "{{ priority }}"
             state: enabled
           notify: __selinux_reload_policy
@@ -65,14 +65,14 @@
   local_semodule:
     name: "{{ mod_name }}"
     state: enabled
-  when: state == "enabled" and item.path is not defined
+  when: state == "enabled" and __selinux_item.path is not defined
   notify: __selinux_reload_policy
 
 - name: Disable module
   local_semodule:
     name: "{{ mod_name }}"
     state: "disabled"
-  when: state == "disabled" and item.path is not defined
+  when: state == "disabled" and __selinux_item.path is not defined
   notify: __selinux_reload_policy
 
 - name: Refresh SELinux modules facts
