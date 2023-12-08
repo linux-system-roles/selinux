@@ -1,6 +1,20 @@
 Changelog
 =========
 
+[1.7.2] - 2023-12-08
+--------------------
+
+### Bug Fixes
+
+- fix: no longer use "item" as a loop variable (#217)
+- fix: Print an error message when module to be created doesn't exist (#218)
+
+### Other Changes
+
+- ci: bump actions/github-script from 6 to 7 (#214)
+- refactor: get_ostree_data.sh use env shebang - remove from .sanity* (#215)
+- docs: Update docs to use yaml style when defining vars (#219)
+
 [1.7.1] - 2023-11-22
 --------------------
 
