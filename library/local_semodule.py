@@ -42,6 +42,7 @@ options:
     description:
       - Use other than current SELinux module store, e.g. mls, minimum, refpolicy ...
     type: str
+    default: ""
 notes:
    - The changes are persistent across reboots.
    - Not tested on any debian based system.
