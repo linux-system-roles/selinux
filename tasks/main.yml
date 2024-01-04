@@ -76,7 +76,7 @@
     loop_var: __selinux_item
 
 - name: Set SELinux file contexts
-  sefcontext:
+  community.general.sefcontext:
     target: "{{ __selinux_item.target }}"
     setype: "{{ __selinux_item.setype }}"
     ftype: "{{ __selinux_item.ftype | default('a') }}"
@@ -101,7 +101,7 @@
     loop_var: __selinux_item
 
 - name: Set linux user to SELinux user mapping
-  selogin:
+  community.general.selogin:
     login: "{{ __selinux_item.login }}"
     seuser: "{{ __selinux_item.seuser }}"
     serange: "{{ __selinux_item.serange | default('s0') }}"

@@ -21,7 +21,7 @@ exclude_paths:
   - .markdownlint.yaml
   - examples/roles/
 mock_modules:
-  - sefcontext
-  - selogin
+  - community.general.sefcontext
+  - community.general.selogin
 mock_roles:
   - linux-system-roles.selinux
