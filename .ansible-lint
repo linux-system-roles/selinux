@@ -23,5 +23,7 @@ exclude_paths:
 mock_modules:
   - community.general.sefcontext
   - community.general.selogin
+  - seboolean
+  - selinux
 mock_roles:
   - linux-system-roles.selinux
