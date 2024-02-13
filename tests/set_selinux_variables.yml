@@ -5,6 +5,7 @@
       - distribution
       - distribution_major_version
       - os_family
+      - python_version
     __selinux_test_facts_regex: "{{ '^(' ~
       (__selinux_test_facts | join('|')) ~ ')$' }}"
     __selinux_test_facts_subsets: "{{ ['!all', '!min'] +
