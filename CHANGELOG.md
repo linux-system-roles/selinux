@@ -1,6 +1,15 @@
 Changelog
 =========
 
+[1.7.4] - 2024-02-14
+--------------------
+
+### Other Changes
+
+- ci: bump codecov/codecov-action from 3 to 4 (#226)
+- ci: fix python unit test - copy pytest config to tests/unit (#227)
+- test: Add python_version to test facts gather ansible_python_version (#228)
+
 [1.7.3] - 2024-01-16
 --------------------
 
