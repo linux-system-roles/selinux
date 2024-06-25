@@ -2,13 +2,6 @@
 galaxy_info:
   author: Petr Lautrbach <plautrba@redhat.com>
   description: Configure SELinux
-  galaxy_tags:
-    - system
-    - selinux
-    - redhat
-    - rhel
-    - fedora
-    - centos
   company: Red Hat, Inc.
   license: GPL-3.0+
   min_ansible_version: "2.9"
@@ -22,5 +15,16 @@ galaxy_info:
         - "7"
         - "8"
         - "9"
-
+  galaxy_tags:
+    - centos
+    - el6
+    - el7
+    - el8
+    - el9
+    - el10
+    - fedora
+    - redhat
+    - rhel
+    - selinux
+    - system
 allow_duplicates: true
