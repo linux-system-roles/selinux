@@ -18,5 +18,6 @@ __selinux_required_facts_subsets: "{{ ['!all', '!min'] +
   __selinux_required_facts }}"
 
 restorecon_threads: "{{ '-T 0' if ansible_distribution == 'Fedora' or
+  ansible_distribution == 'SL-Micro' or
   (ansible_distribution_major_version | int > 8 and
   ansible_distribution in ['CentOS', 'RedHat', 'Rocky']) else '' }}"

@@ -11,6 +11,18 @@
       set_fact:
         __selinux_is_ostree: "{{ __ostree_booted_stat.stat.exists }}"
 
+- name: Determine if system is transactional update and set flag
+  when: not __selinux_is_transactional is defined
+  block:
+    - name: Check if transactional-update exists in /sbin
+      stat:
+        path: /sbin/transactional-update
+      register: __transactional_update_stat
+
+    - name: Set flag if transactional-update exists
+      set_fact:
+        __selinux_is_transactional: "{{ __transactional_update_stat.stat.exists }}"
+
 - name: Install SELinux python2 tools
   package:
     name:
@@ -44,6 +56,7 @@
   when:
     - ansible_python_version is version('3', '>=')
     - ansible_os_family == "Suse"
+  register: selinux_python3_tools_result
 
 - name: Install SELinux tool semanage
   package:
@@ -53,8 +66,33 @@
     use: "{{ (__selinux_is_ostree | d(false)) |
              ternary('ansible.posix.rhel_rpm_ostree', omit) }}"
   when: ansible_distribution == "Fedora" or
+    ansible_distribution == "SL-Micro" or
     (ansible_distribution_major_version | int > 7 and
      ansible_distribution in ["CentOS", "RedHat", "Rocky"])
+  register: selinux_semanage_result
+
+- name: Handle reboot for transactional update systems
+  when:
+    - __selinux_is_transactional | d(false)
+    - selinux_python3_tools_result is changed or
+      selinux_semanage_result is changed
+  block:
+    - name: Notify user that reboot is needed to apply changes
+      debug:
+        msg: >
+          Reboot required to apply changes due to transactional updates.
+
+    - name: Reboot transactional update systems
+      reboot:
+        msg: Rebooting the system to apply transactional update changes.
+      when: selinux_transactional_update_reboot_ok | bool
+
+    - name: Fail if reboot is needed and not set
+      fail:
+        msg: >
+          Reboot is required but not allowed. Please set 'selinux_transactional_update_reboot_ok' to proceed.
+      when:
+        - selinux_transactional_update_reboot_ok is none
 
 - name: Refresh facts
   setup:
