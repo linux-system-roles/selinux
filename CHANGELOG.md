@@ -1,6 +1,13 @@
 Changelog
 =========
 
+[1.8.0] - 2024-07-23
+--------------------
+
+### New Features
+
+- feat: add support for transactional update (#241)
+
 [1.7.7] - 2024-07-02
 --------------------
 
