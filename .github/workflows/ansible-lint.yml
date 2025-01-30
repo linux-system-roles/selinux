@@ -41,10 +41,11 @@ jobs:
           TOXENV=collection lsr_ci_runtox
           coll_dir=".tox/ansible_collections/$LSR_ROLE2COLL_NAMESPACE/$LSR_ROLE2COLL_NAME"
           # cleanup
+          ls -alrtF "$coll_dir/.ansible" || :
           rm -rf "$coll_dir/.ansible"
           # check
-          ls -alrtF .ansible/collections/ansible_collections/community/general/plugins/modules/sefcontext.py || :
-          tail .ansible/collections/ansible_collections/community/general/plugins/modules/sefcontext.py || :
+          pwd
+          find -name sefcontext.py -ls
           # ansible-lint action requires a .git directory???
           # https://github.com/ansible/ansible-lint/blob/main/action.yml#L45
           mkdir -p "$coll_dir/.git"
