@@ -43,7 +43,8 @@ jobs:
           # cleanup
           rm -rf "$coll_dir/.ansible"
           # check
-          tail .ansible/collections/ansible_collections/community/general/plugins/modules/ini_file.py || :
+          ls -alrtF .ansible/collections/ansible_collections/community/general/plugins/modules/sefcontext.py || :
+          tail .ansible/collections/ansible_collections/community/general/plugins/modules/sefcontext.py || :
           # ansible-lint action requires a .git directory???
           # https://github.com/ansible/ansible-lint/blob/main/action.yml#L45
           mkdir -p "$coll_dir/.git"
