@@ -5,4 +5,4 @@ check-hidden = true
 ignore-multiline-regex = codespell:ignore-begin.*codespell:ignore-end
 ignore-words = .codespell_ignores
 # skip-file is not available https://github.com/codespell-project/codespell/pull/2759
-skip = .README.html
+skip = .pandoc_template.html5,.README.html
