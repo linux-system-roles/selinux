@@ -14,15 +14,8 @@
 
 - name: Reboot
   when: restorecon is changed  # noqa no-handler
-  block:
-    - name: Restart managed host
-      shell: sleep 2 && shutdown -r now "Ansible updates triggered"
-      async: 1
-      poll: 0
-      ignore_errors: true  # noqa ignore-errors
-      changed_when: false
-
-    - name: Wait for managed host to come back
-      wait_for_connection:
-        delay: 10
-        timeout: 300
+  reboot:
+    msg: Ansible updates triggered
+    pre_reboot_delay: 2
+    post_reboot_delay: 10
+    reboot_timeout: 300

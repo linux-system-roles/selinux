@@ -9,6 +9,7 @@ drop_local_modifications: |
 __selinux_required_facts:
   - distribution
   - distribution_major_version
+  - os_family
   - python_version
 
 # the subsets of ansible_facts that need to be gathered in case any of the

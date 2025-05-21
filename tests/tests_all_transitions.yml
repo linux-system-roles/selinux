@@ -23,8 +23,54 @@
           meta: end_host
           when: __ostree_booted_stat.stat.exists
 
+    - name: Include test variables
+      import_tasks: set_selinux_variables.yml
+
     - name: Save config
       include_tasks: selinux_config_save.yml
+
+    - name: Get selinux facts
+      setup:
+        filter: ansible_selinux
+
+    - name: Save selinux state before test
+      set_fact:
+        __state_before: "{{ ansible_selinux.mode | d(ansible_selinux.status) }}"
+        __type_before: "{{ ansible_selinux.type }}"
+
+    - name: See if we can use update_kernel_param
+      set_fact:
+        __test_update_kernel_param: "{{ ansible_facts['os_family'] == 'RedHat' and
+          ansible_facts['distribution_major_version'] is version('8', '>=') and
+          ansible_version.full is version('2.10', '>=') }}"
+
+    - name: Disable selinux and set kernel
+      ansible.posix.selinux:
+        state: disabled
+        update_kernel_param: "{{ true if __test_update_kernel_param else omit }}"
+      register: __disable_result
+
+    - name: Add selinux=0 to kernel args
+      when:
+        - not __test_update_kernel_param
+        - __disable_result.reboot_required
+      include_role:
+        name: fedora.linux_system_roles.bootloader
+      vars:
+        bootloader_settings:
+          - kernel: ALL
+            options:
+              - name: selinux
+                value: "0"
+                state: present
+
+    - name: Show __disable_result
+      debug:
+        msg: __disable_result is {{ __disable_result | to_nice_json }}
+
+    - name: Reboot
+      reboot:
+      when: __disable_result.reboot_required
 
     - name: Test all the possible state transitions
       include_tasks: selinux_test_transitions.yml
@@ -37,3 +83,31 @@
 
     - name: Restore config
       include_tasks: selinux_config_restore.yml
+
+    - name: Re-enable selinux and set kernel if disabled
+      ansible.posix.selinux:
+        state: "{{ __state_before }}"
+        policy: "{{ __type_before }}"
+        update_kernel_param: "{{ true if ansible_facts['os_family'] == 'RedHat' and
+          ansible_facts['distribution_major_version'] is version('8', '>=')
+          else omit }}"
+      register: __enable_result
+      when: __disable_result.reboot_required
+
+    - name: Remove selinux=0 from kernel args
+      when:
+        - not __test_update_kernel_param
+        - __enable_result.reboot_required
+      include_role:
+        name: fedora.linux_system_roles.bootloader
+      vars:
+        bootloader_settings:
+          - kernel: ALL
+            options:
+              - name: selinux
+                value: "0"
+                state: absent
+
+    - name: Reboot
+      reboot:
+      when: __enable_result.reboot_required

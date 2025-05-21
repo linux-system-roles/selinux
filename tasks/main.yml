@@ -2,33 +2,60 @@
 - name: Set ansible_facts required by role and install packages
   include_tasks: set_facts_packages.yml
 
-- name: Set permanent SELinux state if enabled
-  # noqa args[module] fqcn[action]
-  selinux:
-    state: "{{ selinux_state | default(ansible_selinux.config_mode, true) }}"
-    policy: "{{ selinux_policy | default(ansible_selinux.type, true) }}"
-  register: selinux_mod_output_enabled
-  when: ansible_selinux.status == "enabled" and
-        (selinux_state or selinux_policy)
+- name: Set permanent SELinux state
+  vars:
+    __update_kernel_param: "{{ ansible_facts['os_family'] == 'RedHat' and
+      ansible_facts['distribution_major_version'] is version('8', '>=') and
+      ansible_version.full is version('2.10', '>=') }}"
+  block:
+    - name: Set permanent SELinux state if enabled
+      # noqa args[module] fqcn[action]
+      selinux:
+        state: "{{ selinux_state | default(ansible_selinux.config_mode, true) }}"
+        policy: "{{ selinux_policy | default(ansible_selinux.type, true) }}"
+        update_kernel_param: "{{ true if __update_kernel_param else omit }}"
+      register: selinux_mod_output_enabled
+      when:
+        - ansible_selinux.status == "enabled"
+        - selinux_state or selinux_policy
 
-- name: Set permanent SELinux state if disabled
-  # noqa args[module] fqcn[action]
-  selinux:
-    state: "{{ selinux_state }}"
-    policy: "{{ selinux_policy | default('targeted', true) }}"
-  register: selinux_mod_output_disabled
-  when: ansible_selinux.status == "disabled" and selinux_state
+    - name: Set permanent SELinux state if disabled
+      # noqa args[module] fqcn[action]
+      selinux:
+        state: "{{ selinux_state }}"
+        policy: "{{ selinux_policy | default('targeted', true) }}"
+        update_kernel_param: "{{ true if __update_kernel_param else omit }}"
+      register: selinux_mod_output_disabled
+      when:
+        - ansible_selinux.status == "disabled"
+        - selinux_state | d(none)
 
-- name: Set selinux_reboot_required
-  set_fact:
-    selinux_reboot_required: "{{ selinux_mod_output_enabled.reboot_required
-      if (selinux_mod_output_enabled.reboot_required is defined) else
-      (selinux_mod_output_disabled.reboot_required | default(false)) }}"
+    - name: Set selinux_reboot_required
+      set_fact:
+        selinux_reboot_required: "{{ selinux_mod_output_enabled.reboot_required
+          if (selinux_mod_output_enabled.reboot_required is defined) else
+          (selinux_mod_output_disabled.reboot_required | default(false)) }}"
 
-- name: Fail if reboot is required
-  fail:
-    msg: "Reboot is required to apply changes. Re-execute the role after boot."
-  when: selinux_reboot_required
+    - name: Add or remove selinux=0 from args as needed
+      when:
+        - not __update_kernel_param
+        - selinux_reboot_required | bool
+      include_role:
+        name: fedora.linux_system_roles.bootloader
+      vars:
+        bootloader_settings:
+          - kernel: ALL
+            options:
+              - name: selinux
+                value: "0"
+                state: "{{ 'present'
+                  if selinux_mod_output_enabled.reboot_required | default(false)
+                  else 'absent' }}"
+
+    - name: Fail if reboot is required
+      fail:
+        msg: "Reboot is required to apply changes. Re-execute the role after boot."
+      when: selinux_reboot_required
 
 - name: Warn if SELinux is disabled
   debug:

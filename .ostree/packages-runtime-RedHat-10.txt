@@ -1,3 +1,4 @@
+grubby
 policycoreutils-python-utils
 python3-libselinux
 python3-policycoreutils
