@@ -72,9 +72,3 @@
           command: /usr/sbin/semanage fcontext -l -n -C
           changed_when: false
           register: selinux_role_fcontext
-  always:
-    - name: Unset facts used above
-      set_fact:
-        ansible_facts: "{{ ansible_facts | dict2items |
-          rejectattr('key', 'match', __selinux_test_facts_regex) |
-          list | items2dict }}"

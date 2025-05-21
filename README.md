@@ -73,6 +73,10 @@ This uses the
 [selinux](https://docs.ansible.com/ansible/latest/collections/ansible/posix/selinux_module.html#ansible-collections-ansible-posix-selinux-module)
 module to manage the SELinux mode and policy.
 
+**NOTE:** On EL 8 and later, the role will use the `update_kernel_param: true` of
+the `selinux` module to update the kernel command line in order to ensure the
+selinux state update is applied and persistent upon reboot.
+
 ### selinux_booleans
 
 Manage the state of SELinux booleans.  This is a `list` of `dict`, where each

@@ -58,6 +58,16 @@
     - ansible_os_family == "Suse"
   register: selinux_python3_tools_result
 
+- name: Ensure grubby used to modify selinux kernel parameter
+  package:
+    name: grubby
+    state: present
+    use: "{{ (__selinux_is_ostree | d(false)) |
+             ternary('ansible.posix.rhel_rpm_ostree', omit) }}"
+  when:
+    - ansible_facts["os_family"] == "RedHat"
+    - ansible_facts["distribution_major_version"] is version("8", ">=")
+
 - name: Install SELinux tool semanage
   package:
     name:
