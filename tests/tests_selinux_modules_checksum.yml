@@ -1,6 +1,9 @@
 ---
 - name: Test management of SELinux modules
   hosts: all
+  tags:
+    # modules do not work in container builds
+    - tests::booted
   tasks:
     - name: Ensure facts, test variables used by role
       set_fact:

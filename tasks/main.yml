@@ -2,6 +2,26 @@
 - name: Set ansible_facts required by role and install packages
   include_tasks: set_facts_packages.yml
 
+- name: Determine if system is booted with systemd
+  when: __selinux_is_booted is not defined
+  block:
+    - name: Run systemctl
+      # noqa command-instead-of-module
+      command: systemctl is-system-running
+      register: __is_system_running
+      changed_when: false
+      failed_when: false
+
+    - name: Require installed systemd
+      fail:
+        msg: "Error: This role requires systemd to be installed."
+      when: '"No such file or directory" in __is_system_running.msg | d("")'
+
+    - name: Set flag to indicate that systemd runtime operations are available
+      set_fact:
+        # see https://www.man7.org/linux/man-pages/man1/systemctl.1.html#:~:text=is-system-running%20output
+        __selinux_is_booted: "{{ __is_system_running.stdout != 'offline' }}"
+
 - name: Set permanent SELinux state
   vars:
     __update_kernel_param: "{{ ansible_facts['os_family'] == 'RedHat' and
@@ -55,7 +75,9 @@
     - name: Fail if reboot is required
       fail:
         msg: "Reboot is required to apply changes. Re-execute the role after boot."
-      when: selinux_reboot_required
+      when:
+        - selinux_reboot_required
+        - __selinux_is_booted | bool
 
 - name: Warn if SELinux is disabled
   debug:

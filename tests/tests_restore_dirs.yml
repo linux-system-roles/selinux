@@ -1,6 +1,9 @@
 ---
 - name: Check if selinux role restores directory SELinux context
   hosts: all
+  tags:
+    # labelling does not work in container builds
+    - tests::booted
   tasks:
     - name: Create tempdir, set fcontext and relabel
       block:
