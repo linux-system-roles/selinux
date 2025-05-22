@@ -116,6 +116,8 @@ Users may also pass the following optional parameters:
 
 Individual modifications can be dropped by setting `state` to `absent`.
 
+Note: The `selinux_fcontexts` option does not work in container builds.
+
 ### selinux_ports
 
 Manage the state of SELinux port policy.  This is a `list` of `dict`, where each
@@ -201,6 +203,8 @@ supported policydb module version on target systems, i.e. on the oldest system.
 
 **Note:** Managing modules is idempotent only on Fedora, and EL 8.6 and later.
 You can manage modules on older releases, but it will not be idempotent.
+
+Note: The `selinux_modules` option does not work in container builds.
 
 ### selinux_transactional_update_reboot_ok
 
