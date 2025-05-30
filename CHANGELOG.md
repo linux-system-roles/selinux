@@ -1,6 +1,28 @@
 Changelog
 =========
 
+[1.8.3] - 2025-05-30
+--------------------
+
+### Bug Fixes
+
+- fix: Set the kernel command line selinux parameter correctly when changing selinux state (#275)
+
+### Other Changes
+
+- ci: ansible-plugin-scan is disabled for now (#259)
+- ci: bump ansible-lint to v25; provide collection requirements for ansible-lint (#262)
+- ci: Check spelling with codespell (#263)
+- ci: Add test plan that runs CI tests and customize it for each role (#264)
+- ci: In test plans, prefix all relate variables with SR_ (#265)
+- ci: Fix bug with ARTIFACTS_URL after prefixing with SR_ (#266)
+- ci: several changes related to new qemu test, ansible-lint, python versions, ubuntu versions (#267)
+- ci: use tox-lsr 3.6.0; improve qemu test logging (#268)
+- ci: skip storage scsi, nvme tests in github qemu ci (#269)
+- ci: bump sclorg/testing-farm-as-github-action from 3 to 4 (#270)
+- ci: bump tox-lsr to 3.8.0; rename qemu/kvm tests (#272)
+- ci: Add Fedora 42; use tox-lsr 3.9.0; use lsr-report-errors for qemu tests (#273)
+
 [1.8.2] - 2025-01-09
 --------------------
 
