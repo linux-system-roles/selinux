@@ -240,6 +240,10 @@ enabled, the policy is not changed.</p>
 <p>This uses the <a
 href="https://docs.ansible.com/ansible/latest/collections/ansible/posix/selinux_module.html#ansible-collections-ansible-posix-selinux-module">selinux</a>
 module to manage the SELinux mode and policy.</p>
+<p><strong>NOTE:</strong> On EL 8 and later, the role will use the
+<code>update_kernel_param: true</code> of the <code>selinux</code>
+module to update the kernel command line in order to ensure the selinux
+state update is applied and persistent upon reboot.</p>
 <h2 id="selinux_booleans">selinux_booleans</h2>
 <p>Manage the state of SELinux booleans. This is a <code>list</code> of
 <code>dict</code>, where each <code>dict</code> is in the same format as
