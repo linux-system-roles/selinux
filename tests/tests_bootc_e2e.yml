@@ -1,0 +1,69 @@
+# SPDX-License-Identifier: MIT
+---
+- name: Bootc end-to-end test
+  hosts: all
+  tags:
+    - tests::bootc-e2e
+  gather_facts: false
+
+  tasks:
+    # PREPARATION
+    - name: Bootc image build preparation
+      when: ansible_connection | d("") == "buildah"
+      block:
+        - name: Add a System Api Roles SELinux User
+          user:
+            comment: System Api Roles SELinux User
+            name: sar-user
+
+        - name: Modify SELinux policy
+          include_role:
+            name: linux-system-roles.selinux
+          vars:
+            # enforcing is the default, so change
+            selinux_state: permissive
+            selinux_booleans:
+              - {name: 'samba_enable_home_dirs', state: 'on', persistent: 'yes'}
+            selinux_logins:
+              - {login: 'sar-user', seuser: 'staff_u', state: 'present'}
+            selinux_ports:
+              - {ports: '22100', proto: 'tcp', setype: 'ssh_port_t', state: 'present'}
+
+        - name: Create QEMU deployment
+          delegate_to: localhost
+          command: "{{ lsr_scriptdir }}/bootc-buildah-qcow.sh {{ ansible_host }}"
+          changed_when: true
+
+      # CLEANUP
+      always:
+        - name: Reset to defaults
+          include_role:
+            name: linux-system-roles.selinux
+          vars:
+            selinux_state: enforcing
+            selinux_all_purge: true
+
+        - name: Remove the System Api Roles SELinux User
+          user:
+            name: sar-user
+            state: absent
+
+    # VALIDATION
+    - name: Validation of deployed image
+      when: ansible_connection | d("") != "buildah"
+      block:
+        - name: Get SELinux state
+          command: getenforce
+          register: getenforce
+          changed_when: false
+
+        - name: Get SELinux modifications
+          import_tasks: set_selinux_variables.yml
+
+        - name: Assert expected state
+          assert:
+            that:
+              - getenforce.stdout | trim == "Permissive"
+              - selinux_role_boolean.stdout is match('^samba_enable_home_dirs.*on.*on')
+              - selinux_role_login.stdout is match('^sar-user.*staff_u.*s0')
+              - selinux_role_port.stdout is match('^ssh_port_t.*22100')
