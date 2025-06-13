@@ -37,7 +37,8 @@
       register: selinux_mod_output_enabled
       when:
         - ansible_selinux.status == "enabled"
-        - selinux_state or selinux_policy
+        - (not selinux_state is none and selinux_state | length > 0) or
+          (not selinux_policy is none and selinux_policy | length > 0)
 
     - name: Set permanent SELinux state if disabled
       # noqa args[module] fqcn[action]
@@ -48,7 +49,8 @@
       register: selinux_mod_output_disabled
       when:
         - ansible_selinux.status == "disabled"
-        - selinux_state | d(none)
+        - not selinux_state is none
+        - selinux_state | length > 0
 
     - name: Set selinux_reboot_required
       set_fact:
