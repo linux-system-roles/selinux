@@ -62,14 +62,14 @@
           enabled"
           assert:
             that:
-              selinux_installed_modules['linux-system-roles-selinux-test-a']['400']['enabled']
+              selinux_installed_modules['linux-system-roles-selinux-test-a']['400']['enabled'] != 0
 
         - name: "Check if linux-system-roles-selinux-test-b is installed and
           disabled"
           assert:
             that:
               # yamllint disable rule:line-length
-              not selinux_installed_modules['linux-system-roles-selinux-test-b']['500']['enabled']
+              selinux_installed_modules['linux-system-roles-selinux-test-b']['500']['enabled'] == 0
 
         - name: Check if linux-system-roles-selinux-test-c is absent
           assert:
@@ -128,14 +128,14 @@
           enabled"
           assert:
             that:
-              selinux_installed_modules['linux-system-roles-selinux-test-a']['0']['enabled']
+              selinux_installed_modules['linux-system-roles-selinux-test-a']['0']['enabled'] != 0
 
         - name: "Check if linux-system-roles-selinux-test-b is installed
           and disabled"
           assert:
             that:
               # yamllint disable rule:line-length
-              not selinux_installed_modules['linux-system-roles-selinux-test-b']['0']['enabled']
+              selinux_installed_modules['linux-system-roles-selinux-test-b']['0']['enabled'] == 0
 
         - name: Check if linux-system-roles-selinux-test-c is absent
           assert:
