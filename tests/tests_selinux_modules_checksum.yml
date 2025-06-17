@@ -2,7 +2,7 @@
 - name: Test management of SELinux modules
   hosts: all
   tags:
-    # modules do not work in container builds
+    # SELinux is not active during container builds, this test covers runtime behaviour
     - tests::booted
   tasks:
     - name: Ensure facts, test variables used by role
