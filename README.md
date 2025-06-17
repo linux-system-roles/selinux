@@ -116,8 +116,6 @@ Users may also pass the following optional parameters:
 
 Individual modifications can be dropped by setting `state` to `absent`.
 
-Note: The `selinux_fcontexts` option does not work in container builds.
-
 ### selinux_ports
 
 Manage the state of SELinux port policy.  This is a `list` of `dict`, where each

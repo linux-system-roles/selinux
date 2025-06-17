@@ -6,6 +6,9 @@
     - tests::bootc-e2e
   gather_facts: false
 
+  vars:
+    __selinux_sar_label_file: /var/sar-label-file
+
   tasks:
     # PREPARATION
     - name: Bootc image build preparation
@@ -15,6 +18,14 @@
           user:
             comment: System Api Roles SELinux User
             name: sar-user
+
+        - name: Create test file for relabeling
+          file:
+            path: "{{ __selinux_sar_label_file }}"
+            state: touch
+            owner: root
+            group: root
+            mode: '0644'
 
         - name: Modify SELinux policy
           include_role:
@@ -28,6 +39,8 @@
               - {login: 'sar-user', seuser: 'staff_u', state: 'present'}
             selinux_ports:
               - {ports: '22100', proto: 'tcp', setype: 'ssh_port_t', state: 'present'}
+            selinux_fcontexts:
+              - {target: "{{ __selinux_sar_label_file }}", setype: "var_spool_t"}
 
         - name: Create QEMU deployment
           delegate_to: localhost
@@ -67,3 +80,13 @@
               - selinux_role_boolean.stdout is match('^samba_enable_home_dirs.*on.*on')
               - selinux_role_login.stdout is match('^sar-user.*staff_u.*s0')
               - selinux_role_port.stdout is match('^ssh_port_t.*22100')
+
+        - name: Get SELinux context of label test file
+          command: "ls -Z {{ __selinux_sar_label_file }}"
+          register: sar_label_file_ls
+          changed_when: false
+
+        - name: Assert SELinux context of label test file
+          assert:
+            that:
+              - "sar_label_file_ls.stdout | trim == 'system_u:object_r:var_spool_t:s0 {{ __selinux_sar_label_file }}'"
