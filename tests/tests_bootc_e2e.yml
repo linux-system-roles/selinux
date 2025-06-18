@@ -27,6 +27,16 @@
             group: root
             mode: '0644'
 
+        - name: Get currently active SELinux modules
+          command: semodule -l
+          changed_when: false
+          register: active_modules
+
+        - name: Consistency check - uuidd module is active
+          assert:
+            that:
+              - "'uuidd' in active_modules.stdout"
+
         - name: Modify SELinux policy
           include_role:
             name: linux-system-roles.selinux
@@ -41,6 +51,11 @@
               - {ports: '22100', proto: 'tcp', setype: 'ssh_port_t', state: 'present'}
             selinux_fcontexts:
               - {target: "{{ __selinux_sar_label_file }}", setype: "var_spool_t"}
+              - {target: "/var/sar-label-file", setype: "var_spool_t"}
+            selinux_modules:
+              - {name: "uuidd", state: "disabled"}
+              - {path: "selinux_modules/linux-system-roles-selinux-test-a.pp"}
+              - {name: "linux-system-roles-selinux-test-a", state: "enabled"}
 
         - name: Create QEMU deployment
           delegate_to: localhost
@@ -90,3 +105,16 @@
           assert:
             that:
               - "sar_label_file_ls.stdout | trim == 'system_u:object_r:var_spool_t:s0 {{ __selinux_sar_label_file }}'"
+
+        - name: Get SELinux modules
+          command: semodule -l
+          changed_when: false
+          register: active_modules
+
+        - name: Assert uuidd module is disabled and test module enabled
+          assert:
+            that:
+              - "'uuidd' not in active_modules.stdout"
+              - "'linux-system-roles-selinux-test-a' in active_modules.stdout"
+              # plausibility check
+              - "'container' in active_modules.stdout"
