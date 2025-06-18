@@ -91,7 +91,9 @@ import traceback
 
 SELINUX_IMP_ERR = None
 try:
-    import selinux
+    # Test if installed; not actually used
+    # pylint: disable=unused-import
+    import selinux  # noqa: F401
 
     HAVE_SELINUX = True
 except ImportError:
@@ -110,10 +112,6 @@ except ImportError:
 from ansible.module_utils.basic import AnsibleModule, missing_required_lib
 
 import os.path
-
-
-def get_runtime_status(ignore_selinux_state=False):
-    return ignore_selinux_state or selinux.is_selinux_enabled()
 
 
 def init_libsemanage(store=""):
@@ -355,9 +353,6 @@ def main():
             msg=missing_required_lib("python3-libsemanage"),
             exception=SEMANAGE_IMP_ERR,
         )
-
-    if not get_runtime_status():
-        module.fail_json(msg="SELinux is disabled on this host.")
 
     path = module.params["path"]
     name = module.params["name"]

@@ -202,8 +202,6 @@ supported policydb module version on target systems, i.e. on the oldest system.
 **Note:** Managing modules is idempotent only on Fedora, and EL 8.6 and later.
 You can manage modules on older releases, but it will not be idempotent.
 
-Note: The `selinux_modules` option does not work in container builds.
-
 ### selinux_transactional_update_reboot_ok
 
 This variable is used to handle reboots required by transactional updates. If a transactional update requires a reboot, the role will proceed with the reboot if selinux_transactional_update_reboot_ok is set to true. If set to false, the role will notify the user that a reboot is required, allowing for custom handling of the reboot requirement. If this variable is not set, the role will fail to ensure the reboot requirement is not overlooked.
