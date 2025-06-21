@@ -44,7 +44,7 @@
             # enforcing is the default, so change
             selinux_state: permissive
             selinux_booleans:
-              - {name: 'samba_enable_home_dirs', state: 'on', persistent: 'yes'}
+              - {name: 'daemons_use_tcp_wrapper', state: 'on', persistent: 'yes'}
             selinux_logins:
               - {login: 'sar-user', seuser: 'staff_u', state: 'present'}
             selinux_ports:
@@ -92,7 +92,7 @@
           assert:
             that:
               - getenforce.stdout | trim == "Permissive"
-              - selinux_role_boolean.stdout is match('^samba_enable_home_dirs.*on.*on')
+              - selinux_role_boolean.stdout is match('^daemons_use_tcp_wrapper.*on.*on')
               - selinux_role_login.stdout is match('^sar-user.*staff_u.*s0')
               - selinux_role_port.stdout is match('^ssh_port_t.*22100')
 
