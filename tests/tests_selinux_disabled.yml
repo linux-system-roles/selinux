@@ -10,7 +10,7 @@
     selinux_policy: targeted
     selinux_state: enforcing
     semanage_change: |
-      boolean -m --on samba_enable_home_dirs
+      boolean -m --on daemons_use_tcp_wrapper
       port -a -p tcp -t ssh_port_t 22100
       fcontext -a -t user_home_dir_t /tmp/test_dir
       login -a -s staff_u sar-user
