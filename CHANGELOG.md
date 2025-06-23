@@ -1,6 +1,14 @@
 Changelog
 =========
 
+[1.10.0] - 2025-06-23
+--------------------
+
+### New Features
+
+- feat: Support selinux_fcontexts during bootc builds (#283)
+- feat: Support selinux_modules during bootc builds (#284)
+
 [1.9.0] - 2025-06-16
 --------------------
 

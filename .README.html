@@ -278,8 +278,6 @@ SELinux user record range.</li>
 </ul>
 <p>Individual modifications can be dropped by setting <code>state</code>
 to <code>absent</code>.</p>
-<p>Note: The <code>selinux_fcontexts</code> option does not work in
-container builds.</p>
 <h2 id="selinux_ports">selinux_ports</h2>
 <p>Manage the state of SELinux port policy. This is a <code>list</code>
 of <code>dict</code>, where each <code>dict</code> is in the same format
@@ -358,8 +356,6 @@ Enterprise Linux 6</p>
 <p><strong>Note:</strong> Managing modules is idempotent only on Fedora,
 and EL 8.6 and later. You can manage modules on older releases, but it
 will not be idempotent.</p>
-<p>Note: The <code>selinux_modules</code> option does not work in
-container builds.</p>
 <h2
 id="selinux_transactional_update_reboot_ok">selinux_transactional_update_reboot_ok</h2>
 <p>This variable is used to handle reboots required by transactional
