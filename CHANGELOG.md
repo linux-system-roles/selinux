@@ -1,6 +1,13 @@
 Changelog
 =========
 
+[1.10.1] - 2025-06-25
+--------------------
+
+### Other Changes
+
+- test: use daemons_use_tcp_wrapper for seboolean tests (#285)
+
 [1.10.0] - 2025-06-23
 --------------------
 
