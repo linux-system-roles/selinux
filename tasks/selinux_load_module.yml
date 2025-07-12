@@ -35,6 +35,7 @@
 
     - name: Install module
       when: not module_file.stat.checksum in checksum
+      ignore_errors: "{{ ansible_check_mode }}"
       block:
         - name: Create temporary directory
           tempfile:
