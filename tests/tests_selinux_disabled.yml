@@ -111,18 +111,6 @@
         - name: Cleanup
           tags: ['tests::cleanup']
           block:
-            - name: Restore original /etc/selinux/config
-              copy:
-                remote_src: true
-                dest: /etc/selinux/config
-                src: /etc/selinux/config.test_selinux_disabled
-                mode: preserve
-
-            - name: Remove /etc/selinux/config backup
-              file:
-                path: /etc/selinux/config.test_selinux_disabled
-                state: absent
-
             - name: Remove Linux System Roles SELinux User
               user:
                 name: sar-user
@@ -136,3 +124,15 @@
                 selinux_all_purge: true
                 selinux_policy: "{{ __save_policy }}"
                 selinux_state: "{{ __save_state }}"
+
+            - name: Restore original /etc/selinux/config
+              copy:
+                remote_src: true
+                dest: /etc/selinux/config
+                src: /etc/selinux/config.test_selinux_disabled
+                mode: preserve
+
+            - name: Remove /etc/selinux/config backup
+              file:
+                path: /etc/selinux/config.test_selinux_disabled
+                state: absent
