@@ -1,6 +1,13 @@
 Changelog
 =========
 
+[1.10.3] - 2025-07-24
+--------------------
+
+### Other Changes
+
+- test: ensure disabled selinux test restores system state (#292)
+
 [1.10.2] - 2025-07-15
 --------------------
 
