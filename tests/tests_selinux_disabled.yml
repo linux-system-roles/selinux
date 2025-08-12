@@ -49,6 +49,10 @@
             src: selinux.config
             dest: /etc/selinux/config
             mode: preserve
+            selevel: _default
+            serole: _default
+            setype: _default
+            seuser: _default
 
         - name: Switch to permissive to allow login when selinuxfs is not mounted
           command: setenforce 0
@@ -131,6 +135,10 @@
                 dest: /etc/selinux/config
                 src: /etc/selinux/config.test_selinux_disabled
                 mode: preserve
+                selevel: _default
+                serole: _default
+                setype: _default
+                seuser: _default
 
             - name: Remove /etc/selinux/config backup
               file:
