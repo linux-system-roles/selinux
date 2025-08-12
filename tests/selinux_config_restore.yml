@@ -5,6 +5,10 @@
     dest: /etc/selinux/config
     src: /etc/selinux/config.test_selinux_save
     mode: preserve
+    selevel: _default
+    serole: _default
+    setype: _default
+    seuser: _default
   register: restorecon
 
 - name: Remove /etc/selinux/config backup
