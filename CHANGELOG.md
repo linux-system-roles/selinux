@@ -1,6 +1,13 @@
 Changelog
 =========
 
+[1.10.4] - 2025-08-18
+--------------------
+
+### Other Changes
+
+- test: restore selinux config file in proper context (#294)
+
 [1.10.3] - 2025-07-24
 --------------------
 
