@@ -14,8 +14,8 @@ kinds:
   - playbook: "**/examples/*.yml"
 skip_list:
   - fqcn-builtins
-  - name[unique]
   - var-naming[no-role-prefix]
+  - name[unique]
 exclude_paths:
   - tests/roles/
   - .github/
