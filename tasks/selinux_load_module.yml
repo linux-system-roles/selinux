@@ -87,3 +87,11 @@
 
 - name: Refresh SELinux modules facts
   selinux_modules_facts:
+
+# This is a workaround to set the SELinux modules facts after the selinux_modules_facts module is executed
+# because with newer version of Ansible facts are no longer set as variables
+- name: Set SELinux modules facts
+  set_fact:
+    selinux_installed_modules: "{{ ansible_facts['selinux_installed_modules'] }}"
+    selinux_priorities: "{{ ansible_facts['selinux_priorities'] }}"
+    selinux_checksums: "{{ ansible_facts['selinux_checksums'] }}"

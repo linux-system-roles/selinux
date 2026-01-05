@@ -31,7 +31,7 @@
     state: present
     use: "{{ (__selinux_is_ostree | d(false)) |
              ternary('ansible.posix.rhel_rpm_ostree', omit) }}"
-  when: ansible_python_version is version('3', '<')
+  when: ansible_facts['python_version'] is version('3', '<')
 
 - name: Install SELinux python3 tools
   package:
@@ -42,8 +42,8 @@
     use: "{{ (__selinux_is_ostree | d(false)) |
              ternary('ansible.posix.rhel_rpm_ostree', omit) }}"
   when:
-    - ansible_python_version is version('3', '>=')
-    - ansible_os_family == "RedHat"
+    - ansible_facts['python_version'] is version('3', '>=')
+    - ansible_facts['os_family'] == "RedHat"
 
 - name: Install SELinux python3 tools
   package:
@@ -54,8 +54,8 @@
     use: "{{ (__selinux_is_ostree | d(false)) |
              ternary('ansible.posix.rhel_rpm_ostree', omit) }}"
   when:
-    - ansible_python_version is version('3', '>=')
-    - ansible_os_family == "Suse"
+    - ansible_facts['python_version'] is version('3', '>=')
+    - ansible_facts['os_family'] == "Suse"
   register: selinux_python3_tools_result
 
 - name: Ensure grubby used to modify selinux kernel parameter
@@ -75,10 +75,10 @@
     state: present
     use: "{{ (__selinux_is_ostree | d(false)) |
              ternary('ansible.posix.rhel_rpm_ostree', omit) }}"
-  when: ansible_distribution == "Fedora" or
-    ansible_distribution == "SL-Micro" or
-    (ansible_distribution_major_version | int > 7 and
-     ansible_distribution in ["CentOS", "RedHat", "Rocky"])
+  when: ansible_facts['distribution'] == "Fedora" or
+    ansible_facts['distribution'] == "SL-Micro" or
+    (ansible_facts['distribution_major_version'] | int > 7 and
+     ansible_facts['distribution'] in ["CentOS", "RedHat", "Rocky"])
   register: selinux_semanage_result
 
 - name: Handle reboot for transactional update systems

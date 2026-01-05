@@ -31,12 +31,12 @@
     - name: Set permanent SELinux state if enabled
       # noqa args[module] fqcn[action]
       selinux:
-        state: "{{ selinux_state | default(ansible_selinux.config_mode, true) }}"
-        policy: "{{ selinux_policy | default(ansible_selinux.type, true) }}"
+        state: "{{ selinux_state | default(ansible_facts['selinux']['config_mode'], true) }}"
+        policy: "{{ selinux_policy | default(ansible_facts['selinux']['type'], true) }}"
         update_kernel_param: "{{ true if __update_kernel_param else omit }}"
       register: selinux_mod_output_enabled
       when:
-        - ansible_selinux.status == "enabled"
+        - ansible_facts['selinux']['status'] == "enabled"
         - (not selinux_state is none and selinux_state | length > 0) or
           (not selinux_policy is none and selinux_policy | length > 0)
 
@@ -48,7 +48,7 @@
         update_kernel_param: "{{ true if __update_kernel_param else omit }}"
       register: selinux_mod_output_disabled
       when:
-        - ansible_selinux.status == "disabled"
+        - ansible_facts['selinux']['status'] == "disabled"
         - not selinux_state is none
         - selinux_state | length > 0
 
@@ -84,7 +84,7 @@
 - name: Warn if SELinux is disabled
   debug:
     msg: "SELinux is disabled on system - some SELinux modules can crash"
-  when: ansible_selinux.status == "disabled"
+  when: ansible_facts['selinux']['status'] == "disabled"
 
 - name: Drop all local modifications
   command: /usr/sbin/semanage -i -
@@ -120,8 +120,8 @@
     name: "{{ __selinux_item.name }}"
     state: "{{ __selinux_item.state }}"
     persistent: "{{ __selinux_item.persistent |
-                  default(ansible_selinux.status == 'disabled') }}"
-    ignore_selinux_state: "{{ ansible_selinux.status == 'disabled' }}"
+                  default(ansible_facts['selinux']['status'] == 'disabled') }}"
+    ignore_selinux_state: "{{ ansible_facts['selinux']['status'] == 'disabled' }}"
   with_items: "{{ selinux_booleans }}"
   loop_control:
     loop_var: __selinux_item
@@ -134,7 +134,7 @@
     state: "{{ __selinux_item.state | default('present') }}"
     selevel: "{{ __selinux_item.selevel | default(omit) }}"
     seuser: "{{ __selinux_item.seuser | default(omit) }}"
-    ignore_selinux_state: "{{ ansible_selinux.status == 'disabled' }}"
+    ignore_selinux_state: "{{ ansible_facts['selinux']['status'] == 'disabled' }}"
   with_items: "{{ selinux_fcontexts }}"
   loop_control:
     loop_var: __selinux_item
@@ -146,7 +146,7 @@
     setype: "{{ __selinux_item.setype }}"
     state: "{{ __selinux_item.state | default('present') }}"
     local: "{{ __selinux_item.local | default(False) }}"
-    ignore_selinux_state: "{{ ansible_selinux.status == 'disabled' }}"
+    ignore_selinux_state: "{{ ansible_facts['selinux']['status'] == 'disabled' }}"
   with_items: "{{ selinux_ports }}"
   loop_control:
     loop_var: __selinux_item
@@ -158,7 +158,7 @@
     serange: "{{ __selinux_item.serange | default('s0') }}"
     state: "{{ __selinux_item.state | default('present') }}"
     reload: "{{ __selinux_item.reload | default(False) }}"
-    ignore_selinux_state: "{{ ansible_selinux.status == 'disabled' }}"
+    ignore_selinux_state: "{{ ansible_facts['selinux']['status'] == 'disabled' }}"
   with_items: "{{ selinux_logins }}"
   notify: __selinux_reload_policy
   loop_control:
@@ -166,6 +166,14 @@
 
 - name: Get SELinux modules facts
   selinux_modules_facts:
+
+# This is a workaround to set the SELinux modules facts after the selinux_modules_facts module is executed
+# because with newer version of Ansible facts are no longer set as variables
+- name: Set SELinux modules facts
+  set_fact:
+    selinux_installed_modules: "{{ ansible_facts['selinux_installed_modules'] }}"
+    selinux_priorities: "{{ ansible_facts['selinux_priorities'] }}"
+    selinux_checksums: "{{ ansible_facts['selinux_checksums'] }}"
 
 - name: Load SELinux modules
   include_tasks: selinux_load_module.yml

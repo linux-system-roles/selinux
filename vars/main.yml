@@ -18,10 +18,10 @@ __selinux_required_facts:
 __selinux_required_facts_subsets: "{{ ['!all', '!min'] +
   __selinux_required_facts }}"
 
-restorecon_threads: "{{ '-T 0' if ansible_distribution == 'Fedora' or
-  ansible_distribution == 'SL-Micro' or
-  (ansible_distribution_major_version | int > 8 and
-  ansible_distribution in ['CentOS', 'RedHat', 'Rocky']) else '' }}"
+restorecon_threads: "{{ '-T 0' if ansible_facts['distribution'] == 'Fedora' or
+  ansible_facts['distribution'] == 'SL-Micro' or
+  (ansible_facts['distribution_major_version'] | int > 8 and
+  ansible_facts['distribution'] in ['CentOS', 'RedHat', 'Rocky']) else '' }}"
 
 # BEGIN - DO NOT EDIT THIS BLOCK - rh distros variables
 # Ansible distribution identifiers that the role treats like RHEL
@@ -35,8 +35,8 @@ __selinux_rh_distros:
 __selinux_rh_distros_fedora: "{{ __selinux_rh_distros + ['Fedora'] }}"
 
 # Use this in conditionals to check if distro is Red Hat or clone
-__selinux_is_rh_distro: "{{ ansible_distribution in __selinux_rh_distros }}"
+__selinux_is_rh_distro: "{{ ansible_facts['distribution'] in __selinux_rh_distros }}"
 
 # Use this in conditionals to check if distro is Red Hat or clone, or Fedora
-__selinux_is_rh_distro_fedora: "{{ ansible_distribution in __selinux_rh_distros_fedora }}"
+__selinux_is_rh_distro_fedora: "{{ ansible_facts['distribution'] in __selinux_rh_distros_fedora }}"
 # END - DO NOT EDIT THIS BLOCK - rh distros variables

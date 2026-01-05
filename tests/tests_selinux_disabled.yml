@@ -15,8 +15,8 @@
 
     - name: Get current SELinux state
       set_fact:
-        __save_policy: "{{ ansible_selinux.type }}"
-        __save_state: "{{ ansible_selinux.config_mode }}"
+        __save_policy: "{{ ansible_facts['selinux']['type'] }}"
+        __save_state: "{{ ansible_facts['selinux']['config_mode'] }}"
 
     - name: Run the tests
       block:
@@ -57,7 +57,7 @@
         - name: Switch to permissive to allow login when selinuxfs is not mounted
           command: setenforce 0
           changed_when: false
-          when: ansible_selinux.status != "disabled"
+          when: ansible_facts['selinux']['status'] != "disabled"
 
         - name: Get selinuxfs mountpoint
           command: findmnt -n -t selinuxfs --output=target
@@ -107,9 +107,9 @@
 
         - name: Check SELinux config mode
           assert:
-            that: ansible_selinux.config_mode == 'enforcing'
+            that: ansible_facts['selinux']['config_mode'] == 'enforcing'
             msg: "SELinux config mode should be enforcing instead of
-                  {{ ansible_selinux.config_mode }}"
+                  {{ ansible_facts['selinux']['config_mode'] }}"
 
       always:
         - name: Cleanup

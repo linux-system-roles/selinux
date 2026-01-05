@@ -2,5 +2,5 @@
 - name: Reload SELinux policy
   command: semodule -R
   listen: __selinux_reload_policy
-  when: ansible_selinux.status != "disabled"
+  when: ansible_facts['selinux']['status'] != "disabled"
   changed_when: true
