@@ -16,9 +16,9 @@
       when: not ansible_facts.keys() | list |
         intersect(__selinux_test_facts) == __selinux_test_facts
     - name: Execute the role and catch errors
-      when: ansible_distribution == "Fedora" or
-        (ansible_distribution in ["CentOS", "RedHat", "Rocky"] and
-        ansible_distribution_version is version("8.6", ">="))
+      when: ansible_facts['distribution'] == "Fedora" or
+        (ansible_facts['distribution'] in ["CentOS", "RedHat", "Rocky"] and
+        ansible_facts['distribution_version'] is version("8.6", ">="))
       vars:
         selinux_modules:
           - {path: "selinux_modules/linux-system-roles-selinux-test-a.pp"}

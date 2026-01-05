@@ -17,12 +17,12 @@
 - name: Check that initial state has been set up properly
   assert:
     that:
-      selinux_initial_state == (ansible_selinux.mode | d(ansible_selinux.status))
+      selinux_initial_state == (ansible_facts['selinux']['mode'] | d(ansible_facts['selinux']['status']))
 # yamllint enable rule:line-length
 
 - name: Save the initial state
   set_fact:
-    initial_selinux_fact: "{{ ansible_selinux }}"
+    initial_selinux_fact: "{{ ansible_facts['selinux'] }}"
 
 - name: Apply the role without parameters
   include_role:
@@ -34,7 +34,7 @@
 
 - name: Check that the run w/o parameters has not changed anything
   assert:
-    that: ansible_selinux == initial_selinux_fact
+    that: ansible_facts['selinux'] == initial_selinux_fact
 
 - name: Apply the desired state if possible without reboot
   include_role:
@@ -59,22 +59,22 @@
 
 - name: Check that something changed if it should have
   assert:
-    that: ansible_selinux != initial_selinux_fact
+    that: ansible_facts['selinux'] != initial_selinux_fact
   when: selinux_initial_state != selinux_desired_state
 
 - name: Check that nothing changed if it should not have
   assert:
-    that: ansible_selinux == initial_selinux_fact
+    that: ansible_facts['selinux'] == initial_selinux_fact
   when: selinux_initial_state == selinux_desired_state
 
 - name: Check that desired state has been applied properly
   assert:
     that:
-      selinux_desired_state == ansible_selinux.mode | d(ansible_selinux.status)
+      selinux_desired_state == ansible_facts['selinux']['mode'] | d(ansible_facts['selinux']['status'])
 
 # yamllint disable rule:line-length
 - name: Check that desired state has been saved properly
   assert:
     that:
-      selinux_desired_state == (ansible_selinux.config_mode | d(ansible_selinux.status))
+      selinux_desired_state == (ansible_facts['selinux']['config_mode'] | d(ansible_facts['selinux']['status']))
 # yamllint enable rule:line-length

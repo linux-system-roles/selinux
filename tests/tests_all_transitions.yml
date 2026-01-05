@@ -35,8 +35,8 @@
 
     - name: Save selinux state before test
       set_fact:
-        __state_before: "{{ ansible_selinux.mode | d(ansible_selinux.status) }}"
-        __type_before: "{{ ansible_selinux.type }}"
+        __state_before: "{{ ansible_facts['selinux']['mode'] | d(ansible_facts['selinux']['status']) }}"
+        __type_before: "{{ ansible_facts['selinux']['type'] }}"
 
     - name: See if we can use update_kernel_param
       set_fact:

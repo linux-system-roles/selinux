@@ -29,8 +29,8 @@
     - name: Switch to permissive to allow login when selinuxfs is not mounted
       command: setenforce 0
       changed_when: true
-      when: ansible_selinux.status != "disabled" and
-        ansible_selinux.mode != "permissive"
+      when: ansible_facts['selinux']['status'] != "disabled" and
+        ansible_facts['selinux']['mode'] != "permissive"
       register: selinux_switch_to_enforcing
     - name: Get selinuxfs mountpoint
       command: findmnt -n -t selinuxfs --output=target

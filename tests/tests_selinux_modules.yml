@@ -25,9 +25,9 @@
           - {path: "{{ playbook_dir }}/files/selinux_modules/linux-system-roles-selinux-test-c.pp", priority: "600"}
           - {name: "linux-system-roles-selinux-test-c", priority: "600",
              state: "absent"}
-      when: ansible_distribution == "Fedora" or
-        (ansible_distribution_major_version | int >= 7 and
-         ansible_distribution in ["CentOS", "RedHat", "Rocky"])
+      when: ansible_facts['distribution'] == "Fedora" or
+        (ansible_facts['distribution_major_version'] | int >= 7 and
+         ansible_facts['distribution'] in ["CentOS", "RedHat", "Rocky"])
       block:
         - name: Execute the role
           include_role:
@@ -51,9 +51,9 @@
         test_module_c: "{{ selinux_installed_modules
           ['linux-system-roles-selinux-test-c']['600']
           | default('absent') }}"
-      when: ansible_distribution == "Fedora" or
-        (ansible_distribution_major_version | int >= 7 and
-         ansible_distribution in ["CentOS", "RedHat", "Rocky"])
+      when: ansible_facts['distribution'] == "Fedora" or
+        (ansible_facts['distribution_major_version'] | int >= 7 and
+         ansible_facts['distribution'] in ["CentOS", "RedHat", "Rocky"])
       block:
         - name: "Check if linux-system-roles-selinux-test-a is installed and
           enabled"
@@ -93,8 +93,8 @@
           - {path: "{{ playbook_dir }}/files/selinux_modules/linux-system-roles-selinux-test-c.pp", priority: "200"}
           - {name: "linux-system-roles-selinux-test-c", priority: "300",
              state: "absent"}
-      when: ansible_distribution_major_version | int < 7 and
-        ansible_distribution in ["CentOS", "RedHat"]
+      when: ansible_facts['distribution_major_version'] | int < 7 and
+        ansible_facts['distribution'] in ["CentOS", "RedHat"]
       block:
         - name: Execute the role
           include_role:
@@ -118,8 +118,8 @@
         test_module_c: "{{ selinux_installed_modules
           ['linux-system-roles-selinux-test-c']['0']
           | default('absent') }}"
-      when: ansible_distribution_major_version | int < 7 and
-        ansible_distribution in ["CentOS", "RedHat"]
+      when: ansible_facts['distribution_major_version'] | int < 7 and
+        ansible_facts['distribution'] in ["CentOS", "RedHat"]
       block:
         - name: "Check if linux-system-roles-selinux-test-a is installed and
           enabled"
