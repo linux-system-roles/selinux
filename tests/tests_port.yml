@@ -70,6 +70,46 @@
       assert:
         that: port_before == port_after
 
+    - name: Test additional protocols - udp, dccp, sctp
+      include_role:
+        name: linux-system-roles.selinux
+      vars:
+        selinux_ports:
+          - {ports: '4000', proto: 'udp', setype: 'unreserved_port_t', state: 'present'}
+          - {ports: '5000', proto: 'dccp', setype: 'unreserved_port_t', state: 'present'}
+          - {ports: '6000', proto: 'sctp', setype: 'unreserved_port_t', state: 'present'}
+
+    - name: Include test variables
+      import_tasks: set_selinux_variables.yml
+
+    - name: Save state after other changes
+      set_fact:
+        port_after: "{{ selinux_role_port.stdout }}"
+
+    - name: Check if there are SELinux port mapping changes
+      assert:
+        that: port_before != port_after
+
+    - name: Clean up additional protocols
+      include_role:
+        name: linux-system-roles.selinux
+      vars:
+        selinux_ports:
+          - {ports: '4000', proto: 'udp', setype: 'unreserved_port_t', state: 'absent'}
+          - {ports: '5000', proto: 'dccp', setype: 'unreserved_port_t', state: 'absent'}
+          - {ports: '6000', proto: 'sctp', setype: 'unreserved_port_t', state: 'absent'}
+
+    - name: Include test variables
+      import_tasks: set_selinux_variables.yml
+
+    - name: Save state after other changes
+      set_fact:
+        port_after: "{{ selinux_role_port.stdout }}"
+
+    - name: Check if SELinux port mapping is as before
+      assert:
+        that: port_before == port_after
+
     - name: Include role
       include_role:
         name: linux-system-roles.selinux

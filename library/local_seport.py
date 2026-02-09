@@ -28,7 +28,7 @@ options:
       - Protocol for the specified port.
     type: str
     required: true
-    choices: [ tcp, udp ]
+    choices: [ tcp, udp, dccp, sctp ]
   setype:
     description:
       - SELinux type for the specified port.
@@ -287,7 +287,7 @@ def main():
         argument_spec=dict(
             ignore_selinux_state=dict(type="bool", default=False),
             ports=dict(type="list", elements="str", required=True),
-            proto=dict(type="str", required=True, choices=["tcp", "udp"]),
+            proto=dict(type="str", required=True, choices=["tcp", "udp", "dccp", "sctp"]),
             setype=dict(type="str", required=True),
             state=dict(type="str", default="present", choices=["absent", "present"]),
             reload=dict(type="bool", default=True),
