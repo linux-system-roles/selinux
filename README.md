@@ -123,6 +123,8 @@ Manage the state of SELinux port policy.  This is a `list` of `dict`, where each
 [seport](https://docs.ansible.com/ansible/latest/collections/community/general/seport_module.html#ansible-collections-community-general-seport-module)
 module.
 
+*NOTE:* protocols `dccp` and `sctp` are only supported on EL8 and later.
+
 ```yaml
 selinux_ports:
   - ports: 22100

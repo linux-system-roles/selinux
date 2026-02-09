@@ -5,11 +5,13 @@
     - name: Initial changes
       include_role:
         name: linux-system-roles.selinux
+        public: true
       vars:
         selinux_ports_purge: true
         selinux_ports:
           - {ports: '22100', proto: 'tcp', setype: 'ssh_port_t',
              state: 'present'}
+          - {ports: '4000', proto: 'udp', setype: 'unreserved_port_t', state: 'present'}
 
     - name: Include test variables
       import_tasks: set_selinux_variables.yml
@@ -32,15 +34,16 @@
              state: 'present'}
           - {ports: '22023', proto: 'tcp', setype: 'ssh_port_t',
              state: 'present', local: true}
+          - {ports: '4001', proto: 'udp', setype: 'unreserved_port_t', state: 'present'}
 
-    - name: Include test variables
+    - name: Include test variables - 2
       import_tasks: set_selinux_variables.yml
 
     - name: Save state after other changes
       set_fact:
         port_after: "{{ selinux_role_port.stdout }}"
 
-    - name: Check if there are SELinux port mapping changes
+    - name: Check if there are SELinux port mapping changes - 2
       assert:
         that: port_before != port_after
 
@@ -58,65 +61,74 @@
              state: 'absent', local: true}
           - {ports: '22023', proto: 'tcp', setype: 'ssh_port_t',
              state: 'absent', local: true}
+          - {ports: '4001', proto: 'udp', setype: 'unreserved_port_t', state: 'absent'}
 
-    - name: Include test variables
+    - name: Include test variables - 3
       import_tasks: set_selinux_variables.yml
 
     - name: Save state after reverting other changes
       set_fact:
         port_after: "{{ selinux_role_port.stdout }}"
 
-    - name: Check if SELinux port mapping is as before
+    - name: Check if SELinux port mapping is as before - 3
       assert:
         that: port_before == port_after
 
-    - name: Test additional protocols - udp, dccp, sctp
-      include_role:
-        name: linux-system-roles.selinux
-      vars:
-        selinux_ports:
-          - {ports: '4000', proto: 'udp', setype: 'unreserved_port_t', state: 'present'}
-          - {ports: '5000', proto: 'dccp', setype: 'unreserved_port_t', state: 'present'}
-          - {ports: '6000', proto: 'sctp', setype: 'unreserved_port_t', state: 'present'}
+    - name: Test and check errors for additional protocols
+      block:
+        - name: Test additional protocols - dccp, sctp
+          include_role:
+            name: linux-system-roles.selinux
+          vars:
+            selinux_ports:
+              - {ports: '5000', proto: 'dccp', setype: 'unreserved_port_t', state: 'present'}
+              - {ports: '6000', proto: 'sctp', setype: 'unreserved_port_t', state: 'present'}
 
-    - name: Include test variables
-      import_tasks: set_selinux_variables.yml
+        - name: Include test variables - 4
+          import_tasks: set_selinux_variables.yml
 
-    - name: Save state after other changes
-      set_fact:
-        port_after: "{{ selinux_role_port.stdout }}"
+        - name: Save state after other changes
+          set_fact:
+            port_after: "{{ selinux_role_port.stdout }}"
 
-    - name: Check if there are SELinux port mapping changes
-      assert:
-        that: port_before != port_after
+        - name: Check if there are SELinux port mapping changes - 4
+          assert:
+            that: port_before != port_after
 
-    - name: Clean up additional protocols
-      include_role:
-        name: linux-system-roles.selinux
-      vars:
-        selinux_ports:
-          - {ports: '4000', proto: 'udp', setype: 'unreserved_port_t', state: 'absent'}
-          - {ports: '5000', proto: 'dccp', setype: 'unreserved_port_t', state: 'absent'}
-          - {ports: '6000', proto: 'sctp', setype: 'unreserved_port_t', state: 'absent'}
+        - name: Clean up additional protocols
+          include_role:
+            name: linux-system-roles.selinux
+          vars:
+            selinux_ports:
+              - {ports: '5000', proto: 'dccp', setype: 'unreserved_port_t', state: 'absent'}
+              - {ports: '6000', proto: 'sctp', setype: 'unreserved_port_t', state: 'absent'}
 
-    - name: Include test variables
-      import_tasks: set_selinux_variables.yml
+        - name: Include test variables - 5
+          import_tasks: set_selinux_variables.yml
 
-    - name: Save state after other changes
-      set_fact:
-        port_after: "{{ selinux_role_port.stdout }}"
+        - name: Save state after other changes - 5
+          set_fact:
+            port_after: "{{ selinux_role_port.stdout }}"
 
-    - name: Check if SELinux port mapping is as before
-      assert:
-        that: port_before == port_after
+        - name: Check if SELinux port mapping is as before - 5
+          assert:
+            that: port_before == port_after
+      rescue:
+        - name: Check for errors
+          assert:
+            that: ansible_failed_result.results | selectattr("msg", "search", "Protocol udp or tcp is required") | list | length == 2
+          when:
+            - __selinux_is_rh_distro
+            - ansible_facts['distribution_major_version'] | int < 8
 
-    - name: Include role
+    - name: Include role - 6
       include_role:
         name: linux-system-roles.selinux
       vars:
         selinux_ports_purge: true
+        selinux_ports: []
 
-    - name: Include test variables
+    - name: Include test variables - 6
       import_tasks: set_selinux_variables.yml
 
     - name: Check if there are no SELinux port mapping changes

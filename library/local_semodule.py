@@ -142,7 +142,7 @@ def semodule_install(module, path, priority, sh):
     path_checksum = "sha256:" + module.sha256(path)
 
     filename = os.path.split(path)[1]
-    (name, ext) = os.path.splitext(filename)
+    name, ext = os.path.splitext(filename)
 
     if ext == ".cil":
         cil = 1
