@@ -284,6 +284,8 @@ of <code>dict</code>, where each <code>dict</code> is in the same format
 as used by the <a
 href="https://docs.ansible.com/ansible/latest/collections/community/general/seport_module.html#ansible-collections-community-general-seport-module">seport</a>
 module.</p>
+<p><em>NOTE:</em> protocols <code>dccp</code> and <code>sctp</code> are
+only supported on EL8 and later.</p>
 <div class="sourceCode" id="cb6"><pre
 class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">selinux_ports</span><span class="kw">:</span></span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">ports</span><span class="kw">:</span><span class="at"> </span><span class="dv">22100</span></span>
