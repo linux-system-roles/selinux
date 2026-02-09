@@ -1,6 +1,21 @@
 Changelog
 =========
 
+[1.11.0] - 2026-02-09
+--------------------
+
+### New Features
+
+- feat: Add support for DCCP and SCTP protocols to selinux_port (#325)
+
+### Other Changes
+
+- ci: use ANSIBLE_INJECT_FACT_VARS=false by default for testing (#319)
+- ci: bump ansible/ansible-lint from 25 to 26 (#321)
+- ci: skip most CI checks if title contains citest skip [citest_skip] (#322)
+- ci: ansible-lint - remove .collection directory from converted collection [citest_skip] (#323)
+- test: ensure dccp and sctp tests fails properly on el7 (#326)
+
 [1.10.6] - 2026-01-06
 --------------------
 
