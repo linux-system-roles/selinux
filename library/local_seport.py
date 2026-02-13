@@ -1,20 +1,23 @@
 #!/usr/bin/python
-# -*- coding: utf-8 -*-
 
 # Copyright (c) 2014, Dan Keder <dan.keder@gmail.com>
 # GNU General Public License v3.0+ (see LICENSES/GPL-3.0-or-later.txt or https://www.gnu.org/licenses/gpl-3.0.txt)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-from __future__ import absolute_import, division, print_function
-
-__metaclass__ = type
+from __future__ import annotations
 
 DOCUMENTATION = r"""
----
 module: local_seport
 short_description: Manages SELinux network port type definitions
 description:
-    - Manages SELinux network port type definitions.
+  - Manages SELinux network port type definitions.
+extends_documentation_fragment:
+  - community.general.attributes
+attributes:
+  check_mode:
+    support: full
+  diff_mode:
+    support: none
 options:
   ports:
     description:
@@ -26,9 +29,10 @@ options:
   proto:
     description:
       - Protocol for the specified port.
+      - Support for V(dccp) and V(sctp) has been added in community.general 12.4.0.
     type: str
     required: true
-    choices: [ tcp, udp, dccp, sctp ]
+    choices: [tcp, udp, dccp, sctp]
   setype:
     description:
       - SELinux type for the specified port.
@@ -38,7 +42,7 @@ options:
     description:
       - Desired boolean value.
     type: str
-    choices: [ absent, present ]
+    choices: [absent, present]
     default: present
   reload:
     description:
@@ -47,23 +51,23 @@ options:
     default: true
   ignore_selinux_state:
     description:
-    - Run independent of selinux runtime state
+      - Run independent of selinux runtime state.
     type: bool
     default: false
   local:
     description:
-    - Work with local modifications only.
+      - Work with local modifications only.
     type: bool
     default: false
     version_added: 5.6.0
 notes:
-   - The changes are persistent across reboots.
-   - Not tested on any debian based system.
+  - The changes are persistent across reboots.
+  - Not tested on any Debian based system.
 requirements:
-- libselinux-python
-- policycoreutils-python
+  - libselinux-python
+  - policycoreutils-python
 author:
-- Dan Keder (@dankeder)
+  - Dan Keder (@dankeder)
 """
 
 EXAMPLES = r"""
@@ -127,7 +131,6 @@ except ImportError:
     HAVE_SEOBJECT = False
 
 from ansible.module_utils.basic import AnsibleModule, missing_required_lib
-from ansible.module_utils.common.text.converters import to_native
 
 
 def get_runtime_status(ignore_selinux_state=False):
@@ -143,7 +146,7 @@ def semanage_port_get_ports(seport, setype, proto, local):
     :param setype: SELinux type.
 
     :type proto: str
-    :param proto: Protocol ('tcp' or 'udp')
+    :param proto: Protocol ('tcp', 'udp', 'dccp', 'sctp')
 
     :rtype: list
     :return: List of ports that have the specified SELinux type.
@@ -164,7 +167,7 @@ def semanage_port_get_type(seport, port, proto):
     :param port: Port or port range (example: "8080", "8080-9090")
 
     :type proto: str
-    :param proto: Protocol ('tcp' or 'udp')
+    :param proto: Protocol ('tcp', 'udp', 'dccp', 'sctp')
 
     :rtype: tuple
     :return: Tuple containing the SELinux type and MLS/MCS level, or None if not found.
@@ -182,9 +185,7 @@ def semanage_port_get_type(seport, port, proto):
     return records.get(key)
 
 
-def semanage_port_add(
-    module, ports, proto, setype, do_reload, serange="s0", sestore="", local=False
-):
+def semanage_port_add(module, ports, proto, setype, do_reload, serange="s0", sestore="", local=False):
     """Add SELinux port type definition to the policy.
 
     :type module: AnsibleModule
@@ -194,7 +195,7 @@ def semanage_port_add(
     :param ports: List of ports and port ranges to add (e.g. ["8080", "8080-9090"])
 
     :type proto: str
-    :param proto: Protocol ('tcp' or 'udp')
+    :param proto: Protocol ('tcp', 'udp', 'dccp', 'sctp')
 
     :type setype: str
     :param setype: SELinux type
@@ -229,11 +230,8 @@ def semanage_port_add(
             else:
                 seport.modify(port, proto, serange, setype)
 
-    except (ValueError, IOError, KeyError, OSError, RuntimeError) as e:
-        module.fail_json(
-            msg="%s: %s\n" % (e.__class__.__name__, to_native(e)),
-            exception=traceback.format_exc(),
-        )
+    except (ValueError, OSError, KeyError, RuntimeError) as e:
+        module.fail_json(msg=f"{e.__class__.__name__}: {e}\n", exception=traceback.format_exc())
 
     return change
 
@@ -248,7 +246,7 @@ def semanage_port_del(module, ports, proto, setype, do_reload, sestore="", local
     :param ports: List of ports and port ranges to delete (e.g. ["8080", "8080-9090"])
 
     :type proto: str
-    :param proto: Protocol ('tcp' or 'udp')
+    :param proto: Protocol ('tcp', 'udp', 'dccp', 'sctp')
 
     :type setype: str
     :param setype: SELinux type.
@@ -273,11 +271,8 @@ def semanage_port_del(module, ports, proto, setype, do_reload, sestore="", local
                 if not module.check_mode:
                     seport.delete(port, proto)
 
-    except (ValueError, IOError, KeyError, OSError, RuntimeError) as e:
-        module.fail_json(
-            msg="%s: %s\n" % (e.__class__.__name__, to_native(e)),
-            exception=traceback.format_exc(),
-        )
+    except (ValueError, OSError, KeyError, RuntimeError) as e:
+        module.fail_json(msg=f"{e.__class__.__name__}: {e}\n", exception=traceback.format_exc())
 
     return change
 
@@ -287,9 +282,7 @@ def main():
         argument_spec=dict(
             ignore_selinux_state=dict(type="bool", default=False),
             ports=dict(type="list", elements="str", required=True),
-            proto=dict(
-                type="str", required=True, choices=["tcp", "udp", "dccp", "sctp"]
-            ),
+            proto=dict(type="str", required=True, choices=["tcp", "udp", "dccp", "sctp"]),
             setype=dict(type="str", required=True),
             state=dict(type="str", default="present", choices=["absent", "present"]),
             reload=dict(type="bool", default=True),
@@ -299,15 +292,10 @@ def main():
     )
 
     if not HAVE_SELINUX:
-        module.fail_json(
-            msg=missing_required_lib("libselinux-python"), exception=SELINUX_IMP_ERR
-        )
+        module.fail_json(msg=missing_required_lib("libselinux-python"), exception=SELINUX_IMP_ERR)
 
     if not HAVE_SEOBJECT:
-        module.fail_json(
-            msg=missing_required_lib("policycoreutils-python"),
-            exception=SEOBJECT_IMP_ERR,
-        )
+        module.fail_json(msg=missing_required_lib("policycoreutils-python"), exception=SEOBJECT_IMP_ERR)
 
     ignore_selinux_state = module.params["ignore_selinux_state"]
 
@@ -329,15 +317,11 @@ def main():
     }
 
     if state == "present":
-        result["changed"] = semanage_port_add(
-            module, ports, proto, setype, do_reload, local=local
-        )
+        result["changed"] = semanage_port_add(module, ports, proto, setype, do_reload, local=local)
     elif state == "absent":
-        result["changed"] = semanage_port_del(
-            module, ports, proto, setype, do_reload, local=local
-        )
+        result["changed"] = semanage_port_del(module, ports, proto, setype, do_reload, local=local)
     else:
-        module.fail_json(msg='Invalid value of argument "state": {0}'.format(state))
+        module.fail_json(msg=f'Invalid value of argument "state": {state}')
 
     module.exit_json(**result)
 
