@@ -12,7 +12,7 @@
     - state == "enabled"
     - __selinux_item.path is defined
   block:
-    - name: Get checksum for {{ __selinux_item.path }}
+    - name: Get checksum for {{ __selinux_item.path | d("module file") }}
       stat:
         path: "{{ __resolved_file }}"
         checksum_algorithm: sha256
@@ -42,7 +42,7 @@
             prefix: linux_system_role.selinux
           register: tempdir
 
-        - name: Copy module file {{ __selinux_item.path | d("EMPTY") }}
+        - name: Copy module file {{ __selinux_item.path | d("") }}
           copy:
             dest: "{{ tempdir.path }}"
             src: "{{ __selinux_item.path }}"
@@ -57,7 +57,7 @@
           notify: __selinux_reload_policy
           when: tempdir.path is defined
       always:
-        - name: Clean temporary directory {{ tempdir.path | d("EMPTY") }}
+        - name: Clean temporary directory {{ tempdir.path | d("") }}
           file:
             path: "{{ tempdir.path }}"
             state: absent
