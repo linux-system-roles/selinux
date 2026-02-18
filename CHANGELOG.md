@@ -1,6 +1,19 @@
 Changelog
 =========
 
+[1.11.1] - 2026-02-18
+--------------------
+
+### Bug Fixes
+
+- fix: when does not prevent template expansion in name with import_role (#331)
+
+### Other Changes
+
+- ci: tox-lsr version 3.15.0 [citest_skip] (#328)
+- ci: Add Fedora 43, remove Fedora 41 from Testing Farm CI (#329)
+- ci: Ansible version must be string, not float [citest_skip] (#332)
+
 [1.11.0] - 2026-02-09
 --------------------
 
