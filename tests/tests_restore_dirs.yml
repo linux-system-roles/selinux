@@ -25,8 +25,7 @@
           changed_when: true
 
         - name: Run the role
-          include_role:
-            name: linux-system-roles.selinux
+          include_tasks: tasks/run_role_with_clear_facts.yml
           vars:
             selinux_fcontexts:
               - {target: "{{ tempdir.path }}(/.*)?", setype: "user_tmp_t"}
@@ -49,8 +48,7 @@
             path: "{{ tempdir.path }}"
             state: absent
         - name: Clean temporary fcontext
-          include_role:
-            name: linux-system-roles.selinux
+          include_tasks: tasks/run_role_with_clear_facts.yml
           vars:
             selinux_fcontexts:
               - {target: "{{ tempdir.path }}(/.*)?", setype: "user_tmp_t",

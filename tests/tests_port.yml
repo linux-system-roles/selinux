@@ -3,10 +3,9 @@
   hosts: all
   tasks:
     - name: Initial changes
-      include_role:
-        name: linux-system-roles.selinux
-        public: true
+      include_tasks: tasks/run_role_with_clear_facts.yml
       vars:
+        __sr_public: true
         selinux_ports_purge: true
         selinux_ports:
           - {ports: '22100', proto: 'tcp', setype: 'ssh_port_t',
@@ -25,8 +24,7 @@
         that: port_before | length > 0
 
     - name: Subsequent changes
-      include_role:
-        name: linux-system-roles.selinux
+      include_tasks: tasks/run_role_with_clear_facts.yml
       vars:
         selinux_ports_purge: false
         selinux_ports:
@@ -48,8 +46,7 @@
         that: port_before != port_after
 
     - name: Revert subsequent changes
-      include_role:
-        name: linux-system-roles.selinux
+      include_tasks: tasks/run_role_with_clear_facts.yml
       vars:
         selinux_ports_purge: false
         selinux_ports:
@@ -77,8 +74,7 @@
     - name: Test and check errors for additional protocols
       block:
         - name: Test additional protocols - dccp, sctp
-          include_role:
-            name: linux-system-roles.selinux
+          include_tasks: tasks/run_role_with_clear_facts.yml
           vars:
             selinux_ports:
               - {ports: '5000', proto: 'dccp', setype: 'unreserved_port_t', state: 'present'}
@@ -96,8 +92,7 @@
             that: port_before != port_after
 
         - name: Clean up additional protocols
-          include_role:
-            name: linux-system-roles.selinux
+          include_tasks: tasks/run_role_with_clear_facts.yml
           vars:
             selinux_ports:
               - {ports: '5000', proto: 'dccp', setype: 'unreserved_port_t', state: 'absent'}
@@ -122,8 +117,7 @@
             - ansible_facts['distribution_major_version'] | int < 8
 
     - name: Include role - 6
-      include_role:
-        name: linux-system-roles.selinux
+      include_tasks: tasks/run_role_with_clear_facts.yml
       vars:
         selinux_ports_purge: true
         selinux_ports: []

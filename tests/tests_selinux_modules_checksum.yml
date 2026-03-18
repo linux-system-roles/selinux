@@ -15,17 +15,20 @@
         gather_subset: min
       when: not ansible_facts.keys() | list |
         intersect(__selinux_test_facts) == __selinux_test_facts
+    - name: Set when condition for Execute the role and catch errors
+      set_fact:
+        __run_selinux_modules_checksum: "{{
+          ansible_facts['distribution'] == 'Fedora' or
+          (ansible_facts['distribution'] in ['CentOS', 'RedHat', 'Rocky'] and
+           ansible_facts['distribution_version'] is version('8.6', '>=')) }}"
     - name: Execute the role and catch errors
-      when: ansible_facts['distribution'] == "Fedora" or
-        (ansible_facts['distribution'] in ["CentOS", "RedHat", "Rocky"] and
-        ansible_facts['distribution_version'] is version("8.6", ">="))
+      when: __run_selinux_modules_checksum
       vars:
         selinux_modules:
           - {path: "selinux_modules/linux-system-roles-selinux-test-a.pp"}
       block:
         - name: Execute the role
-          include_role:
-            name: linux-system-roles.selinux
+          include_tasks: tasks/run_role_with_clear_facts.yml
           register: role_result
         - name: Get commit_num file
           set_fact:
@@ -37,8 +40,7 @@
           register: commit_num_before
           changed_when: false
         - name: Execute the role
-          include_role:
-            name: linux-system-roles.selinux
+          include_tasks: tasks/run_role_with_clear_facts.yml
           register: role_result
         - name: Get current commit_num
           command: cat {{ commit_num_file | quote }}

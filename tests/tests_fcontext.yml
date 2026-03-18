@@ -1,7 +1,6 @@
 ---
 - name: Check if selinux role sets SELinux fcontext mappings
   hosts: all
-  gather_facts: false
   vars:
     __str1: >-
       /tmp/test_dir1[^ ]+[ ]+directory[
@@ -15,8 +14,7 @@
       import_tasks: set_selinux_variables.yml
 
     - name: Initial changes
-      include_role:
-        name: linux-system-roles.selinux
+      include_tasks: tasks/run_role_with_clear_facts.yml
       vars:
         selinux_fcontexts_purge: true
         selinux_fcontexts:
@@ -39,8 +37,7 @@
         that: fcontext_before is search(__str1)
 
     - name: Subsequent changes
-      include_role:
-        name: linux-system-roles.selinux
+      include_tasks: tasks/run_role_with_clear_facts.yml
       vars:
         selinux_fcontexts_purge: false
         selinux_fcontexts:
@@ -65,8 +62,7 @@
           - fcontext_after is search(__str2)
 
     - name: Revert subsequent changes
-      include_role:
-        name: linux-system-roles.selinux
+      include_tasks: tasks/run_role_with_clear_facts.yml
       vars:
         selinux_fcontexts_purge: false
         selinux_fcontexts:
@@ -91,8 +87,7 @@
           - not fcontext_after is search(__str2)
 
     - name: Purge all fcontexts
-      include_role:
-        name: linux-system-roles.selinux
+      include_tasks: tasks/run_role_with_clear_facts.yml
       vars:
         selinux_fcontexts_purge: true
 

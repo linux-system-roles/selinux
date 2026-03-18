@@ -4,8 +4,6 @@
   hosts: all
   tags:
     - tests::bootc-e2e
-  gather_facts: false
-
   vars:
     __selinux_sar_label_file: /var/sar-label-file
 
@@ -38,8 +36,7 @@
               - "'uuidd' in active_modules.stdout"
 
         - name: Modify SELinux policy
-          include_role:
-            name: linux-system-roles.selinux
+          include_tasks: tasks/run_role_with_clear_facts.yml
           vars:
             # enforcing is the default, so change
             selinux_state: permissive
@@ -65,8 +62,7 @@
       # CLEANUP
       always:
         - name: Reset to defaults
-          include_role:
-            name: linux-system-roles.selinux
+          include_tasks: tasks/run_role_with_clear_facts.yml
           vars:
             selinux_state: enforcing
             selinux_all_purge: true

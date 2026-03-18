@@ -4,7 +4,6 @@
   tags:
     # (un)mounting SELinux fs does not work in container builds
     - tests::booted
-  gather_facts: true
   tasks:
     - name: Ensure SELinux test packages
       include_tasks:
@@ -73,8 +72,7 @@
         - name: Execute the role and catch errors
           block:
             - name: Include role
-              include_role:
-                name: linux-system-roles.selinux
+              include_tasks: tasks/run_role_with_clear_facts.yml
               vars:
                 selinux_policy: targeted
                 selinux_state: enforcing
@@ -122,8 +120,7 @@
                 state: absent
 
             - name: Include role to purge everything
-              include_role:
-                name: linux-system-roles.selinux
+              include_tasks: tasks/run_role_with_clear_facts.yml
               vars:
                 selinux_all_purge: true
                 selinux_policy: "{{ __save_policy }}"

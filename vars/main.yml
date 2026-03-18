@@ -11,6 +11,7 @@ __selinux_required_facts:
   - distribution_major_version
   - os_family
   - python_version
+  - selinux
 
 # the subsets of ansible_facts that need to be gathered in case any of the
 # facts in required_facts is missing; see the documentation of

@@ -1,10 +1,12 @@
 ---
 - name: Ensure that the role declares all parameters in defaults
   hosts: all
-
-  roles:
-    - linux-system-roles.selinux
   tasks:
+    - name: Run the role
+      include_tasks: tasks/run_role_with_clear_facts.yml
+      vars:
+        __sr_public: true
+
     - name: Assert that the role declares all parameters in defaults
       assert:
         that: vars[item] is defined

@@ -2,8 +2,7 @@
 - name: Execute the role and catch errors
   block:
     - name: Call SELinux role
-      include_role:
-        name: linux-system-roles.selinux
+      include_tasks: tasks/run_role_with_clear_facts.yml
   rescue:
     # Fail if failed for a different reason than selinux_reboot_required.
     - name: Handle errors
