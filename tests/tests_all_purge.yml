@@ -1,7 +1,6 @@
 ---
 - name: Test that selinux_all_purge drops local modifications, defaults to no
   hosts: all
-  gather_facts: true
   vars:
     semanage_change: |
       boolean -m --on daemons_use_tcp_wrapper
@@ -28,8 +27,7 @@
       changed_when: false
 
     - name: Apply role with defaults, should not drop local modifications
-      include_role:
-        name: linux-system-roles.selinux
+      include_tasks: tasks/run_role_with_clear_facts.yml
 
     - name: Include test variables
       import_tasks: set_selinux_variables.yml
@@ -48,8 +46,7 @@
         that: selinux_role_fcontext.stdout | length > 0
 
     - name: Apply the role to drop local modifications
-      include_role:
-        name: linux-system-roles.selinux
+      include_tasks: tasks/run_role_with_clear_facts.yml
       vars:
         selinux_all_purge: true
 

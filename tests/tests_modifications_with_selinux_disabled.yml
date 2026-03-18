@@ -4,7 +4,6 @@
   tags:
     # (un)mounting SELinux fs does not work in container builds
     - tests::booted
-  gather_facts: true
   vars:
     selinux_all_purge: true
     selinux_logins_purge: true
@@ -46,8 +45,7 @@
     - name: Execute the role
       block:
         - name: Include role
-          include_role:
-            name: linux-system-roles.selinux
+          include_tasks: tasks/run_role_with_clear_facts.yml
           vars:
             # https://github.com/ansible-collections/ansible.posix/pull/496
             # selinux_booleans:
@@ -81,7 +79,6 @@
             remove: true
             state: absent
         - name: Include role to purge everything
-          include_role:
-            name: linux-system-roles.selinux
+          include_tasks: tasks/run_role_with_clear_facts.yml
           vars:
             selinux_all_purge: true

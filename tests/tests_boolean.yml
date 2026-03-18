@@ -3,8 +3,7 @@
   hosts: all
   tasks:
     - name: Initial changes
-      include_role:
-        name: linux-system-roles.selinux
+      include_tasks: tasks/run_role_with_clear_facts.yml
       vars:
         selinux_booleans_purge: true
         selinux_booleans:
@@ -22,8 +21,7 @@
         that: selinux_role_boolean.stdout | length > 0
 
     - name: Subsequent changes
-      include_role:
-        name: linux-system-roles.selinux
+      include_tasks: tasks/run_role_with_clear_facts.yml
       vars:
         selinux_booleans_purge: false
         selinux_booleans:
@@ -42,8 +40,7 @@
         that: (boolean_before | count) < (boolean_after | count)
 
     - name: Include role
-      include_role:
-        name: linux-system-roles.selinux
+      include_tasks: tasks/run_role_with_clear_facts.yml
       vars:
         selinux_booleans_purge: true
 

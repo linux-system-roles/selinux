@@ -25,8 +25,7 @@
     initial_selinux_fact: "{{ ansible_facts['selinux'] }}"
 
 - name: Apply the role without parameters
-  include_role:
-    name: linux-system-roles.selinux
+  include_tasks: tasks/run_role_with_clear_facts.yml
 
 - name: Refresh facts
   setup:
@@ -37,8 +36,7 @@
     that: ansible_facts['selinux'] == initial_selinux_fact
 
 - name: Apply the desired state if possible without reboot
-  include_role:
-    name: linux-system-roles.selinux
+  include_tasks: tasks/run_role_with_clear_facts.yml
   vars:
     selinux_state: "{{ selinux_desired_state }}"
   when: selinux_initial_state == selinux_desired_state or
