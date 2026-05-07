@@ -87,6 +87,7 @@
 
 - name: Refresh SELinux modules facts
   selinux_modules_facts:
+  no_log: "{{ ansible_verbosity < 2 }}"
 
 # This is a workaround to set the SELinux modules facts after the selinux_modules_facts module is executed
 # because with newer version of Ansible facts are no longer set as variables
