@@ -2,6 +2,7 @@
 ---
 collections:
   - name: ansible.posix
+    version: '>=2.1.0,<2.2.0'
   - name: community.general
     version: '>=6.6.0,<12.0.0'
   - name: fedora.linux_system_roles
