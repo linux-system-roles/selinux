@@ -31,8 +31,25 @@
           - {path: "{{ playbook_dir }}/files/selinux_modules/linux-system-roles-selinux-test-c.pp", priority: "600"}
           - {name: "linux-system-roles-selinux-test-c", priority: "600",
              state: "absent"}
+          - {path: "selinux_modules/linux-system-roles-selinux-test-d.pp"}
+        selinux_restore_dirs:
+          - /opt/lsr_policy_test
       when: __run_selinux_modules_fedora_el7
       block:
+        - name: Ensure test directory exists for policy in test-d module
+          file:
+            path: /opt/lsr_policy_test
+            state: directory
+            mode: "0755"
+            owner: root
+            group: root
+        - name: Ensure test file exists for policy in test-d module
+          copy:
+            dest: /opt/lsr_policy_test/test.txt
+            content: lsr_policy_test
+            mode: "0644"
+            owner: root
+            group: root
         - name: Execute the role
           include_tasks: tasks/run_role_with_clear_facts.yml
       rescue:
@@ -42,11 +59,17 @@
             - "semodule -r linux-system-roles-selinux-test-a"
             - "semodule -X 500 -r linux-system-roles-selinux-test-b"
             - "semodule -X 600 -r linux-system-roles-selinux-test-c"
+            - "semodule -r linux-system-roles-selinux-test-d"
           ignore_errors: true  # noqa ignore-errors
           changed_when: false
         - name: Report role linux-system-roles.selinux failed
           fail:
             msg: "linux-system-roles.selinux failed"
+      always:
+        - name: Cleanup test directory
+          file:
+            path: /opt/lsr_policy_test
+            state: absent
 
     - name: Check module states
       vars:
@@ -81,6 +104,7 @@
             - "semodule -r linux-system-roles-selinux-test-a"
             - "semodule -X 500 -r linux-system-roles-selinux-test-b"
             - "semodule -X 600 -r linux-system-roles-selinux-test-c"
+            - "semodule -r linux-system-roles-selinux-test-d"
           ignore_errors: true  # noqa ignore-errors
           changed_when: false
 
@@ -101,6 +125,7 @@
           - {path: "{{ playbook_dir }}/files/selinux_modules/linux-system-roles-selinux-test-c.pp", priority: "200"}
           - {name: "linux-system-roles-selinux-test-c", priority: "300",
              state: "absent"}
+          - {path: "selinux_modules/linux-system-roles-selinux-test-d.pp"}
       when: __run_selinux_modules_el6
       block:
         - name: Execute the role
@@ -112,6 +137,7 @@
             - "semodule -r linux-system-roles-selinux-test-a"
             - "semodule -r linux-system-roles-selinux-test-b"
             - "semodule -r linux-system-roles-selinux-test-c"
+            - "semodule -r linux-system-roles-selinux-test-d"
           ignore_errors: true  # noqa ignore-errors
           changed_when: false
         - name: Report role linux-system-roles.selinux failed
@@ -150,6 +176,7 @@
             - "semodule -r linux-system-roles-selinux-test-a"
             - "semodule -r linux-system-roles-selinux-test-b"
             - "semodule -r linux-system-roles-selinux-test-c"
+            - "semodule -r linux-system-roles-selinux-test-d"
           ignore_errors: true  # noqa ignore-errors
           changed_when: false
     - name: Ensure file glob patterns do not work

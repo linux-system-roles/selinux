@@ -1,0 +1,4 @@
+policy_module(linux-system-roles-selinux-test-d, 1.0.0)
+
+type policy_var_lib_t;
+files_type(policy_var_lib_t)
