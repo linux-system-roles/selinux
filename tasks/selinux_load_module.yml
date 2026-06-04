@@ -7,6 +7,7 @@
 # way.  The wrinkle is that we do not want to match
 # file globs, so we escape any file glob patterns
 # in the string before using `fileglob`.
+# Sets __selinux_modules_needs_reload to true if the modules need to be reloaded
 - name: Prepare module installation
   when:
     - state == "enabled"
@@ -54,7 +55,7 @@
             path: "{{ tempdir.path }}/{{ __selinux_item.path | basename }}"
             priority: "{{ priority }}"
             state: enabled
-          notify: __selinux_reload_policy
+          register: __selinux_policy_installed
           when: tempdir.path is defined
       always:
         - name: Clean temporary directory {{ tempdir.path | d("") }}
@@ -69,21 +70,21 @@
     state: absent
     priority: "{{ priority }}"
   when: state == "absent"
-  notify: __selinux_reload_policy
+  register: __selinux_policy_removed
 
 - name: Enable module
   local_semodule:
     name: "{{ mod_name }}"
     state: enabled
   when: state == "enabled" and __selinux_item.path is not defined
-  notify: __selinux_reload_policy
+  register: __selinux_policy_enabled
 
 - name: Disable module
   local_semodule:
     name: "{{ mod_name }}"
     state: "disabled"
   when: state == "disabled" and __selinux_item.path is not defined
-  notify: __selinux_reload_policy
+  register: __selinux_policy_disabled
 
 - name: Refresh SELinux modules facts
   selinux_modules_facts:
@@ -96,3 +97,8 @@
     selinux_installed_modules: "{{ ansible_facts['selinux_installed_modules'] }}"
     selinux_priorities: "{{ ansible_facts['selinux_priorities'] }}"
     selinux_checksums: "{{ ansible_facts['selinux_checksums'] }}"
+    __selinux_modules_needs_reload: "{{ (__selinux_modules_needs_reload | d(false)) or
+      (__selinux_policy_installed is defined and __selinux_policy_installed is changed) or
+      (__selinux_policy_removed is defined and __selinux_policy_removed is changed) or
+      (__selinux_policy_enabled is defined and __selinux_policy_enabled is changed) or
+      (__selinux_policy_disabled is defined and __selinux_policy_disabled is changed) }}"

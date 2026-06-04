@@ -1,0 +1,1 @@
+/opt/lsr_policy_test(/.*)?    gen_context(system_u:object_r:policy_var_lib_t,s0)

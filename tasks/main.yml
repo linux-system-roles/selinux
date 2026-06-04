@@ -175,6 +175,7 @@
     selinux_installed_modules: "{{ ansible_facts['selinux_installed_modules'] }}"
     selinux_priorities: "{{ ansible_facts['selinux_priorities'] }}"
     selinux_checksums: "{{ ansible_facts['selinux_checksums'] }}"
+    __selinux_modules_needs_reload: false
 
 - name: Load SELinux modules
   include_tasks: selinux_load_module.yml
@@ -190,6 +191,13 @@
   loop: "{{ selinux_modules | flatten(levels=1) }}"
   loop_control:
     loop_var: __selinux_item
+
+- name: Reload SELinux policy if modules need to be reloaded
+  command: semodule -R
+  when:
+    - __selinux_modules_needs_reload
+    - ansible_facts['selinux']['status'] != "disabled"
+  changed_when: true
 
 - name: Restore SELinux labels on filesystem tree
   command: /sbin/restorecon -R -F -v {{ restorecon_threads }} {{ __selinux_item }}
