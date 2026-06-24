@@ -1,6 +1,20 @@
 Changelog
 =========
 
+[1.12.2] - 2026-06-24
+--------------------
+
+### Bug Fixes
+
+- fix: ensure policy modules are loaded before they can be referenced (#354)
+
+### Other Changes
+
+- refactor: use ansible.posix 2.1.X for EL7 compatibility [citest_skip] (#350)
+- ci: Add config file for CodeRabbit with custom rules (#351)
+- ci: Skip reviews for PRs with [citest_skip] in the title (#353)
+- test: remove unused files [citest_skip] (#355)
+
 [1.12.1] - 2026-05-07
 --------------------
 
