@@ -24,6 +24,8 @@ restorecon_threads: "{{ '-T 0' if ansible_facts['distribution'] == 'Fedora' or
   (ansible_facts['distribution_major_version'] | int > 8 and
   ansible_facts['distribution'] in ['CentOS', 'RedHat', 'Rocky']) else '' }}"
 
+__selinux_write_log_file: false
+
 # BEGIN - DO NOT EDIT THIS BLOCK - rh distros variables
 # Ansible distribution identifiers that the role treats like RHEL
 __selinux_rh_distros:

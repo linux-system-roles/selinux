@@ -7,9 +7,13 @@
 
 - name: Record role begin fingerprint
   sr_fingerprint:
-    sr_message: >-
-      begin system_role:selinux ansible_version={{ ansible_version.full }}
-      {{ ansible_facts['distribution'] }}-{{ ansible_facts['distribution_version'] }}
+    status: begin
+    role_name: selinux
+    role_path: "{{ role_path }}"
+    ansible_play_hosts_all: "{{ ansible_play_hosts_all }}"
+    distribution: "{{ ansible_facts['distribution'] }}"
+    distribution_version: "{{ ansible_facts['distribution_version'] }}"
+    write_log_file: "{{ __selinux_write_log_file }}"
 
 - name: Ensure SELinux packages
   include_tasks: ensure_selinux_packages.yml
