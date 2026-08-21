@@ -26,9 +26,6 @@
     - name: Include test variables
       import_tasks: set_selinux_variables.yml
 
-    - name: Include RH distros variables
-      include_vars: vars/rh_distros_vars.yml
-
     - name: Save config
       include_tasks: selinux_config_save.yml
 
@@ -47,27 +44,13 @@
           ansible_facts['distribution_major_version'] is version('8', '>=') and
           ansible_version.full is version('2.10', '>=') }}"
 
-    # selinux is a builtin module in ansible 2.9 (EL7); ansible.posix otherwise
-    - name: Disable selinux and set kernel - EL7
+    # Bare name resolves to the ansible.posix builtin on EL7 (ansible 2.9) and
+    # redirects to the latest ansible.posix.selinux on newer systems.
+    - name: Disable selinux and set kernel
       selinux:  # noqa fqcn
         state: disabled
         update_kernel_param: "{{ true if __test_update_kernel_param else omit }}"
-      register: __disable_result_el7
-      when:
-        - __selinux_is_rh_distro_7
-
-    - name: Disable selinux and set kernel
-      ansible.posix.selinux:
-        state: disabled
-        update_kernel_param: "{{ true if __test_update_kernel_param else omit }}"
-      register: __disable_result_non_el7
-      when: not __selinux_is_rh_distro_7
-
-    - name: Set disable result
-      set_fact:
-        __disable_result: "{{ __disable_result_el7
-          if __selinux_is_rh_distro_7
-          else __disable_result_non_el7 }}"
+      register: __disable_result
 
     - name: Add selinux=0 to kernel args
       when:
@@ -103,36 +86,18 @@
     - name: Restore config
       include_tasks: selinux_config_restore.yml
 
-    # selinux is a builtin module in ansible 2.9 (EL7); ansible.posix otherwise
-    - name: Re-enable selinux and set kernel if disabled - EL7
+    # Bare name resolves to the ansible.posix builtin on EL7 (ansible 2.9) and
+    # redirects to the latest ansible.posix.selinux on newer systems.
+    - name: Re-enable selinux and set kernel if disabled
       selinux:  # noqa fqcn
         state: "{{ __state_before }}"
         policy: "{{ __type_before }}"
         update_kernel_param: "{{ true if ansible_facts['os_family'] == 'RedHat' and
           ansible_facts['distribution_major_version'] is version('8', '>=')
           else omit }}"
-      register: __enable_result_el7
+      register: __enable_result
       when:
         - __disable_result.reboot_required
-        - __selinux_is_rh_distro_7
-
-    - name: Re-enable selinux and set kernel if disabled
-      ansible.posix.selinux:
-        state: "{{ __state_before }}"
-        policy: "{{ __type_before }}"
-        update_kernel_param: "{{ true if ansible_facts['os_family'] == 'RedHat' and
-          ansible_facts['distribution_major_version'] is version('8', '>=')
-          else omit }}"
-      register: __enable_result_non_el7
-      when:
-        - __disable_result.reboot_required
-        - not __selinux_is_rh_distro_7
-
-    - name: Set enable result
-      set_fact:
-        __enable_result: "{{ __enable_result_el7
-          if __selinux_is_rh_distro_7
-          else __enable_result_non_el7 }}"
 
     - name: Remove selinux=0 from kernel args
       when:
