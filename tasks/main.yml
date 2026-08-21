@@ -41,9 +41,13 @@
         - (not selinux_state is none and selinux_state | length > 0) or
           (not selinux_policy is none and selinux_policy | length > 0)
 
+    # Bare module name (not FQCN): on EL7 (ansible 2.9) the collection is not
+    # installable and an unresolvable FQCN aborts play parsing even for a task
+    # skipped by "when". The bare name resolves to the 2.9 builtin on EL7
+    # (skipped here) and redirects to the latest collection module elsewhere.
     - name: Set permanent SELinux state if enabled
       # noqa args[module]
-      ansible.posix.selinux:
+      selinux:  # noqa fqcn
         state: "{{ selinux_state | default(ansible_facts['selinux']['config_mode'], true) }}"
         policy: "{{ selinux_policy | default(ansible_facts['selinux']['type'], true) }}"
         update_kernel_param: "{{ true if __update_kernel_param else omit }}"
@@ -67,9 +71,13 @@
         - not selinux_state is none
         - selinux_state | length > 0
 
+    # Bare module name (not FQCN): on EL7 (ansible 2.9) the collection is not
+    # installable and an unresolvable FQCN aborts play parsing even for a task
+    # skipped by "when". The bare name resolves to the 2.9 builtin on EL7
+    # (skipped here) and redirects to the latest collection module elsewhere.
     - name: Set permanent SELinux state if disabled
       # noqa args[module]
-      ansible.posix.selinux:
+      selinux:  # noqa fqcn
         state: "{{ selinux_state }}"
         policy: "{{ selinux_policy | default('targeted', true) }}"
         update_kernel_param: "{{ true if __update_kernel_param else omit }}"
@@ -167,8 +175,12 @@
   when:
     - __selinux_is_rh_distro_7
 
+# Bare module name (not FQCN): on EL7 (ansible 2.9) the collection is not
+# installable and an unresolvable FQCN aborts play parsing even for a task
+# skipped by "when". The bare name resolves to the 2.9 builtin on EL7
+# (skipped here) and redirects to the latest collection module elsewhere.
 - name: Set SELinux booleans
-  ansible.posix.seboolean:
+  seboolean:  # noqa fqcn
     name: "{{ __selinux_item.name }}"
     state: "{{ __selinux_item.state }}"
     persistent: "{{ __selinux_item.persistent |
@@ -195,8 +207,12 @@
   when:
     - __selinux_is_rh_distro_7
 
+# Bare module name (not FQCN): on EL7 (ansible 2.9) the collection is not
+# installable and an unresolvable FQCN aborts play parsing even for a task
+# skipped by "when". The bare name resolves to the 2.9 builtin on EL7
+# (skipped here) and redirects to the latest collection module elsewhere.
 - name: Set SELinux file contexts
-  community.general.sefcontext:
+  sefcontext:  # noqa fqcn
     target: "{{ __selinux_item.target }}"
     setype: "{{ __selinux_item.setype }}"
     ftype: "{{ __selinux_item.ftype | default('a') }}"
@@ -237,8 +253,12 @@
   when:
     - __selinux_is_rh_distro_7
 
+# Bare module name (not FQCN): on EL7 (ansible 2.9) the collection is not
+# installable and an unresolvable FQCN aborts play parsing even for a task
+# skipped by "when". The bare name resolves to the 2.9 builtin on EL7
+# (skipped here) and redirects to the latest collection module elsewhere.
 - name: Set linux user to SELinux user mapping
-  community.general.selogin:
+  selogin:  # noqa fqcn
     login: "{{ __selinux_item.login }}"
     seuser: "{{ __selinux_item.seuser }}"
     serange: "{{ __selinux_item.serange | default('s0') }}"
