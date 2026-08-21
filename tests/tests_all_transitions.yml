@@ -44,8 +44,10 @@
           ansible_facts['distribution_major_version'] is version('8', '>=') and
           ansible_version.full is version('2.10', '>=') }}"
 
+    # Bare name resolves to the ansible.posix builtin on EL7 (ansible 2.9) and
+    # redirects to the latest ansible.posix.selinux on newer systems.
     - name: Disable selinux and set kernel
-      ansible.posix.selinux:
+      selinux:  # noqa fqcn
         state: disabled
         update_kernel_param: "{{ true if __test_update_kernel_param else omit }}"
       register: __disable_result
@@ -84,15 +86,18 @@
     - name: Restore config
       include_tasks: selinux_config_restore.yml
 
+    # Bare name resolves to the ansible.posix builtin on EL7 (ansible 2.9) and
+    # redirects to the latest ansible.posix.selinux on newer systems.
     - name: Re-enable selinux and set kernel if disabled
-      ansible.posix.selinux:
+      selinux:  # noqa fqcn
         state: "{{ __state_before }}"
         policy: "{{ __type_before }}"
         update_kernel_param: "{{ true if ansible_facts['os_family'] == 'RedHat' and
           ansible_facts['distribution_major_version'] is version('8', '>=')
           else omit }}"
       register: __enable_result
-      when: __disable_result.reboot_required
+      when:
+        - __disable_result.reboot_required
 
     - name: Remove selinux=0 from kernel args
       when:
