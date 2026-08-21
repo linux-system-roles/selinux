@@ -36,8 +36,7 @@
         update_kernel_param: "{{ true if __update_kernel_param else omit }}"
       register: selinux_mod_output_enabled_el7
       when:
-        - __selinux_is_rh_distro
-        - ansible_facts['distribution_major_version'] == '7'
+        - __selinux_is_rh_distro_7
         - ansible_facts['selinux']['status'] == "enabled"
         - (not selinux_state is none and selinux_state | length > 0) or
           (not selinux_policy is none and selinux_policy | length > 0)
@@ -50,8 +49,7 @@
         update_kernel_param: "{{ true if __update_kernel_param else omit }}"
       register: selinux_mod_output_enabled
       when:
-        - not (__selinux_is_rh_distro and
-            ansible_facts['distribution_major_version'] == '7')
+        - not __selinux_is_rh_distro_7
         - ansible_facts['selinux']['status'] == "enabled"
         - (not selinux_state is none and selinux_state | length > 0) or
           (not selinux_policy is none and selinux_policy | length > 0)
@@ -64,8 +62,7 @@
         update_kernel_param: "{{ true if __update_kernel_param else omit }}"
       register: selinux_mod_output_disabled_el7
       when:
-        - __selinux_is_rh_distro
-        - ansible_facts['distribution_major_version'] == '7'
+        - __selinux_is_rh_distro_7
         - ansible_facts['selinux']['status'] == "disabled"
         - not selinux_state is none
         - selinux_state | length > 0
@@ -78,8 +75,7 @@
         update_kernel_param: "{{ true if __update_kernel_param else omit }}"
       register: selinux_mod_output_disabled
       when:
-        - not (__selinux_is_rh_distro and
-            ansible_facts['distribution_major_version'] == '7')
+        - not __selinux_is_rh_distro_7
         - ansible_facts['selinux']['status'] == "disabled"
         - not selinux_state is none
         - selinux_state | length > 0
@@ -169,8 +165,7 @@
   loop_control:
     loop_var: __selinux_item
   when:
-    - __selinux_is_rh_distro
-    - ansible_facts['distribution_major_version'] == '7'
+    - __selinux_is_rh_distro_7
 
 - name: Set SELinux booleans
   ansible.posix.seboolean:
@@ -183,8 +178,7 @@
   loop_control:
     loop_var: __selinux_item
   when:
-    - not (__selinux_is_rh_distro and
-        ansible_facts['distribution_major_version'] == '7')
+    - not __selinux_is_rh_distro_7
 
 - name: Set SELinux file contexts - EL7
   sefcontext_el7:
@@ -199,8 +193,7 @@
   loop_control:
     loop_var: __selinux_item
   when:
-    - __selinux_is_rh_distro
-    - ansible_facts['distribution_major_version'] == '7'
+    - __selinux_is_rh_distro_7
 
 - name: Set SELinux file contexts
   community.general.sefcontext:
@@ -215,8 +208,7 @@
   loop_control:
     loop_var: __selinux_item
   when:
-    - not (__selinux_is_rh_distro and
-        ansible_facts['distribution_major_version'] == '7')
+    - not __selinux_is_rh_distro_7
 
 - name: Set an SELinux label on a port
   local_seport:
@@ -243,8 +235,7 @@
   loop_control:
     loop_var: __selinux_item
   when:
-    - __selinux_is_rh_distro
-    - ansible_facts['distribution_major_version'] == '7'
+    - __selinux_is_rh_distro_7
 
 - name: Set linux user to SELinux user mapping
   community.general.selogin:
@@ -259,8 +250,7 @@
   loop_control:
     loop_var: __selinux_item
   when:
-    - not (__selinux_is_rh_distro and
-        ansible_facts['distribution_major_version'] == '7')
+    - not __selinux_is_rh_distro_7
 
 - name: Get SELinux modules facts
   selinux_modules_facts:
