@@ -54,22 +54,19 @@
         update_kernel_param: "{{ true if __test_update_kernel_param else omit }}"
       register: __disable_result_el7
       when:
-        - __selinux_is_rh_distro
-        - ansible_facts['distribution_major_version'] == '7'
+        - __selinux_is_rh_distro_7
 
     - name: Disable selinux and set kernel
       ansible.posix.selinux:
         state: disabled
         update_kernel_param: "{{ true if __test_update_kernel_param else omit }}"
       register: __disable_result_non_el7
-      when: not (__selinux_is_rh_distro and
-        ansible_facts['distribution_major_version'] == '7')
+      when: not __selinux_is_rh_distro_7
 
     - name: Set disable result
       set_fact:
         __disable_result: "{{ __disable_result_el7
-          if (__selinux_is_rh_distro and
-            ansible_facts['distribution_major_version'] == '7')
+          if __selinux_is_rh_distro_7
           else __disable_result_non_el7 }}"
 
     - name: Add selinux=0 to kernel args
@@ -117,8 +114,7 @@
       register: __enable_result_el7
       when:
         - __disable_result.reboot_required
-        - __selinux_is_rh_distro
-        - ansible_facts['distribution_major_version'] == '7'
+        - __selinux_is_rh_distro_7
 
     - name: Re-enable selinux and set kernel if disabled
       ansible.posix.selinux:
@@ -130,14 +126,12 @@
       register: __enable_result_non_el7
       when:
         - __disable_result.reboot_required
-        - not (__selinux_is_rh_distro and
-            ansible_facts['distribution_major_version'] == '7')
+        - not __selinux_is_rh_distro_7
 
     - name: Set enable result
       set_fact:
         __enable_result: "{{ __enable_result_el7
-          if (__selinux_is_rh_distro and
-            ansible_facts['distribution_major_version'] == '7')
+          if __selinux_is_rh_distro_7
           else __enable_result_non_el7 }}"
 
     - name: Remove selinux=0 from kernel args
