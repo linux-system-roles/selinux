@@ -28,22 +28,22 @@
       ansible_facts['distribution_major_version'] is version('8', '>=') and
       ansible_version.full is version('2.10', '>=') }}"
   block:
-    - name: Set permanent SELinux state if enabled - EL7
+    - name: Set permanent SELinux state if enabled - ansible 2.9
       # noqa args[module]
-      selinux_el7:
+      selinux_ansible_29:
         state: "{{ selinux_state | default(ansible_facts['selinux']['config_mode'], true) }}"
         policy: "{{ selinux_policy | default(ansible_facts['selinux']['type'], true) }}"
         update_kernel_param: "{{ true if __update_kernel_param else omit }}"
-      register: selinux_mod_output_enabled_el7
+      register: selinux_mod_output_enabled_ansible_29
       when:
-        - __selinux_is_rh_distro_7
+        - ansible_version.full is version('2.10', '<')
         - ansible_facts['selinux']['status'] == "enabled"
         - (not selinux_state is none and selinux_state | length > 0) or
           (not selinux_policy is none and selinux_policy | length > 0)
 
-    # Bare module name (not FQCN): on EL7 (ansible 2.9) the collection is not
+    # Bare module name (not FQCN): on ansible 2.9 the collection is not
     # installable and an unresolvable FQCN aborts play parsing even for a task
-    # skipped by "when". The bare name resolves to the 2.9 builtin on EL7
+    # skipped by "when". The bare name resolves to the ansible 2.9 builtin
     # (skipped here) and redirects to the latest collection module elsewhere.
     - name: Set permanent SELinux state if enabled
       # noqa args[module]
@@ -53,27 +53,27 @@
         update_kernel_param: "{{ true if __update_kernel_param else omit }}"
       register: selinux_mod_output_enabled
       when:
-        - not __selinux_is_rh_distro_7
+        - ansible_version.full is version('2.10', '>=')
         - ansible_facts['selinux']['status'] == "enabled"
         - (not selinux_state is none and selinux_state | length > 0) or
           (not selinux_policy is none and selinux_policy | length > 0)
 
-    - name: Set permanent SELinux state if disabled - EL7
+    - name: Set permanent SELinux state if disabled - ansible 2.9
       # noqa args[module]
-      selinux_el7:
+      selinux_ansible_29:
         state: "{{ selinux_state }}"
         policy: "{{ selinux_policy | default('targeted', true) }}"
         update_kernel_param: "{{ true if __update_kernel_param else omit }}"
-      register: selinux_mod_output_disabled_el7
+      register: selinux_mod_output_disabled_ansible_29
       when:
-        - __selinux_is_rh_distro_7
+        - ansible_version.full is version('2.10', '<')
         - ansible_facts['selinux']['status'] == "disabled"
         - not selinux_state is none
         - selinux_state | length > 0
 
-    # Bare module name (not FQCN): on EL7 (ansible 2.9) the collection is not
+    # Bare module name (not FQCN): on ansible 2.9 the collection is not
     # installable and an unresolvable FQCN aborts play parsing even for a task
-    # skipped by "when". The bare name resolves to the 2.9 builtin on EL7
+    # skipped by "when". The bare name resolves to the ansible 2.9 builtin
     # (skipped here) and redirects to the latest collection module elsewhere.
     - name: Set permanent SELinux state if disabled
       # noqa args[module]
@@ -83,21 +83,22 @@
         update_kernel_param: "{{ true if __update_kernel_param else omit }}"
       register: selinux_mod_output_disabled
       when:
-        - not __selinux_is_rh_distro_7
+        - ansible_version.full is version('2.10', '>=')
         - ansible_facts['selinux']['status'] == "disabled"
         - not selinux_state is none
         - selinux_state | length > 0
 
-    # Only one of the EL7 / non-EL7 tasks above runs; the other is skipped and
-    # its (skipped) result would otherwise clobber a shared register. Coalesce
-    # into the original variable names so downstream logic is unchanged.
+    # Only one of the ansible 2.9 / non-2.9 tasks above runs; the other is
+    # skipped and its (skipped) result would otherwise clobber a shared
+    # register. Coalesce into the original variable names so downstream logic
+    # is unchanged.
     - name: Consolidate SELinux state module output
       set_fact:
-        selinux_mod_output_enabled: "{{ selinux_mod_output_enabled_el7
-          if not (selinux_mod_output_enabled_el7.skipped | d(false))
+        selinux_mod_output_enabled: "{{ selinux_mod_output_enabled_ansible_29
+          if not (selinux_mod_output_enabled_ansible_29.skipped | d(false))
           else selinux_mod_output_enabled }}"
-        selinux_mod_output_disabled: "{{ selinux_mod_output_disabled_el7
-          if not (selinux_mod_output_disabled_el7.skipped | d(false))
+        selinux_mod_output_disabled: "{{ selinux_mod_output_disabled_ansible_29
+          if not (selinux_mod_output_disabled_ansible_29.skipped | d(false))
           else selinux_mod_output_disabled }}"
 
     - name: Set selinux_reboot_required
@@ -162,8 +163,8 @@
   when: selinux_logins_purge | bool
   changed_when: true
 
-- name: Set SELinux booleans - EL7
-  seboolean_el7:
+- name: Set SELinux booleans - ansible 2.9
+  seboolean_ansible_29:
     name: "{{ __selinux_item.name }}"
     state: "{{ __selinux_item.state }}"
     persistent: "{{ __selinux_item.persistent |
@@ -173,11 +174,11 @@
   loop_control:
     loop_var: __selinux_item
   when:
-    - __selinux_is_rh_distro_7
+    - ansible_version.full is version('2.10', '<')
 
-# Bare module name (not FQCN): on EL7 (ansible 2.9) the collection is not
+# Bare module name (not FQCN): on ansible 2.9 the collection is not
 # installable and an unresolvable FQCN aborts play parsing even for a task
-# skipped by "when". The bare name resolves to the 2.9 builtin on EL7
+# skipped by "when". The bare name resolves to the ansible 2.9 builtin
 # (skipped here) and redirects to the latest collection module elsewhere.
 - name: Set SELinux booleans
   seboolean:  # noqa fqcn
@@ -190,10 +191,10 @@
   loop_control:
     loop_var: __selinux_item
   when:
-    - not __selinux_is_rh_distro_7
+    - ansible_version.full is version('2.10', '>=')
 
-- name: Set SELinux file contexts - EL7
-  sefcontext_el7:
+- name: Set SELinux file contexts - ansible 2.9
+  sefcontext_ansible_29:
     target: "{{ __selinux_item.target }}"
     setype: "{{ __selinux_item.setype }}"
     ftype: "{{ __selinux_item.ftype | default('a') }}"
@@ -205,11 +206,11 @@
   loop_control:
     loop_var: __selinux_item
   when:
-    - __selinux_is_rh_distro_7
+    - ansible_version.full is version('2.10', '<')
 
-# Bare module name (not FQCN): on EL7 (ansible 2.9) the collection is not
+# Bare module name (not FQCN): on ansible 2.9 the collection is not
 # installable and an unresolvable FQCN aborts play parsing even for a task
-# skipped by "when". The bare name resolves to the 2.9 builtin on EL7
+# skipped by "when". The bare name resolves to the ansible 2.9 builtin
 # (skipped here) and redirects to the latest collection module elsewhere.
 - name: Set SELinux file contexts
   sefcontext:  # noqa fqcn
@@ -224,7 +225,7 @@
   loop_control:
     loop_var: __selinux_item
   when:
-    - not __selinux_is_rh_distro_7
+    - ansible_version.full is version('2.10', '>=')
 
 - name: Set an SELinux label on a port
   local_seport:
@@ -238,8 +239,8 @@
   loop_control:
     loop_var: __selinux_item
 
-- name: Set linux user to SELinux user mapping - EL7
-  selogin_el7:
+- name: Set linux user to SELinux user mapping - ansible 2.9
+  selogin_ansible_29:
     login: "{{ __selinux_item.login }}"
     seuser: "{{ __selinux_item.seuser }}"
     serange: "{{ __selinux_item.serange | default('s0') }}"
@@ -251,11 +252,11 @@
   loop_control:
     loop_var: __selinux_item
   when:
-    - __selinux_is_rh_distro_7
+    - ansible_version.full is version('2.10', '<')
 
-# Bare module name (not FQCN): on EL7 (ansible 2.9) the collection is not
+# Bare module name (not FQCN): on ansible 2.9 the collection is not
 # installable and an unresolvable FQCN aborts play parsing even for a task
-# skipped by "when". The bare name resolves to the 2.9 builtin on EL7
+# skipped by "when". The bare name resolves to the ansible 2.9 builtin
 # (skipped here) and redirects to the latest collection module elsewhere.
 - name: Set linux user to SELinux user mapping
   selogin:  # noqa fqcn
@@ -270,7 +271,7 @@
   loop_control:
     loop_var: __selinux_item
   when:
-    - not __selinux_is_rh_distro_7
+    - ansible_version.full is version('2.10', '>=')
 
 - name: Get SELinux modules facts
   selinux_modules_facts:
