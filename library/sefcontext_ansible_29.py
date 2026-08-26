@@ -10,7 +10,7 @@ from __future__ import absolute_import, division, print_function
 __metaclass__ = type
 
 DOCUMENTATION = r"""
-module: sefcontext_el7
+module: sefcontext_ansible_29
 short_description: Manages SELinux file context mapping definitions
 description:
   - Manages SELinux file context mapping definitions.
@@ -97,25 +97,25 @@ author:
 
 EXAMPLES = r"""
 - name: Allow apache to modify files in /srv/git_repos
-  sefcontext_el7:
+  sefcontext_ansible_29:
     target: '/srv/git_repos(/.*)?'
     setype: httpd_sys_rw_content_t
     state: present
 
 - name: Substitute file contexts for path /srv/containers with /var/lib/containers
-  sefcontext_el7:
+  sefcontext_ansible_29:
     target: /srv/containers
     substitute: /var/lib/containers
     state: present
 
 - name: Delete file context path substitution for /srv/containers
-  sefcontext_el7:
+  sefcontext_ansible_29:
     target: /srv/containers
     substitute: /var/lib/containers
     state: absent
 
 - name: Delete any file context mappings for path /srv/git
-  sefcontext_el7:
+  sefcontext_ansible_29:
     target: /srv/git
     state: absent
 

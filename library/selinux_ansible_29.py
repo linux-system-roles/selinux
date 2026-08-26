@@ -12,7 +12,7 @@ __metaclass__ = type
 
 DOCUMENTATION = r"""
 ---
-module: selinux_el7
+module: selinux_ansible_29
 short_description: Change policy and state of SELinux
 description:
   - Configures the SELinux mode and policy.
@@ -48,17 +48,17 @@ author:
 
 EXAMPLES = r"""
 - name: Enable SELinux
-  selinux_el7:
+  selinux_ansible_29:
     policy: targeted
     state: enforcing
 
 - name: Put SELinux in permissive mode, logging actions that would be blocked.
-  selinux_el7:
+  selinux_ansible_29:
     policy: targeted
     state: permissive
 
 - name: Disable SELinux
-  selinux_el7:
+  selinux_ansible_29:
     state: disabled
 """
 
