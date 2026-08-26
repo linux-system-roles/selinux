@@ -26,6 +26,9 @@
     - name: Include test variables
       import_tasks: set_selinux_variables.yml
 
+    - name: Include RH distros variables
+      include_vars: vars/rh_distros_vars.yml
+
     - name: Save config
       include_tasks: selinux_config_save.yml
 
@@ -44,13 +47,30 @@
           ansible_facts['distribution_major_version'] is version('8', '>=') and
           ansible_version.full is version('2.10', '>=') }}"
 
-    # Bare name resolves to the ansible.posix builtin on EL7 (ansible 2.9) and
-    # redirects to the latest ansible.posix.selinux on newer systems.
+    # EL7 (ansible 2.9) uses the vendored selinux_el7 module; other systems use
+    # the bare selinux name, which redirects to the latest ansible.posix.selinux.
+    - name: Disable selinux and set kernel - EL7
+      selinux_el7:
+        state: disabled
+        update_kernel_param: "{{ true if __test_update_kernel_param else omit }}"
+      register: __disable_result_el7
+      when: __selinux_is_rh_distro_7
+
+    # Bare name (not FQCN): an unresolvable FQCN aborts play parsing on EL7 even
+    # when the task is skipped. The bare selinux name resolves to the ansible 2.9
+    # builtin (skipped here) and redirects to ansible.posix.selinux elsewhere.
     - name: Disable selinux and set kernel
       selinux:  # noqa fqcn
         state: disabled
         update_kernel_param: "{{ true if __test_update_kernel_param else omit }}"
-      register: __disable_result
+      register: __disable_result_non_el7
+      when: not __selinux_is_rh_distro_7
+
+    - name: Set disable result
+      set_fact:
+        __disable_result: "{{ __disable_result_el7
+          if __selinux_is_rh_distro_7
+          else __disable_result_non_el7 }}"
 
     - name: Add selinux=0 to kernel args
       when:
@@ -86,8 +106,23 @@
     - name: Restore config
       include_tasks: selinux_config_restore.yml
 
-    # Bare name resolves to the ansible.posix builtin on EL7 (ansible 2.9) and
-    # redirects to the latest ansible.posix.selinux on newer systems.
+    # EL7 (ansible 2.9) uses the vendored selinux_el7 module; other systems use
+    # the bare selinux name, which redirects to the latest ansible.posix.selinux.
+    - name: Re-enable selinux and set kernel if disabled - EL7
+      selinux_el7:
+        state: "{{ __state_before }}"
+        policy: "{{ __type_before }}"
+        update_kernel_param: "{{ true if ansible_facts['os_family'] == 'RedHat' and
+          ansible_facts['distribution_major_version'] is version('8', '>=')
+          else omit }}"
+      register: __enable_result_el7
+      when:
+        - __disable_result.reboot_required
+        - __selinux_is_rh_distro_7
+
+    # Bare name (not FQCN): an unresolvable FQCN aborts play parsing on EL7 even
+    # when the task is skipped. The bare selinux name resolves to the ansible 2.9
+    # builtin (skipped here) and redirects to ansible.posix.selinux elsewhere.
     - name: Re-enable selinux and set kernel if disabled
       selinux:  # noqa fqcn
         state: "{{ __state_before }}"
@@ -95,9 +130,16 @@
         update_kernel_param: "{{ true if ansible_facts['os_family'] == 'RedHat' and
           ansible_facts['distribution_major_version'] is version('8', '>=')
           else omit }}"
-      register: __enable_result
+      register: __enable_result_non_el7
       when:
         - __disable_result.reboot_required
+        - not __selinux_is_rh_distro_7
+
+    - name: Set enable result
+      set_fact:
+        __enable_result: "{{ __enable_result_el7
+          if __selinux_is_rh_distro_7
+          else __enable_result_non_el7 }}"
 
     - name: Remove selinux=0 from kernel args
       when:
