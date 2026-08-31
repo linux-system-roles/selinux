@@ -10,7 +10,7 @@ from __future__ import absolute_import, division, print_function
 __metaclass__ = type
 
 DOCUMENTATION = r"""
-module: selogin_ansible_29
+module: selogin_python_36
 short_description: Manages linux user to SELinux user mapping
 description:
   - Manages linux user to SELinux user mapping.
@@ -59,20 +59,20 @@ author:
 
 EXAMPLES = r"""
 - name: Modify the default user on the system to the guest_u user
-  selogin_ansible_29:
+  selogin_python_36:
     login: __default__
     seuser: guest_u
     state: present
 
 - name: Assign gijoe user on an MLS machine a range and to the staff_u user
-  selogin_ansible_29:
+  selogin_python_36:
     login: gijoe
     seuser: staff_u
     serange: SystemLow-Secret
     state: present
 
 - name: Assign all users in the engineering group to the staff_u user
-  selogin_ansible_29:
+  selogin_python_36:
     login: '%engineering'
     seuser: staff_u
     state: present
