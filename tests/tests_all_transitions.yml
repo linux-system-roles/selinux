@@ -44,32 +44,33 @@
           ansible_facts['distribution_major_version'] is version('8', '>=') and
           ansible_version.full is version('2.10', '>=') }}"
 
-    # ansible 2.9 (ansible-engine) uses the vendored selinux_ansible_29 module,
-    # since ansible.posix cannot be installed there; other systems use the bare
-    # selinux name, which redirects to the latest ansible.posix.selinux.
-    - name: Disable selinux and set kernel - ansible 2.9
-      selinux_ansible_29:
+    # Managed nodes with python 2 (EL7 with ansible 2.9, where ansible.posix
+    # cannot be installed) use the vendored selinux_python_27 module, which
+    # retains python 2 support; python 3 nodes use the bare selinux name, which
+    # redirects to the latest ansible.posix.selinux.
+    - name: Disable selinux and set kernel - python 2
+      selinux_python_27:
         state: disabled
         update_kernel_param: "{{ true if __test_update_kernel_param else omit }}"
-      register: __disable_result_ansible_29
-      when: ansible_version.full is version('2.10', '<')
+      register: __disable_result_py2
+      when: ansible_facts['python_version'] is version('3', '<')
 
     # Bare name (not FQCN): an unresolvable FQCN aborts play parsing on ansible
-    # 2.9 even when the task is skipped. The bare selinux name resolves to the
-    # ansible 2.9 builtin (skipped here) and redirects to ansible.posix.selinux
-    # elsewhere.
+    # 2.9 even when the task is skipped, so the bare name is used. This runs
+    # only on managed nodes with python 3, where the bare selinux name resolves
+    # to the latest ansible.posix.selinux.
     - name: Disable selinux and set kernel
       selinux:  # noqa fqcn
         state: disabled
         update_kernel_param: "{{ true if __test_update_kernel_param else omit }}"
-      register: __disable_result_non_ansible_29
-      when: ansible_version.full is version('2.10', '>=')
+      register: __disable_result_py3
+      when: ansible_facts['python_version'] is version('3', '>=')
 
     - name: Set disable result
       set_fact:
-        __disable_result: "{{ __disable_result_ansible_29
-          if ansible_version.full is version('2.10', '<')
-          else __disable_result_non_ansible_29 }}"
+        __disable_result: "{{ __disable_result_py2
+          if ansible_facts['python_version'] is version('3', '<')
+          else __disable_result_py3 }}"
 
     - name: Add selinux=0 to kernel args
       when:
@@ -105,25 +106,26 @@
     - name: Restore config
       include_tasks: selinux_config_restore.yml
 
-    # ansible 2.9 (ansible-engine) uses the vendored selinux_ansible_29 module,
-    # since ansible.posix cannot be installed there; other systems use the bare
-    # selinux name, which redirects to the latest ansible.posix.selinux.
-    - name: Re-enable selinux and set kernel if disabled - ansible 2.9
-      selinux_ansible_29:
+    # Managed nodes with python 2 (EL7 with ansible 2.9, where ansible.posix
+    # cannot be installed) use the vendored selinux_python_27 module, which
+    # retains python 2 support; python 3 nodes use the bare selinux name, which
+    # redirects to the latest ansible.posix.selinux.
+    - name: Re-enable selinux and set kernel if disabled - python 2
+      selinux_python_27:
         state: "{{ __state_before }}"
         policy: "{{ __type_before }}"
         update_kernel_param: "{{ true if ansible_facts['os_family'] == 'RedHat' and
           ansible_facts['distribution_major_version'] is version('8', '>=')
           else omit }}"
-      register: __enable_result_ansible_29
+      register: __enable_result_py2
       when:
         - __disable_result.reboot_required
-        - ansible_version.full is version('2.10', '<')
+        - ansible_facts['python_version'] is version('3', '<')
 
     # Bare name (not FQCN): an unresolvable FQCN aborts play parsing on ansible
-    # 2.9 even when the task is skipped. The bare selinux name resolves to the
-    # ansible 2.9 builtin (skipped here) and redirects to ansible.posix.selinux
-    # elsewhere.
+    # 2.9 even when the task is skipped, so the bare name is used. This runs
+    # only on managed nodes with python 3, where the bare selinux name resolves
+    # to the latest ansible.posix.selinux.
     - name: Re-enable selinux and set kernel if disabled
       selinux:  # noqa fqcn
         state: "{{ __state_before }}"
@@ -131,16 +133,16 @@
         update_kernel_param: "{{ true if ansible_facts['os_family'] == 'RedHat' and
           ansible_facts['distribution_major_version'] is version('8', '>=')
           else omit }}"
-      register: __enable_result_non_ansible_29
+      register: __enable_result_py3
       when:
         - __disable_result.reboot_required
-        - ansible_version.full is version('2.10', '>=')
+        - ansible_facts['python_version'] is version('3', '>=')
 
     - name: Set enable result
       set_fact:
-        __enable_result: "{{ __enable_result_ansible_29
-          if ansible_version.full is version('2.10', '<')
-          else __enable_result_non_ansible_29 }}"
+        __enable_result: "{{ __enable_result_py2
+          if ansible_facts['python_version'] is version('3', '<')
+          else __enable_result_py3 }}"
 
     - name: Remove selinux=0 from kernel args
       when:

@@ -12,7 +12,7 @@ __metaclass__ = type
 
 DOCUMENTATION = r"""
 ---
-module: seboolean_ansible_29
+module: seboolean_python_27
 short_description: Toggles SELinux booleans
 description:
      - Toggles SELinux booleans.
@@ -49,7 +49,7 @@ author:
 
 EXAMPLES = r"""
 - name: Set httpd_can_network_connect flag on and keep it persistent across reboots
-  seboolean_ansible_29:
+  seboolean_python_27:
     name: httpd_can_network_connect
     state: true
     persistent: true
