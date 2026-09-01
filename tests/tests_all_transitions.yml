@@ -114,9 +114,7 @@
       selinux_python_27:
         state: "{{ __state_before }}"
         policy: "{{ __type_before }}"
-        update_kernel_param: "{{ true if ansible_facts['os_family'] == 'RedHat' and
-          ansible_facts['distribution_major_version'] is version('8', '>=')
-          else omit }}"
+        update_kernel_param: "{{ true if __test_update_kernel_param else omit }}"
       register: __enable_result_py2
       when:
         - __disable_result.reboot_required
@@ -130,9 +128,7 @@
       selinux:  # noqa fqcn
         state: "{{ __state_before }}"
         policy: "{{ __type_before }}"
-        update_kernel_param: "{{ true if ansible_facts['os_family'] == 'RedHat' and
-          ansible_facts['distribution_major_version'] is version('8', '>=')
-          else omit }}"
+        update_kernel_param: "{{ true if __test_update_kernel_param else omit }}"
       register: __enable_result_py3
       when:
         - __disable_result.reboot_required
