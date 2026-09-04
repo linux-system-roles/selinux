@@ -1,0 +1,23 @@
+---
+# Shared helper included from main.yml with include_tasks. The selogin module
+# arguments are passed in as the __selinux_selogin_args dict; the loop is handled
+# by the parent include_tasks task. include_tasks is dynamic: its tasks are only
+# parsed when the include runs, and a task skipped by its "when" (the
+# community.general module on ansible 2.9) never has its FQCN resolved, so it
+# cannot abort play parsing the way it would in a statically parsed task file.
+
+# On managed nodes with python < 3.7, the latest community.general.selogin
+# fails to import ("from __future__ import annotations" requires python >=
+# 3.7), so use the dependency-free vendored selogin_python_36 module.
+- name: Set linux user to SELinux user mapping - python 3.6
+  selogin_python_36: "{{ __selinux_selogin_args }}"  # noqa args[module]
+  notify: __selinux_reload_policy
+  when:
+    - not (ansible_facts['python_version'] is version('3.7', '>='))
+
+# On managed nodes with python >= 3.7, use community.general.selogin.
+- name: Set linux user to SELinux user mapping
+  community.general.selogin: "{{ __selinux_selogin_args }}"  # noqa args[module]
+  notify: __selinux_reload_policy
+  when:
+    - ansible_facts['python_version'] is version('3.7', '>=')

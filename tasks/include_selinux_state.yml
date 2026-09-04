@@ -1,0 +1,31 @@
+---
+# Shared helper included from main.yml with include_tasks. The selinux module
+# arguments are passed in as the __selinux_state_args dict. include_tasks is
+# dynamic: its tasks are only parsed when the include runs, and a task skipped
+# by its "when" (the ansible.posix module on ansible 2.9) never has its FQCN
+# resolved, so it cannot abort play parsing the way it would in a statically
+# parsed task file.
+
+# On managed nodes with python 2 (EL7 with ansible 2.9, where the ansible.posix
+# collection cannot be installed), use the dependency-free vendored
+# selinux_python_27 module, which retains python 2 support.
+- name: Set permanent SELinux state - python 2
+  selinux_python_27: "{{ __selinux_state_args }}"  # noqa args[module]
+  register: __selinux_state_py2
+  when:
+    - ansible_facts['python_version'] is version('3', '<')
+
+# On managed nodes with python 3, use ansible.posix.selinux.
+- name: Set permanent SELinux state
+  ansible.posix.selinux: "{{ __selinux_state_args }}"  # noqa args[module]
+  register: __selinux_state_py3
+  when:
+    - ansible_facts['python_version'] is version('3', '>=')
+
+# Only one of the tasks above runs; the other is skipped. Coalesce into a single
+# output fact for the caller.
+- name: Consolidate SELinux state module output
+  set_fact:
+    __selinux_state_output: "{{ __selinux_state_py2
+      if not (__selinux_state_py2.skipped | d(false))
+      else __selinux_state_py3 }}"
