@@ -1,0 +1,17 @@
+---
+# sefcontext module call split by python version; args come from
+# __selinux_sefcontext_args.
+
+# python < 3.7: the latest community.general.sefcontext needs python >= 3.7 to
+# import, so use the vendored sefcontext_python_36 copy.
+- name: Set SELinux file contexts - python 3.6
+  sefcontext_python_36: "{{ __selinux_sefcontext_args }}"  # noqa args[module]
+  when:
+    - not (ansible_facts['python_version'] is version('3.7', '>='))
+
+# python >= 3.7: bare name, not FQCN, because an unresolvable FQCN aborts play
+# parsing on ansible 2.9 even when skipped; resolves to community.general.sefcontext.
+- name: Set SELinux file contexts
+  sefcontext: "{{ __selinux_sefcontext_args }}"  # noqa fqcn args[module]
+  when:
+    - ansible_facts['python_version'] is version('3.7', '>=')

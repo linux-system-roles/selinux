@@ -1,0 +1,19 @@
+---
+# selogin module call split by python version; args come from
+# __selinux_selogin_args.
+
+# python < 3.7: the latest community.general.selogin needs python >= 3.7 to
+# import, so use the vendored selogin_python_36 copy.
+- name: Set linux user to SELinux user mapping - python 3.6
+  selogin_python_36: "{{ __selinux_selogin_args }}"  # noqa args[module]
+  notify: __selinux_reload_policy
+  when:
+    - not (ansible_facts['python_version'] is version('3.7', '>='))
+
+# python >= 3.7: bare name, not FQCN, because an unresolvable FQCN aborts play
+# parsing on ansible 2.9 even when skipped; resolves to community.general.selogin.
+- name: Set linux user to SELinux user mapping
+  selogin: "{{ __selinux_selogin_args }}"  # noqa fqcn args[module]
+  notify: __selinux_reload_policy
+  when:
+    - ansible_facts['python_version'] is version('3.7', '>=')
