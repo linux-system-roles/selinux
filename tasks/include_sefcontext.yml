@@ -1,0 +1,21 @@
+---
+# Shared helper included from main.yml with include_tasks. The sefcontext module
+# arguments are passed in as the __selinux_sefcontext_args dict; the loop is
+# handled by the parent include_tasks task. include_tasks is dynamic: its tasks
+# are only parsed when the include runs, and a task skipped by its "when" (the
+# community.general module on ansible 2.9) never has its FQCN resolved, so it
+# cannot abort play parsing the way it would in a statically parsed task file.
+
+# On managed nodes with python < 3.7, the latest community.general.sefcontext
+# fails to import ("from __future__ import annotations" requires python >=
+# 3.7), so use the dependency-free vendored sefcontext_python_36 module.
+- name: Set SELinux file contexts - python 3.6
+  sefcontext_python_36: "{{ __selinux_sefcontext_args }}"  # noqa args[module]
+  when:
+    - not (ansible_facts['python_version'] is version('3.7', '>='))
+
+# On managed nodes with python >= 3.7, use community.general.sefcontext.
+- name: Set SELinux file contexts
+  community.general.sefcontext: "{{ __selinux_sefcontext_args }}"  # noqa args[module]
+  when:
+    - ansible_facts['python_version'] is version('3.7', '>=')

@@ -44,33 +44,21 @@
           ansible_facts['distribution_major_version'] is version('8', '>=') and
           ansible_version.full is version('2.10', '>=') }}"
 
-    # Managed nodes with python 2 (EL7 with ansible 2.9, where ansible.posix
-    # cannot be installed) use the vendored selinux_python_27 module, which
-    # retains python 2 support; python 3 nodes use the bare selinux name, which
-    # redirects to the latest ansible.posix.selinux.
-    - name: Disable selinux and set kernel - python 2
-      selinux_python_27:
-        state: disabled
-        update_kernel_param: "{{ true if __test_update_kernel_param else omit }}"
-      register: __disable_result_py2
-      when: ansible_facts['python_version'] is version('3', '<')
-
-    # Bare name (not FQCN): an unresolvable FQCN aborts play parsing on ansible
-    # 2.9 even when the task is skipped, so the bare name is used. This runs
-    # only on managed nodes with python 3, where the bare selinux name resolves
-    # to the latest ansible.posix.selinux.
+    # Reuse the role's include_selinux_state.yml helper, which picks the vendored
+    # (python 2) or ansible.posix (python 3) selinux module and coalesces the
+    # result into __selinux_state_output.
     - name: Disable selinux and set kernel
-      selinux:  # noqa fqcn
-        state: disabled
-        update_kernel_param: "{{ true if __test_update_kernel_param else omit }}"
-      register: __disable_result_py3
-      when: ansible_facts['python_version'] is version('3', '>=')
+      include_role:
+        name: linux-system-roles.selinux
+        tasks_from: include_selinux_state.yml
+      vars:
+        __selinux_state_args:
+          state: disabled
+          update_kernel_param: "{{ true if __test_update_kernel_param else omit }}"
 
     - name: Set disable result
       set_fact:
-        __disable_result: "{{ __disable_result_py2
-          if ansible_facts['python_version'] is version('3', '<')
-          else __disable_result_py3 }}"
+        __disable_result: "{{ __selinux_state_output }}"
 
     - name: Add selinux=0 to kernel args
       when:
@@ -106,39 +94,25 @@
     - name: Restore config
       include_tasks: selinux_config_restore.yml
 
-    # Managed nodes with python 2 (EL7 with ansible 2.9, where ansible.posix
-    # cannot be installed) use the vendored selinux_python_27 module, which
-    # retains python 2 support; python 3 nodes use the bare selinux name, which
-    # redirects to the latest ansible.posix.selinux.
-    - name: Re-enable selinux and set kernel if disabled - python 2
-      selinux_python_27:
-        state: "{{ __state_before }}"
-        policy: "{{ __type_before }}"
-        update_kernel_param: "{{ true if __test_update_kernel_param else omit }}"
-      register: __enable_result_py2
-      when:
-        - __disable_result.reboot_required
-        - ansible_facts['python_version'] is version('3', '<')
-
-    # Bare name (not FQCN): an unresolvable FQCN aborts play parsing on ansible
-    # 2.9 even when the task is skipped, so the bare name is used. This runs
-    # only on managed nodes with python 3, where the bare selinux name resolves
-    # to the latest ansible.posix.selinux.
+    # Reuse the role's include_selinux_state.yml helper, which picks the vendored
+    # (python 2) or ansible.posix (python 3) selinux module and coalesces the
+    # result into __selinux_state_output.
     - name: Re-enable selinux and set kernel if disabled
-      selinux:  # noqa fqcn
-        state: "{{ __state_before }}"
-        policy: "{{ __type_before }}"
-        update_kernel_param: "{{ true if __test_update_kernel_param else omit }}"
-      register: __enable_result_py3
+      include_role:
+        name: linux-system-roles.selinux
+        tasks_from: include_selinux_state.yml
+      vars:
+        __selinux_state_args:
+          state: "{{ __state_before }}"
+          policy: "{{ __type_before }}"
+          update_kernel_param: "{{ true if __test_update_kernel_param else omit }}"
       when:
         - __disable_result.reboot_required
-        - ansible_facts['python_version'] is version('3', '>=')
 
     - name: Set enable result
       set_fact:
-        __enable_result: "{{ __enable_result_py2
-          if ansible_facts['python_version'] is version('3', '<')
-          else __enable_result_py3 }}"
+        __enable_result: "{{ __selinux_state_output
+          if __disable_result.reboot_required else {} }}"
 
     - name: Remove selinux=0 from kernel args
       when:
