@@ -29,6 +29,12 @@ options:
       - SELinux module priority, 0 means SELinux store default (400) with "path" and "enabled", otherwise all priorities
     type: int
     default: 0
+  ignore_module_cache:
+    description:
+      - Recompile high-level language modules instead of using cached CIL files.
+      - This is equivalent to using C(semodule --ignore-module-cache).
+    type: bool
+    default: false
   state:
     description:
       - Desired module state
@@ -58,6 +64,12 @@ EXAMPLES = r"""
   local_semodule:
     path: mymodule.pp
     state: enabled
+
+- name: Install mymodule.pp without using the module cache
+  local_semodule:
+    path: mymodule.pp
+    state: enabled
+    ignore_module_cache: true
 
 - name: Install mymodule.pp with default priority (300)
   local_semodule:
@@ -126,7 +138,7 @@ def init_libsemanage(store=""):
     return sh
 
 
-def semodule_install(module, path, priority, sh):
+def semodule_install(module, path, priority, ignore_module_cache, sh):
     """Install a local policy module
 
     :type module: AnsibleModule
@@ -137,6 +149,9 @@ def semodule_install(module, path, priority, sh):
 
     :type priority: int
     :param priority: SELinux module priority, 0 - use SELinux module store default (400)
+
+    :type ignore_module_cache: bool
+    :param ignore_module_cache: recompile HLL modules instead of using cached CIL files
     """
 
     path_checksum = "sha256:" + module.sha256(path)
@@ -204,6 +219,15 @@ def semodule_install(module, path, priority, sh):
 
         if priority != 0:
             semanage.semanage_set_default_priority(sh, priority)
+
+    if ignore_module_cache:
+        try:
+            semanage.semanage_set_ignore_module_cache(sh, 1)
+        except AttributeError:
+            module.fail_json(
+                msg="Installed python3-libsemanage does not support "
+                "ignore_module_cache"
+            )
 
     semanage.semanage_module_install_file(sh, path)
     semanage.semanage_commit(sh)
@@ -335,6 +359,7 @@ def main():
             path=dict(type="str"),
             name=dict(type="str"),
             priority=dict(type="int", default=0),
+            ignore_module_cache=dict(type="bool", default=False),
             state=dict(
                 type="str", default="enabled", choices=["absent", "disabled", "enabled"]
             ),
@@ -357,6 +382,7 @@ def main():
     path = module.params["path"]
     name = module.params["name"]
     priority = module.params["priority"]
+    ignore_module_cache = module.params["ignore_module_cache"]
     state = module.params["state"]
     store = module.params["store"]
 
@@ -377,7 +403,7 @@ def main():
 
     if state == "enabled":
         if path is not None:
-            result = semodule_install(module, path, priority, sh)
+            result = semodule_install(module, path, priority, ignore_module_cache, sh)
         elif name is not None:
             result = semodule_enable(module, name, 1, sh)
         else:

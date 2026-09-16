@@ -171,6 +171,7 @@ which would contain a `list` of `dict`, e.g.:
 selinux_modules:
   - path: localmodule.pp
     state: enabled
+    ignore_module_cache: true
   - path: localmodule.cil
     priority: 350
     state: enabled
@@ -188,6 +189,9 @@ selinux_modules:
 * `priority`: SELinux module priority, default is *"400"*. *"100"* is used for
   modules installed from *selinux-policy* packages, *"200"* for other modules
   installed from 3rd party rpms, *"300"* is used by SETroubleshoot
+* `ignore_module_cache`: recompile high-level language modules instead of using
+  cached CIL files, equivalent to `semodule --ignore-module-cache`; defaults to
+  `false`
 * `state`: one of the following values
   * `enabled`: install or enable module
   * `disabled`: disable module
