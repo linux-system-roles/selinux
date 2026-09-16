@@ -354,6 +354,7 @@ def semodule_remove(module, name, priority, sh):
 
 
 def main():
+    """Parse module arguments and apply the requested SELinux module state."""
     module = AnsibleModule(
         argument_spec=dict(
             path=dict(type="str"),
