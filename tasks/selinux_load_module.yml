@@ -55,6 +55,8 @@
             path: "{{ tempdir.path }}/{{ __selinux_item.path | basename }}"
             priority: "{{ priority }}"
             state: enabled
+            ignore_module_cache: "{{
+              __selinux_item.ignore_module_cache | d(false) }}"
           register: __selinux_policy_installed
           when: tempdir.path is defined
       always:

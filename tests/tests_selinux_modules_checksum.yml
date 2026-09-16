@@ -25,7 +25,8 @@
       when: __run_selinux_modules_checksum
       vars:
         selinux_modules:
-          - {path: "selinux_modules/linux-system-roles-selinux-test-a.pp"}
+          - {path: "selinux_modules/linux-system-roles-selinux-test-a.pp",
+             ignore_module_cache: true}
       block:
         - name: Execute the role
           include_tasks: tasks/run_role_with_clear_facts.yml
