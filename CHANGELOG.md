@@ -1,6 +1,31 @@
 Changelog
 =========
 
+[1.13.1] - 2026-09-17
+--------------------
+
+### Bug Fixes
+
+- fix: Vendor ansible-2.9-compatible SELinux modules (#374)
+- fix: Select SELinux modules by managed node python version (#377)
+- fix: Move SELinux module calls to shared include task files (#387)
+
+### Other Changes
+
+- ci: use commit hash for github action, add persist-credentials false [citest_skip] (#371)
+- ci: refactor build_docs so that pandoc runs in isolated read-only job [citest_skip] (#372)
+- ci: use exact match for systemroller instead of contains [citest_skip] (#373)
+- ci(build_docs): fix pandoc container syntax [citest_skip] (#376)
+- ci: [citest_skip] bump github/codeql-action/autobuild from 4.37.4 to 4.37.9 (#378)
+- ci: [citest_skip] bump myrotvorets/set-commit-status-action from 2774e1f040c82ed70a76b4b5cd53bb11ffaedd0a to c0f880c99d91381c6fdb97726f03feb8004409b4 (#379)
+- ci: [citest_skip] bump codespell-project/actions-codespell from 2.1 to 2.2 (#380)
+- ci: [citest_skip] bump github/codeql-action/analyze from 4.37.4 to 4.37.9 (#381)
+- ci: [citest_skip] bump actions/download-artifact from 7.0.0 to 8.0.1 (#382)
+- refactor: Relax collection constraints, gate vendored modules by python version, update ci versions [citest_skip] (#383)
+- ci: do not run ci tests by default, require citest comment or label [citest_skip] (#384)
+- ci: replace weekly_ci with periodic_ci, stagger schedules [citest_skip] (#385)
+- ci: update status when action triggered by issue comment (#386)
+
 [1.13.0] - 2026-08-06
 --------------------
 
