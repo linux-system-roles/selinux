@@ -1,0 +1,108 @@
+---
+- name: Test ignoring the SELinux module cache
+  hosts: all
+  tags:
+    # SELinux is not active during container builds, this test covers runtime behaviour
+    - tests::booted
+  tasks:
+    - name: Ensure facts used by test
+      setup:
+        gather_subset: min
+
+    - name: Set condition for testing the module cache
+      set_fact:
+        __run_selinux_modules_ignore_cache: "{{
+          ansible_facts['distribution'] == 'Fedora' or
+          (ansible_facts['distribution'] in ['CentOS', 'RedHat', 'Rocky'] and
+           ansible_facts['distribution_version'] is version('8.6', '>=')) }}"
+
+    - name: Test installation with a corrupted module cache
+      when: __run_selinux_modules_ignore_cache
+      block:
+        - name: Remove modules left by an interrupted test run
+          command: "semodule -C -r {{ item }}"
+          loop:
+            - linux-system-roles-selinux-test-a
+            - linux-system-roles-selinux-test-c
+          failed_when: false
+          changed_when: false
+
+        - name: Install module used to populate the cache
+          include_tasks: tasks/run_role_with_clear_facts.yml
+          vars:
+            selinux_modules:
+              - path: selinux_modules/linux-system-roles-selinux-test-a.pp
+
+        - name: Set module cache path
+          set_fact:
+            __selinux_test_module_cache: "{{ __selinux_test_store_root ~
+              '/targeted/active/modules/400/' ~
+              'linux-system-roles-selinux-test-a/cil' }}"
+          vars:
+            __selinux_test_store_root: "{{ __selinux_is_ostree | d(false) |
+              ternary('/etc/selinux', '/var/lib/selinux') }}"
+
+        - name: Corrupt cached CIL
+          copy:
+            dest: "{{ __selinux_test_module_cache }}"
+            content: "invalid CIL\n"
+            owner: root
+            group: root
+            mode: "0600"
+
+        - name: Create temporary directory
+          tempfile:
+            state: directory
+            prefix: linux_system_role.selinux.ignore_cache
+          register: __selinux_test_tempdir
+
+        - name: Copy module used to trigger a policy rebuild
+          copy:
+            src: selinux_modules/linux-system-roles-selinux-test-c.pp
+            dest: "{{ __selinux_test_tempdir.path }}/"
+            mode: preserve
+
+        - name: Install module without ignoring the cache
+          command: >-
+            semodule -i
+            {{ __selinux_test_tempdir.path }}/linux-system-roles-selinux-test-c.pp
+          register: __selinux_install_without_ignore_cache
+          failed_when: false
+          changed_when: false
+
+        - name: Verify installation failed because of the corrupted cache
+          assert:
+            that:
+              - __selinux_install_without_ignore_cache.rc != 0
+              - >-
+                'linux-system-roles-selinux-test-a' in
+                (__selinux_install_without_ignore_cache.stdout ~
+                 __selinux_install_without_ignore_cache.stderr)
+
+        - name: Install module while ignoring the cache
+          include_tasks: tasks/run_role_with_clear_facts.yml
+          vars:
+            selinux_modules:
+              - path: selinux_modules/linux-system-roles-selinux-test-c.pp
+                ignore_module_cache: true
+
+        - name: Verify module was installed
+          assert:
+            that:
+              - >-
+                selinux_installed_modules
+                ['linux-system-roles-selinux-test-c']['400']['enabled'] != 0
+      always:
+        - name: Remove test modules and rebuild the module cache
+          command: "semodule -C -r {{ item }}"
+          loop:
+            - linux-system-roles-selinux-test-a
+            - linux-system-roles-selinux-test-c
+          ignore_errors: true  # noqa ignore-errors
+          changed_when: false
+
+        - name: Remove temporary directory
+          file:
+            path: "{{ __selinux_test_tempdir.path | d('') }}"
+            state: absent
+          when: __selinux_test_tempdir is defined
