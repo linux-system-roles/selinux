@@ -1,0 +1,711 @@
+# SPDX-License-Identifier: MIT
+---
+- name: Verify invalid parameters are rejected
+  hosts: all
+  tasks:
+    - name: Run invalid input tests
+      block:
+        # ====================================================
+        # Section 1: Verify role works with valid defaults
+        # ====================================================
+        - name: Run role with valid defaults
+          ansible.builtin.include_tasks: tasks/run_role_with_clear_facts.yml
+
+        - name: Mark valid defaults succeeded
+          ansible.builtin.set_fact:
+            __valid_defaults_succeeded: true
+
+        - name: Assert role completed with valid defaults
+          ansible.builtin.assert:
+            that:
+              - __valid_defaults_succeeded | default(false)
+            fail_msg: >-
+              Role should succeed with default parameters
+
+        # ====================================================
+        # Section 2: argument_specs validation (Ansible 2.11+)
+        # ====================================================
+        - name: Run argument specs validation tests
+          when: ansible_version.full is version("2.11", ">=")
+          block:
+            # --- Test: selinux_booleans list of dicts, required fields ---
+            - name: Argument specs reject selinux_booleans as a string
+              block:
+                - name: Run role with selinux_booleans as a string
+                  ansible.builtin.include_tasks: tasks/run_role_with_clear_facts.yml
+                  vars:
+                    selinux_booleans: not_a_list
+              rescue:
+                - name: Mark selinux_booleans type rejected
+                  ansible.builtin.set_fact:
+                    __invalid_input_booleans_type_failed: true
+
+            - name: Assert selinux_booleans as a string was rejected
+              ansible.builtin.assert:
+                that:
+                  - __invalid_input_booleans_type_failed | default(false)
+                fail_msg: >-
+                  argument_specs should reject selinux_booleans when it is
+                  not a list of dictionaries
+
+            - name: Argument specs reject missing name in selinux_booleans
+              block:
+                - name: Run role with selinux_booleans missing name
+                  ansible.builtin.include_tasks: tasks/run_role_with_clear_facts.yml
+                  vars:
+                    selinux_booleans:
+                      - state: true
+              rescue:
+                - name: Mark missing name rejected
+                  ansible.builtin.set_fact:
+                    __invalid_input_booleans_missing_name_failed: true
+                  when: >-
+                    'missing required arguments' in
+                    (ansible_failed_result | default({}) | to_json)
+
+            - name: Assert missing name in selinux_booleans was rejected
+              ansible.builtin.assert:
+                that:
+                  - __invalid_input_booleans_missing_name_failed | default(false)
+                fail_msg: >-
+                  argument_specs should reject selinux_booleans entries
+                  missing the required name field
+
+            - name: Argument specs reject missing state in selinux_booleans
+              block:
+                - name: Run role with selinux_booleans missing state
+                  ansible.builtin.include_tasks: tasks/run_role_with_clear_facts.yml
+                  vars:
+                    selinux_booleans:
+                      - name: httpd_can_network_connect
+              rescue:
+                - name: Mark missing state rejected
+                  ansible.builtin.set_fact:
+                    __invalid_input_booleans_missing_state_failed: true
+                  when: >-
+                    'missing required arguments' in
+                    (ansible_failed_result | default({}) | to_json)
+
+            - name: Assert missing state in selinux_booleans was rejected
+              ansible.builtin.assert:
+                that:
+                  - __invalid_input_booleans_missing_state_failed | default(false)
+                fail_msg: >-
+                  argument_specs should reject selinux_booleans entries
+                  missing the required state field
+
+            - name: Argument specs reject non-boolean state in selinux_booleans
+              block:
+                - name: Run role with selinux_booleans state as a string
+                  ansible.builtin.include_tasks: tasks/run_role_with_clear_facts.yml
+                  vars:
+                    selinux_booleans:
+                      - name: httpd_can_network_connect
+                        state: not_a_bool
+              rescue:
+                - name: Mark invalid state type rejected
+                  ansible.builtin.set_fact:
+                    __invalid_input_booleans_state_type_failed: true
+
+            - name: Assert non-boolean state in selinux_booleans was rejected
+              ansible.builtin.assert:
+                that:
+                  - __invalid_input_booleans_state_type_failed | default(false)
+                fail_msg: >-
+                  argument_specs should reject selinux_booleans state values
+                  that are not booleans
+
+            # --- Test: selinux_fcontexts required fields and choices ---
+            - name: Argument specs reject missing target in selinux_fcontexts
+              block:
+                - name: Run role with selinux_fcontexts missing target
+                  ansible.builtin.include_tasks: tasks/run_role_with_clear_facts.yml
+                  vars:
+                    selinux_fcontexts:
+                      - setype: user_home_dir_t
+              rescue:
+                - name: Mark missing target rejected
+                  ansible.builtin.set_fact:
+                    __invalid_input_fcontexts_missing_target_failed: true
+                  when: >-
+                    'missing required arguments' in
+                    (ansible_failed_result | default({}) | to_json)
+
+            - name: Assert missing target in selinux_fcontexts was rejected
+              ansible.builtin.assert:
+                that:
+                  - __invalid_input_fcontexts_missing_target_failed | default(false)
+                fail_msg: >-
+                  argument_specs should reject selinux_fcontexts entries
+                  missing the required target field
+
+            - name: Argument specs reject invalid ftype choice
+              block:
+                - name: Run role with invalid ftype
+                  ansible.builtin.include_tasks: tasks/run_role_with_clear_facts.yml
+                  vars:
+                    selinux_fcontexts:
+                      - target: /tmp/test_dir(/.*)?
+                        setype: user_home_dir_t
+                        ftype: invalid_ftype
+              rescue:
+                - name: Mark invalid ftype rejected
+                  ansible.builtin.set_fact:
+                    __invalid_input_fcontexts_ftype_failed: true
+                  when: >-
+                    'must be one of' in
+                    (ansible_failed_result | default({}) | to_json)
+
+            - name: Assert invalid ftype was rejected
+              ansible.builtin.assert:
+                that:
+                  - __invalid_input_fcontexts_ftype_failed | default(false)
+                fail_msg: >-
+                  argument_specs should reject selinux_fcontexts ftype
+                  values outside the allowed set
+
+            - name: Argument specs reject invalid state choice in selinux_fcontexts
+              block:
+                - name: Run role with invalid selinux_fcontexts state
+                  ansible.builtin.include_tasks: tasks/run_role_with_clear_facts.yml
+                  vars:
+                    selinux_fcontexts:
+                      - target: /tmp/test_dir(/.*)?
+                        setype: user_home_dir_t
+                        state: not_a_valid_state
+              rescue:
+                - name: Mark invalid fcontexts state rejected
+                  ansible.builtin.set_fact:
+                    __invalid_input_fcontexts_state_failed: true
+                  when: >-
+                    'must be one of' in
+                    (ansible_failed_result | default({}) | to_json)
+
+            - name: Assert invalid state in selinux_fcontexts was rejected
+              ansible.builtin.assert:
+                that:
+                  - __invalid_input_fcontexts_state_failed | default(false)
+                fail_msg: >-
+                  argument_specs should reject selinux_fcontexts state
+                  values outside the allowed set
+
+            # --- Test: selinux_logins required fields and choices ---
+            - name: Argument specs reject missing login in selinux_logins
+              block:
+                - name: Run role with selinux_logins missing login
+                  ansible.builtin.include_tasks: tasks/run_role_with_clear_facts.yml
+                  vars:
+                    selinux_logins:
+                      - seuser: staff_u
+              rescue:
+                - name: Mark missing login rejected
+                  ansible.builtin.set_fact:
+                    __invalid_input_logins_missing_login_failed: true
+                  when: >-
+                    'missing required arguments' in
+                    (ansible_failed_result | default({}) | to_json)
+
+            - name: Assert missing login in selinux_logins was rejected
+              ansible.builtin.assert:
+                that:
+                  - __invalid_input_logins_missing_login_failed | default(false)
+                fail_msg: >-
+                  argument_specs should reject selinux_logins entries
+                  missing the required login field
+
+            - name: Argument specs reject invalid state choice in selinux_logins
+              block:
+                - name: Run role with invalid selinux_logins state
+                  ansible.builtin.include_tasks: tasks/run_role_with_clear_facts.yml
+                  vars:
+                    selinux_logins:
+                      - login: sar-user
+                        seuser: staff_u
+                        state: not_a_valid_state
+              rescue:
+                - name: Mark invalid logins state rejected
+                  ansible.builtin.set_fact:
+                    __invalid_input_logins_state_failed: true
+                  when: >-
+                    'must be one of' in
+                    (ansible_failed_result | default({}) | to_json)
+
+            - name: Assert invalid state in selinux_logins was rejected
+              ansible.builtin.assert:
+                that:
+                  - __invalid_input_logins_state_failed | default(false)
+                fail_msg: >-
+                  argument_specs should reject selinux_logins state values
+                  outside the allowed set
+
+            # --- Test: selinux_ports required fields and choices ---
+            - name: Argument specs reject missing ports in selinux_ports
+              block:
+                - name: Run role with selinux_ports missing ports
+                  ansible.builtin.include_tasks: tasks/run_role_with_clear_facts.yml
+                  vars:
+                    selinux_ports:
+                      - setype: ssh_port_t
+              rescue:
+                - name: Mark missing ports rejected
+                  ansible.builtin.set_fact:
+                    __invalid_input_ports_missing_ports_failed: true
+                  when: >-
+                    'missing required arguments' in
+                    (ansible_failed_result | default({}) | to_json)
+
+            - name: Assert missing ports in selinux_ports was rejected
+              ansible.builtin.assert:
+                that:
+                  - __invalid_input_ports_missing_ports_failed | default(false)
+                fail_msg: >-
+                  argument_specs should reject selinux_ports entries
+                  missing the required ports field
+
+            - name: Argument specs reject missing setype in selinux_ports
+              block:
+                - name: Run role with selinux_ports missing setype
+                  ansible.builtin.include_tasks: tasks/run_role_with_clear_facts.yml
+                  vars:
+                    selinux_ports:
+                      - ports: "22100"
+              rescue:
+                - name: Mark missing setype rejected
+                  ansible.builtin.set_fact:
+                    __invalid_input_ports_missing_setype_failed: true
+                  when: >-
+                    'missing required arguments' in
+                    (ansible_failed_result | default({}) | to_json)
+
+            - name: Assert missing setype in selinux_ports was rejected
+              ansible.builtin.assert:
+                that:
+                  - __invalid_input_ports_missing_setype_failed | default(false)
+                fail_msg: >-
+                  argument_specs should reject selinux_ports entries
+                  missing the required setype field
+
+            - name: Argument specs reject invalid proto choice in selinux_ports
+              block:
+                - name: Run role with invalid selinux_ports proto
+                  ansible.builtin.include_tasks: tasks/run_role_with_clear_facts.yml
+                  vars:
+                    selinux_ports:
+                      - ports: "22100"
+                        proto: not_a_valid_proto
+                        setype: ssh_port_t
+              rescue:
+                - name: Mark invalid proto rejected
+                  ansible.builtin.set_fact:
+                    __invalid_input_ports_proto_failed: true
+                  when: >-
+                    'must be one of' in
+                    (ansible_failed_result | default({}) | to_json)
+
+            - name: Assert invalid proto in selinux_ports was rejected
+              ansible.builtin.assert:
+                that:
+                  - __invalid_input_ports_proto_failed | default(false)
+                fail_msg: >-
+                  argument_specs should reject selinux_ports proto values
+                  outside the allowed set
+
+            # --- Test: selinux_modules choices ---
+            - name: Argument specs reject invalid state choice in selinux_modules
+              block:
+                - name: Run role with invalid selinux_modules state
+                  ansible.builtin.include_tasks: tasks/run_role_with_clear_facts.yml
+                  vars:
+                    selinux_modules:
+                      - name: mymodule
+                        state: not_a_valid_state
+              rescue:
+                - name: Mark invalid modules state rejected
+                  ansible.builtin.set_fact:
+                    __invalid_input_modules_state_failed: true
+                  when: >-
+                    'must be one of' in
+                    (ansible_failed_result | default({}) | to_json)
+
+            - name: Assert invalid state in selinux_modules was rejected
+              ansible.builtin.assert:
+                that:
+                  - __invalid_input_modules_state_failed | default(false)
+                fail_msg: >-
+                  argument_specs should reject selinux_modules state values
+                  outside the allowed set
+
+            - name: Argument specs reject non-integer priority in selinux_modules
+              block:
+                - name: Run role with non-integer selinux_modules priority
+                  ansible.builtin.include_tasks: tasks/run_role_with_clear_facts.yml
+                  vars:
+                    selinux_modules:
+                      - name: mymodule
+                        priority: not_an_int
+              rescue:
+                - name: Mark invalid priority rejected
+                  ansible.builtin.set_fact:
+                    __invalid_input_modules_priority_failed: true
+
+            - name: Assert non-integer priority in selinux_modules was rejected
+              ansible.builtin.assert:
+                that:
+                  - __invalid_input_modules_priority_failed | default(false)
+                fail_msg: >-
+                  argument_specs should reject selinux_modules priority
+                  values that are not integers
+
+            # --- Test: simple boolean parameters ---
+            - name: Argument specs reject invalid selinux_all_purge type
+              block:
+                - name: Run role with non-boolean selinux_all_purge
+                  ansible.builtin.include_tasks: tasks/run_role_with_clear_facts.yml
+                  vars:
+                    selinux_all_purge: not_a_bool
+              rescue:
+                - name: Mark invalid selinux_all_purge rejected
+                  ansible.builtin.set_fact:
+                    __invalid_input_all_purge_type_failed: true
+
+            - name: Assert invalid selinux_all_purge type was rejected
+              ansible.builtin.assert:
+                that:
+                  - __invalid_input_all_purge_type_failed | default(false)
+                fail_msg: >-
+                  argument_specs should reject selinux_all_purge values
+                  that are not booleans
+
+            - name: Argument specs reject invalid selinux_booleans_purge type
+              block:
+                - name: Run role with non-boolean selinux_booleans_purge
+                  ansible.builtin.include_tasks: tasks/run_role_with_clear_facts.yml
+                  vars:
+                    selinux_booleans_purge: not_a_bool
+              rescue:
+                - name: Mark invalid selinux_booleans_purge rejected
+                  ansible.builtin.set_fact:
+                    __invalid_input_booleans_purge_type_failed: true
+
+            - name: Assert invalid selinux_booleans_purge type was rejected
+              ansible.builtin.assert:
+                that:
+                  - __invalid_input_booleans_purge_type_failed | default(false)
+                fail_msg: >-
+                  argument_specs should reject selinux_booleans_purge values
+                  that are not booleans
+
+            - name: Argument specs reject invalid selinux_fcontexts_purge type
+              block:
+                - name: Run role with non-boolean selinux_fcontexts_purge
+                  ansible.builtin.include_tasks: tasks/run_role_with_clear_facts.yml
+                  vars:
+                    selinux_fcontexts_purge: not_a_bool
+              rescue:
+                - name: Mark invalid selinux_fcontexts_purge rejected
+                  ansible.builtin.set_fact:
+                    __invalid_input_fcontexts_purge_type_failed: true
+
+            - name: Assert invalid selinux_fcontexts_purge type was rejected
+              ansible.builtin.assert:
+                that:
+                  - __invalid_input_fcontexts_purge_type_failed | default(false)
+                fail_msg: >-
+                  argument_specs should reject selinux_fcontexts_purge
+                  values that are not booleans
+
+            - name: Argument specs reject invalid selinux_ports_purge type
+              block:
+                - name: Run role with non-boolean selinux_ports_purge
+                  ansible.builtin.include_tasks: tasks/run_role_with_clear_facts.yml
+                  vars:
+                    selinux_ports_purge: not_a_bool
+              rescue:
+                - name: Mark invalid selinux_ports_purge rejected
+                  ansible.builtin.set_fact:
+                    __invalid_input_ports_purge_type_failed: true
+
+            - name: Assert invalid selinux_ports_purge type was rejected
+              ansible.builtin.assert:
+                that:
+                  - __invalid_input_ports_purge_type_failed | default(false)
+                fail_msg: >-
+                  argument_specs should reject selinux_ports_purge values
+                  that are not booleans
+
+            - name: Argument specs reject invalid selinux_logins_purge type
+              block:
+                - name: Run role with non-boolean selinux_logins_purge
+                  ansible.builtin.include_tasks: tasks/run_role_with_clear_facts.yml
+                  vars:
+                    selinux_logins_purge: not_a_bool
+              rescue:
+                - name: Mark invalid selinux_logins_purge rejected
+                  ansible.builtin.set_fact:
+                    __invalid_input_logins_purge_type_failed: true
+
+            - name: Assert invalid selinux_logins_purge type was rejected
+              ansible.builtin.assert:
+                that:
+                  - __invalid_input_logins_purge_type_failed | default(false)
+                fail_msg: >-
+                  argument_specs should reject selinux_logins_purge values
+                  that are not booleans
+
+        # ====================================================
+        # Section 3: assert_role_vars validation (all versions)
+        # ====================================================
+
+        # --- Test: raw type field with invalid value/type ---
+        - name: Assert rejects selinux_state with an invalid value
+          block:
+            - name: Run role with invalid selinux_state
+              ansible.builtin.include_tasks: tasks/run_role_with_clear_facts.yml
+              vars:
+                selinux_state: not_a_valid_state
+          rescue:
+            - name: Mark invalid selinux_state rejected
+              ansible.builtin.set_fact:
+                __invalid_input_state_choice_failed: true
+              when: >-
+                'selinux_state must be null, disabled, enforcing, or
+                permissive' in
+                (ansible_failed_result | default({}) | to_json)
+
+        - name: Assert invalid selinux_state value was rejected
+          ansible.builtin.assert:
+            that:
+              - __invalid_input_state_choice_failed | default(false)
+            fail_msg: >-
+              assert_role_vars should reject selinux_state values outside
+              the allowed set of null, disabled, enforcing, and permissive
+
+        - name: Assert accepts selinux_state explicitly set to null
+          block:
+            - name: Run role with selinux_state explicitly null
+              ansible.builtin.include_tasks: tasks/run_role_with_clear_facts.yml
+              vars:
+                selinux_state: null
+            - name: Mark explicit null selinux_state succeeded
+              ansible.builtin.set_fact:
+                __valid_state_null_succeeded: true
+          rescue:
+            - name: Fail because explicit null selinux_state should be accepted
+              ansible.builtin.fail:
+                msg: >-
+                  selinux_state: null should be accepted since it is
+                  documented as meaning "the SELinux state is not changed"
+
+        - name: Assert explicit null selinux_state was accepted
+          ansible.builtin.assert:
+            that:
+              - __valid_state_null_succeeded | default(false)
+            fail_msg: >-
+              assert_role_vars should accept selinux_state explicitly set
+              to null
+
+        # --- Test: raw type field with wrong type ---
+        - name: Assert rejects selinux_transactional_update_reboot_ok as a string
+          block:
+            - name: Run role with selinux_transactional_update_reboot_ok as a string
+              ansible.builtin.include_tasks: tasks/run_role_with_clear_facts.yml
+              vars:
+                selinux_transactional_update_reboot_ok: not_a_bool
+          rescue:
+            - name: Mark string transactional_update_reboot_ok rejected
+              ansible.builtin.set_fact:
+                __invalid_input_reboot_ok_string_failed: true
+              when: >-
+                'must be null or a boolean' in
+                (ansible_failed_result | default({}) | to_json)
+
+        - name: Assert selinux_transactional_update_reboot_ok as a string was rejected
+          ansible.builtin.assert:
+            that:
+              - __invalid_input_reboot_ok_string_failed | default(false)
+            fail_msg: >-
+              assert_role_vars should reject
+              selinux_transactional_update_reboot_ok when it is a string
+              instead of null or a boolean
+
+        - name: Assert rejects selinux_transactional_update_reboot_ok as an integer
+          block:
+            - name: Run role with selinux_transactional_update_reboot_ok as an integer
+              ansible.builtin.include_tasks: tasks/run_role_with_clear_facts.yml
+              vars:
+                selinux_transactional_update_reboot_ok: 42
+          rescue:
+            - name: Mark integer transactional_update_reboot_ok rejected
+              ansible.builtin.set_fact:
+                __invalid_input_reboot_ok_int_failed: true
+              when: >-
+                'must be null or a boolean' in
+                (ansible_failed_result | default({}) | to_json)
+
+        - name: Assert selinux_transactional_update_reboot_ok as an integer was rejected
+          ansible.builtin.assert:
+            that:
+              - __invalid_input_reboot_ok_int_failed | default(false)
+            fail_msg: >-
+              assert_role_vars should reject
+              selinux_transactional_update_reboot_ok when it is an integer
+              instead of null or a boolean
+
+        # --- Test: cross-field dependency ---
+        - name: Assert rejects selinux_fcontexts entry missing setype when state is present
+          block:
+            - name: Run role with selinux_fcontexts missing setype
+              ansible.builtin.include_tasks: tasks/run_role_with_clear_facts.yml
+              vars:
+                selinux_fcontexts:
+                  - target: /tmp/test_dir(/.*)?
+                    state: present
+          rescue:
+            - name: Mark missing setype cross-field rejected
+              ansible.builtin.set_fact:
+                __invalid_input_fcontexts_no_setype_failed: true
+              when: >-
+                'setype is required' in
+                (ansible_failed_result | default({}) | to_json)
+
+        - name: Assert selinux_fcontexts entry missing setype was rejected
+          ansible.builtin.assert:
+            that:
+              - __invalid_input_fcontexts_no_setype_failed | default(false)
+            fail_msg: >-
+              assert_role_vars should reject selinux_fcontexts entries with
+              state present that do not specify setype
+
+        - name: Assert accepts selinux_fcontexts entry missing setype when state is absent
+          block:
+            - name: Run role with absent selinux_fcontexts and no setype
+              ansible.builtin.include_tasks: tasks/run_role_with_clear_facts.yml
+              vars:
+                selinux_fcontexts:
+                  - target: /tmp/test_dir_no_setype(/.*)?
+                    state: absent
+            - name: Mark absent fcontexts without setype succeeded
+              ansible.builtin.set_fact:
+                __valid_fcontexts_absent_no_setype_succeeded: true
+          rescue:
+            - name: Fail because absent fcontexts without setype should be accepted
+              ansible.builtin.fail:
+                msg: >-
+                  selinux_fcontexts entries with state absent and no setype
+                  should be accepted, since sefcontext supports removing
+                  mappings by target alone
+
+        - name: Assert absent selinux_fcontexts without setype was accepted
+          ansible.builtin.assert:
+            that:
+              - __valid_fcontexts_absent_no_setype_succeeded | default(false)
+            fail_msg: >-
+              The role should not fail with an undefined attribute error
+              when selinux_fcontexts state is absent and setype is omitted
+
+        - name: Assert rejects selinux_logins entry missing seuser when state is present
+          block:
+            - name: Run role with selinux_logins missing seuser
+              ansible.builtin.include_tasks: tasks/run_role_with_clear_facts.yml
+              vars:
+                selinux_logins:
+                  - login: sar-user
+                    state: present
+          rescue:
+            - name: Mark missing seuser cross-field rejected
+              ansible.builtin.set_fact:
+                __invalid_input_logins_no_seuser_failed: true
+              when: >-
+                'seuser is required' in
+                (ansible_failed_result | default({}) | to_json)
+
+        - name: Assert selinux_logins entry missing seuser was rejected
+          ansible.builtin.assert:
+            that:
+              - __invalid_input_logins_no_seuser_failed | default(false)
+            fail_msg: >-
+              assert_role_vars should reject selinux_logins entries with
+              state present that do not specify seuser
+
+        - name: Assert accepts selinux_logins entry missing seuser when state is absent
+          block:
+            - name: Run role with absent selinux_logins and no seuser
+              ansible.builtin.include_tasks: tasks/run_role_with_clear_facts.yml
+              vars:
+                selinux_logins:
+                  - login: sar-user-no-seuser
+                    state: absent
+            - name: Mark absent logins without seuser succeeded
+              ansible.builtin.set_fact:
+                __valid_logins_absent_no_seuser_succeeded: true
+          rescue:
+            - name: Fail because absent logins without seuser should be accepted
+              ansible.builtin.fail:
+                msg: >-
+                  selinux_logins entries with state absent and no seuser
+                  should be accepted
+
+        - name: Assert absent selinux_logins without seuser was accepted
+          ansible.builtin.assert:
+            that:
+              - __valid_logins_absent_no_seuser_succeeded | default(false)
+            fail_msg: >-
+              The role should not fail with an undefined attribute error
+              when selinux_logins state is absent and seuser is omitted
+
+        - name: Assert rejects selinux_modules entry missing name and path
+          block:
+            - name: Run role with selinux_modules missing name and path
+              ansible.builtin.include_tasks: tasks/run_role_with_clear_facts.yml
+              vars:
+                selinux_modules:
+                  - state: absent
+          rescue:
+            - name: Mark missing name/path rejected
+              ansible.builtin.set_fact:
+                __invalid_input_modules_no_name_or_path_failed: true
+              when: >-
+                'must specify at least one of name or path' in
+                (ansible_failed_result | default({}) | to_json)
+
+        - name: Assert selinux_modules entry missing name and path was rejected
+          ansible.builtin.assert:
+            that:
+              - __invalid_input_modules_no_name_or_path_failed | default(false)
+            fail_msg: >-
+              assert_role_vars should reject selinux_modules entries that
+              specify neither name nor path
+
+      always:
+        - name: Clear test facts
+          ansible.builtin.set_fact:
+            __valid_defaults_succeeded:
+            __invalid_input_state_choice_failed:
+            __invalid_input_booleans_type_failed:
+            __invalid_input_booleans_missing_name_failed:
+            __invalid_input_booleans_missing_state_failed:
+            __invalid_input_booleans_state_type_failed:
+            __invalid_input_fcontexts_missing_target_failed:
+            __invalid_input_fcontexts_ftype_failed:
+            __invalid_input_fcontexts_state_failed:
+            __invalid_input_logins_missing_login_failed:
+            __invalid_input_logins_state_failed:
+            __invalid_input_ports_missing_ports_failed:
+            __invalid_input_ports_missing_setype_failed:
+            __invalid_input_ports_proto_failed:
+            __invalid_input_modules_state_failed:
+            __invalid_input_modules_priority_failed:
+            __invalid_input_all_purge_type_failed:
+            __invalid_input_booleans_purge_type_failed:
+            __invalid_input_fcontexts_purge_type_failed:
+            __invalid_input_ports_purge_type_failed:
+            __invalid_input_logins_purge_type_failed:
+            __invalid_input_reboot_ok_string_failed:
+            __invalid_input_reboot_ok_int_failed:
+            __valid_state_null_succeeded:
+            __invalid_input_fcontexts_no_setype_failed:
+            __valid_fcontexts_absent_no_setype_succeeded:
+            __invalid_input_logins_no_seuser_failed:
+            __valid_logins_absent_no_seuser_succeeded:
+            __invalid_input_modules_no_name_or_path_failed:
+          tags: tests::cleanup
