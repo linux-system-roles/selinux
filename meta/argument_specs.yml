@@ -1,0 +1,270 @@
+# SPDX-License-Identifier: MIT
+---
+argument_specs:
+  main:
+    short_description: The selinux role.
+    description: >
+      The selinux role allows you to manage the SELinux mode and policy,
+      local customizations (booleans, file contexts, ports, and user
+      logins), SELinux policy modules, and filesystem relabeling.
+
+      This role will optionally change the SELinux state and policy,
+      apply or purge local modifications, install or remove SELinux
+      policy modules, and run `restorecon` on the directories listed in
+      `selinux_restore_dirs`.
+    options:
+      selinux_state:
+        type: raw
+        default: null
+        description: >
+          The SELinux mode to set on the system: `disabled`,
+          `enforcing`, or `permissive`. Accepts a string or `null`. If
+          not set, the SELinux state is not changed.
+      selinux_policy:
+        type: str
+        default: null
+        description: >
+          The name of the SELinux policy to use, such as `targeted`. If
+          not set and SELinux is being enabled, the policy defaults to
+          `targeted`. If SELinux is already enabled, the policy is not
+          changed.
+      selinux_transactional_update_reboot_ok:
+        type: raw
+        default: null
+        description: >
+          Whether to allow a reboot on transactional update systems
+          after packages required by this role are installed. Accepts a
+          boolean value or `null`. If not set, the role fails when a
+          reboot is required so that the requirement is not overlooked.
+      selinux_booleans:
+        type: list
+        elements: dict
+        default: []
+        description: >
+          A list of SELinux booleans to set. Each item is in the same
+          format used by the `seboolean` module.
+        options:
+          name:
+            type: str
+            required: true
+            description: >
+              The name of the SELinux boolean.
+          state:
+            type: bool
+            required: true
+            description: >
+              The desired value of the boolean.
+          persistent:
+            type: bool
+            description: >
+              Whether the boolean setting should survive a reboot.
+      selinux_fcontexts:
+        type: list
+        elements: dict
+        default: []
+        description: >
+          A list of SELinux file context mapping definitions to set.
+          Each item is in the same format used by the `sefcontext`
+          module.
+        options:
+          target:
+            type: str
+            required: true
+            description: >
+              The target path expression for the file context mapping.
+          setype:
+            type: str
+            description: >
+              The SELinux type for `target`. Required when `state` is
+              `present`.
+          ftype:
+            type: str
+            choices:
+              - a
+              - b
+              - c
+              - d
+              - f
+              - l
+              - p
+              - s
+            default: a
+            description: >
+              The file type that should have SELinux contexts applied:
+              `a` for all files, `b` for block devices, `c` for
+              character devices, `d` for directories, `f` for regular
+              files, `l` for symbolic links, `p` for named pipes, or `s`
+              for socket files.
+          seuser:
+            type: str
+            description: >
+              The SELinux user for `target`.
+          selevel:
+            type: str
+            description: >
+              The MLS/MCS security range for `target`.
+          state:
+            type: str
+            choices:
+              - present
+              - absent
+            default: present
+            description: >
+              Whether the file context mapping should be `present` or
+              `absent`.
+      selinux_logins:
+        type: list
+        elements: dict
+        default: []
+        description: >
+          A list of Linux user to SELinux user mappings to set. Each
+          item is in the same format used by the `selogin` module.
+        options:
+          login:
+            type: str
+            required: true
+            description: >
+              The Linux user name. Also accepts `%group` to map a Linux
+              group, or `__default__` to set the default mapping.
+          seuser:
+            type: str
+            description: >
+              The SELinux user to map `login` to.
+          serange:
+            type: str
+            default: s0
+            description: >
+              The MLS/MCS security range for the SELinux login mapping.
+          state:
+            type: str
+            choices:
+              - present
+              - absent
+            default: present
+            description: >
+              Whether the login mapping should be `present` or `absent`.
+          reload:
+            type: bool
+            default: false
+            description: >
+              Whether to reload the SELinux policy after applying the
+              change.
+      selinux_ports:
+        type: list
+        elements: dict
+        default: []
+        description: >
+          A list of SELinux port type definitions to set. Each item is
+          in the same format used by the `seport` module.
+        options:
+          ports:
+            type: list
+            elements: str
+            required: true
+            description: >
+              A port, port range, or list of ports/port ranges to
+              label, such as `22100` or `10000-10100`.
+          proto:
+            type: str
+            choices:
+              - tcp
+              - udp
+              - dccp
+              - sctp
+            default: tcp
+            description: >
+              The protocol for `ports`. `dccp` and `sctp` are only
+              supported on EL8 and later.
+          setype:
+            type: str
+            required: true
+            description: >
+              The SELinux type for `ports`.
+          state:
+            type: str
+            choices:
+              - present
+              - absent
+            default: present
+            description: >
+              Whether the port mapping should be `present` or `absent`.
+          local:
+            type: bool
+            default: false
+            description: >
+              Whether to work with local modifications only.
+      selinux_restore_dirs:
+        type: list
+        elements: path
+        default: []
+        description: >
+          A list of filesystem trees on which to run `restorecon` to
+          restore SELinux labels.
+      selinux_modules:
+        type: list
+        elements: dict
+        default: []
+        description: >
+          A list of SELinux policy modules to install, enable, disable,
+          or remove.
+        options:
+          path:
+            type: path
+            description: >
+              The path to a local module file (`.pp` or `.cil`) to
+              install. Used with `state` set to `enabled`.
+          name:
+            type: str
+            description: >
+              The module name. Used to enable a disabled module,
+              disable an enabled module, or remove a module.
+          priority:
+            type: int
+            default: 400
+            description: >
+              The SELinux module priority. `100` is used for modules
+              installed from `selinux-policy` packages, `200` for other
+              modules installed from third-party RPMs, and `300` is
+              used by SETroubleshoot. Module priorities are ignored on
+              Red Hat Enterprise Linux 6.
+          state:
+            type: str
+            choices:
+              - enabled
+              - disabled
+              - absent
+            default: enabled
+            description: >
+              Whether the module should be installed or enabled
+              (`enabled`), disabled (`disabled`), or removed (`absent`).
+      selinux_all_purge:
+        type: bool
+        default: false
+        description: >
+          Whether to purge all local SELinux modifications (booleans,
+          file contexts, ports, and login mappings) before applying the
+          ones specified by this role.
+      selinux_booleans_purge:
+        type: bool
+        default: false
+        description: >
+          Whether to purge local SELinux boolean modifications before
+          applying `selinux_booleans`.
+      selinux_fcontexts_purge:
+        type: bool
+        default: false
+        description: >
+          Whether to purge local SELinux file context modifications
+          before applying `selinux_fcontexts`.
+      selinux_ports_purge:
+        type: bool
+        default: false
+        description: >
+          Whether to purge local SELinux port modifications before
+          applying `selinux_ports`.
+      selinux_logins_purge:
+        type: bool
+        default: false
+        description: >
+          Whether to purge local SELinux login mapping modifications
+          before applying `selinux_logins`.
