@@ -10,6 +10,9 @@ selinux_logins: []
 selinux_ports: []
 selinux_restore_dirs: []
 
+# List of SELinux policy modules to install, enable, disable, or remove.
+selinux_modules: []
+
 # Purging local modifications is disabled by default.
 selinux_all_purge: false
 selinux_booleans_purge: false
