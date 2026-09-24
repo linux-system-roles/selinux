@@ -1,0 +1,63 @@
+# SPDX-License-Identifier: MIT
+---
+- name: Assert selinux_state is null or one of the allowed values
+  ansible.builtin.assert:
+    that:
+      - >-
+        (selinux_state is none)
+        or (selinux_state in ['disabled', 'enforcing', 'permissive'])
+    fail_msg: >-
+      selinux_state must be null, disabled, enforcing, or permissive,
+      got {{ selinux_state }} ({{ selinux_state | type_debug }})
+
+- name: Assert selinux_transactional_update_reboot_ok is null or a boolean
+  ansible.builtin.assert:
+    that:
+      - >-
+        (selinux_transactional_update_reboot_ok is none)
+        or (selinux_transactional_update_reboot_ok is sameas true)
+        or (selinux_transactional_update_reboot_ok is sameas false)
+    fail_msg: >-
+      selinux_transactional_update_reboot_ok must be null or a boolean,
+      got {{ selinux_transactional_update_reboot_ok | type_debug }}
+
+- name: Assert setype is set when state is present in selinux_fcontexts
+  ansible.builtin.assert:
+    that:
+      - item.setype | default('', true) | length > 0
+    fail_msg: >-
+      selinux_fcontexts[{{ idx }}].setype is required when state is
+      present
+  loop: "{{ selinux_fcontexts }}"
+  loop_control:
+    index_var: idx
+    label: "{{ item.target | d('unnamed') }}"
+  when: (item.state | default('present')) == 'present'
+
+- name: Assert seuser is set when state is present in selinux_logins
+  ansible.builtin.assert:
+    that:
+      - item.seuser | default('', true) | length > 0
+    fail_msg: >-
+      selinux_logins[{{ idx }}].seuser is required when state is
+      present
+  loop: "{{ selinux_logins }}"
+  loop_control:
+    index_var: idx
+    label: "{{ item.login | d('unnamed') }}"
+  when: (item.state | default('present')) == 'present'
+
+- name: Assert selinux_modules items specify name or path
+  ansible.builtin.assert:
+    that:
+      - >-
+        (item.name | default('', true) | length > 0)
+        or (item.path | default('', true) | length > 0)
+    fail_msg: >-
+      selinux_modules[{{ idx }}] must specify at least one of name or
+      path
+  loop: "{{ selinux_modules }}"
+  loop_control:
+    index_var: idx
+    label: "{{ idx }}"
+  when: selinux_modules | length > 0

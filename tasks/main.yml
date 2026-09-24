@@ -1,4 +1,7 @@
 ---
+- name: Validate role parameters
+  ansible.builtin.include_tasks: assert_role_vars.yml
+
 - name: Set ansible_facts required by role and install packages
   include_tasks: set_facts_packages.yml
 
@@ -157,7 +160,7 @@
   vars:
     __selinux_sefcontext_args:
       target: "{{ __selinux_item.target }}"
-      setype: "{{ __selinux_item.setype }}"
+      setype: "{{ __selinux_item.setype | default(omit) }}"
       ftype: "{{ __selinux_item.ftype | default('a') }}"
       state: "{{ __selinux_item.state | default('present') }}"
       selevel: "{{ __selinux_item.selevel | default(omit) }}"
@@ -186,7 +189,7 @@
   vars:
     __selinux_selogin_args:
       login: "{{ __selinux_item.login }}"
-      seuser: "{{ __selinux_item.seuser }}"
+      seuser: "{{ __selinux_item.seuser | default(omit) }}"
       serange: "{{ __selinux_item.serange | default('s0') }}"
       state: "{{ __selinux_item.state | default('present') }}"
       reload: "{{ __selinux_item.reload | default(False) }}"
