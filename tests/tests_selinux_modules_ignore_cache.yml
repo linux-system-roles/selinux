@@ -35,6 +35,9 @@
 
         - name: Set module cache path
           set_fact:
+            __selinux_test_module_dir: "{{ __selinux_test_store_root ~
+              '/targeted/active/modules/400/' ~
+              'linux-system-roles-selinux-test-a' }}"
             __selinux_test_module_cache: "{{ __selinux_test_store_root ~
               '/targeted/active/modules/400/' ~
               'linux-system-roles-selinux-test-a/cil' }}"
@@ -92,6 +95,28 @@
               - >-
                 selinux_installed_modules
                 ['linux-system-roles-selinux-test-c']['400']['enabled'] != 0
+
+        - name: Remove the installed module cache directory
+          file:
+            path: "{{ __selinux_test_module_dir }}"
+            state: absent
+
+        - name: Reinstall the module whose cache directory is missing
+          include_tasks: tasks/run_role_with_clear_facts.yml
+          vars:
+            selinux_modules:
+              - path: selinux_modules/linux-system-roles-selinux-test-a.pp
+                ignore_module_cache: true
+
+        - name: Check that the module cache was regenerated
+          stat:
+            path: "{{ __selinux_test_module_cache }}"
+          register: __selinux_test_regenerated_cache
+
+        - name: Verify that the module cache was regenerated
+          assert:
+            that:
+              - __selinux_test_regenerated_cache.stat.exists
       always:
         - name: Remove test modules and rebuild the module cache
           command: "semodule -C -r {{ item }}"

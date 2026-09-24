@@ -138,6 +138,12 @@ def run_module():
                 r = 0
                 m_checksum = ""
                 checksums = False
+            except Exception:
+                r = 0
+                m_checksum = ""
+
+            if r != 0:
+                m_checksum = ""
 
             if m_name not in selinux_modules:
                 selinux_modules[m_name] = {}

@@ -202,20 +202,21 @@ def semodule_install(module, path, priority, ignore_module_cache, sh):
             if r != 0:
                 raise Exception(r)
 
-        try:
-            r, module_checksum, _len = semanage.semanage_module_compute_checksum(
-                sh, modkey, cil
-            )
+        if not ignore_module_cache:
+            try:
+                r, module_checksum, _len = semanage.semanage_module_compute_checksum(
+                    sh, modkey, cil
+                )
 
-        except Exception:
-            r = 0
-            module_checksum = ""
+            except Exception:
+                r = 0
+                module_checksum = ""
 
-        if r != 0:
-            raise Exception(r)
+            if r != 0:
+                raise Exception(r)
 
-        if path_checksum == module_checksum:
-            return result
+            if path_checksum == module_checksum:
+                return result
 
         if priority != 0:
             semanage.semanage_set_default_priority(sh, priority)
