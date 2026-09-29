@@ -61,3 +61,24 @@
     index_var: idx
     label: "{{ idx }}"
   when: selinux_modules | length > 0
+
+# tasks/selinux_load_module.yml only runs the "Disable module" task
+# when path is not set, so a disabled item with path present would be
+# silently skipped (no error, no effect). state defaults to enabled
+# when omitted, matching selinux_load_module.yml's own default.
+- name: Assert selinux_modules disabled items specify name and not path
+  ansible.builtin.assert:
+    that:
+      - item.name | default('', true) | length > 0
+      - item.path | default('', true) | length == 0
+    fail_msg: >-
+      selinux_modules[{{ idx }}] must specify name and must not
+      specify path when state is disabled, since disabling a module is
+      skipped whenever path is set
+  loop: "{{ selinux_modules }}"
+  loop_control:
+    index_var: idx
+    label: "{{ idx }}"
+  when:
+    - selinux_modules | length > 0
+    - (item.state | default('enabled')) == 'disabled'
