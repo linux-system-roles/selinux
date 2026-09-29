@@ -676,6 +676,59 @@
               assert_role_vars should reject selinux_modules entries that
               specify neither name nor path
 
+        - name: Assert rejects selinux_modules disabled entry with path only
+          block:
+            - name: Run role with disabled selinux_modules entry using path only
+              ansible.builtin.include_tasks: tasks/run_role_with_clear_facts.yml
+              vars:
+                selinux_modules:
+                  - path: mymodule.pp
+                    state: disabled
+          rescue:
+            - name: Mark disabled path-only module rejected
+              ansible.builtin.set_fact:
+                __invalid_input_modules_disabled_path_only_failed: true
+              when: >-
+                'must specify name and must not specify path' in
+                (ansible_failed_result | default({}) | to_json)
+
+        - name: Assert disabled selinux_modules entry with path only was rejected
+          ansible.builtin.assert:
+            that:
+              - __invalid_input_modules_disabled_path_only_failed | default(false)
+            fail_msg: >-
+              assert_role_vars should reject selinux_modules entries with
+              state disabled that specify path instead of name, since
+              disabling is silently skipped whenever path is set
+
+        - name: Assert accepts selinux_modules absent entry with path only
+          block:
+            - name: Run role with absent selinux_modules entry using path only
+              ansible.builtin.include_tasks: tasks/run_role_with_clear_facts.yml
+              vars:
+                selinux_modules:
+                  - path: linux-system-roles-selinux-test-nonexistent.pp
+                    state: absent
+            - name: Mark absent path-only module succeeded
+              ansible.builtin.set_fact:
+                __valid_modules_absent_path_only_succeeded: true
+          rescue:
+            - name: Fail because absent path-only module should be accepted
+              ansible.builtin.fail:
+                msg: >-
+                  selinux_modules entries with state absent and path
+                  only (no name) should be accepted, since the module
+                  name is derived from the path's basename
+
+        - name: Assert absent selinux_modules entry with path only was accepted
+          ansible.builtin.assert:
+            that:
+              - __valid_modules_absent_path_only_succeeded | default(false)
+            fail_msg: >-
+              assert_role_vars should accept selinux_modules entries
+              with state absent that specify only path, since a valid
+              module name can be derived from the path's basename
+
       always:
         - name: Clear test facts
           ansible.builtin.set_fact:
@@ -708,4 +761,6 @@
             __invalid_input_logins_no_seuser_failed:
             __valid_logins_absent_no_seuser_succeeded:
             __invalid_input_modules_no_name_or_path_failed:
+            __invalid_input_modules_disabled_path_only_failed:
+            __valid_modules_absent_path_only_succeeded:
           tags: tests::cleanup
