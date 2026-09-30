@@ -356,6 +356,27 @@
                   argument_specs should reject selinux_modules priority
                   values that are not integers
 
+            - name: Argument specs reject non-boolean ignore_module_cache in selinux_modules
+              block:
+                - name: Run role with non-boolean selinux_modules ignore_module_cache
+                  ansible.builtin.include_tasks: tasks/run_role_with_clear_facts.yml
+                  vars:
+                    selinux_modules:
+                      - name: mymodule
+                        ignore_module_cache: not_a_bool
+              rescue:
+                - name: Mark invalid ignore_module_cache rejected
+                  ansible.builtin.set_fact:
+                    __invalid_input_modules_ignore_cache_failed: true
+
+            - name: Assert non-boolean ignore_module_cache in selinux_modules was rejected
+              ansible.builtin.assert:
+                that:
+                  - __invalid_input_modules_ignore_cache_failed | default(false)
+                fail_msg: >-
+                  argument_specs should reject selinux_modules
+                  ignore_module_cache values that are not booleans
+
             # --- Test: simple boolean parameters ---
             - name: Argument specs reject invalid selinux_all_purge type
               block:
@@ -748,6 +769,7 @@
             __invalid_input_ports_proto_failed:
             __invalid_input_modules_state_failed:
             __invalid_input_modules_priority_failed:
+            __invalid_input_modules_ignore_cache_failed:
             __invalid_input_all_purge_type_failed:
             __invalid_input_booleans_purge_type_failed:
             __invalid_input_fcontexts_purge_type_failed:
