@@ -227,6 +227,13 @@ argument_specs:
               modules installed from third-party RPMs, and `300` is
               used by SETroubleshoot. Module priorities are ignored on
               Red Hat Enterprise Linux 6.
+          ignore_module_cache:
+            type: bool
+            default: false
+            description: >
+              Whether to recompile high-level language modules instead
+              of using cached CIL files when installing `path`. This is
+              equivalent to using `semodule --ignore-module-cache`.
           state:
             type: str
             choices:
