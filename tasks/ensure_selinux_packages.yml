@@ -81,11 +81,31 @@
      ansible_facts['distribution'] in ["CentOS", "RedHat", "Rocky"])
   register: selinux_semanage_result
 
+# A staged install reports ok on re-runs, so ask rpm (by provides) if it is live.
+- name: Check whether the packages are live on a transactional update system
+  command:  # noqa command-instead-of-module
+    argv: "{{ ['rpm', '-q', '--whatprovides'] + __selinux_wanted_packages }}"
+  register: __selinux_packages_live
+  changed_when: false
+  failed_when: false
+  check_mode: false
+  vars:
+    __selinux_wanted_packages: "{{
+      (['python3-selinux', 'python3-policycoreutils']
+       if (ansible_facts['python_version'] is version('3', '>=') and
+           ansible_facts['os_family'] == 'Suse') else []) +
+      (['policycoreutils-python-utils']
+       if ansible_facts['distribution'] == 'SL-Micro' else []) }}"
+  when:
+    - __selinux_is_transactional | d(false)
+    - __selinux_wanted_packages | length > 0
+
 - name: Handle reboot for transactional update systems
   when:
     - __selinux_is_transactional | d(false)
     - selinux_python3_tools_result is changed or
-      selinux_semanage_result is changed
+      selinux_semanage_result is changed or
+      (__selinux_packages_live.rc | d(0)) != 0
   block:
     - name: Notify user that reboot is needed to apply changes
       debug:
@@ -95,7 +115,9 @@
     - name: Reboot transactional update systems
       reboot:
         msg: Rebooting the system to apply transactional update changes.
-      when: selinux_transactional_update_reboot_ok | bool
+      when:
+        - selinux_transactional_update_reboot_ok is not none
+        - selinux_transactional_update_reboot_ok | bool
 
     - name: Fail if reboot is needed and not set
       fail:
