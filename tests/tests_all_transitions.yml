@@ -23,6 +23,11 @@
           meta: end_host
           when: __ostree_booted_stat.stat.exists
 
+        # the bootloader role does not support SUSE yet
+        - name: Skip on SUSE
+          meta: end_host
+          when: ansible_facts['os_family'] == 'Suse'
+
     - name: Include test variables
       import_tasks: set_selinux_variables.yml
 
