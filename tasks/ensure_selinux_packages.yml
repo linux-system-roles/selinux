@@ -77,6 +77,7 @@
              ternary('ansible.posix.rhel_rpm_ostree', omit) }}"
   when: ansible_facts['distribution'] == "Fedora" or
     ansible_facts['distribution'] == "SL-Micro" or
+    ansible_facts['os_family'] == "Suse" or
     (ansible_facts['distribution_major_version'] | int > 7 and
      ansible_facts['distribution'] in ["CentOS", "RedHat", "Rocky"])
   register: selinux_semanage_result
@@ -95,7 +96,8 @@
        if (ansible_facts['python_version'] is version('3', '>=') and
            ansible_facts['os_family'] == 'Suse') else []) +
       (['policycoreutils-python-utils']
-       if ansible_facts['distribution'] == 'SL-Micro' else []) }}"
+       if (ansible_facts['distribution'] == 'SL-Micro' or
+           ansible_facts['os_family'] == 'Suse') else []) }}"
   when:
     - __selinux_is_transactional | d(false)
     - __selinux_wanted_packages | length > 0
