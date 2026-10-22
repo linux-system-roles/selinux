@@ -2,6 +2,13 @@
 ---
 - name: Verify invalid parameters are rejected
   hosts: all
+  vars:
+    __invalid_input_failure_messages: >-
+      {{ ([ansible_failed_result.msg | default('') | string,
+           ansible_failed_result.msg.msg | default('') | string]
+          + (ansible_failed_result.results | default([])
+             | map(attribute='msg') | map('default', '') | list))
+         | join(' ') }}
   tasks:
     - name: Run invalid input tests
       block:
@@ -39,6 +46,9 @@
                 - name: Mark selinux_booleans type rejected
                   ansible.builtin.set_fact:
                     __invalid_input_booleans_type_failed: true
+                  when: >-
+                    'selinux_booleans' in __invalid_input_failure_messages and
+                    'convert to dict' in __invalid_input_failure_messages
 
             - name: Assert selinux_booleans as a string was rejected
               ansible.builtin.assert:
@@ -60,8 +70,8 @@
                   ansible.builtin.set_fact:
                     __invalid_input_booleans_missing_name_failed: true
                   when: >-
-                    'missing required arguments' in
-                    (ansible_failed_result | default({}) | to_json)
+                    'missing required arguments: name' in __invalid_input_failure_messages and
+                    'selinux_booleans' in __invalid_input_failure_messages
 
             - name: Assert missing name in selinux_booleans was rejected
               ansible.builtin.assert:
@@ -83,8 +93,8 @@
                   ansible.builtin.set_fact:
                     __invalid_input_booleans_missing_state_failed: true
                   when: >-
-                    'missing required arguments' in
-                    (ansible_failed_result | default({}) | to_json)
+                    'missing required arguments: state' in __invalid_input_failure_messages and
+                    'selinux_booleans' in __invalid_input_failure_messages
 
             - name: Assert missing state in selinux_booleans was rejected
               ansible.builtin.assert:
@@ -106,6 +116,10 @@
                 - name: Mark invalid state type rejected
                   ansible.builtin.set_fact:
                     __invalid_input_booleans_state_type_failed: true
+                  when: >-
+                    "argument 'state'" in __invalid_input_failure_messages and
+                    'selinux_booleans' in __invalid_input_failure_messages and
+                    'convert to bool' in __invalid_input_failure_messages
 
             - name: Assert non-boolean state in selinux_booleans was rejected
               ansible.builtin.assert:
@@ -128,8 +142,8 @@
                   ansible.builtin.set_fact:
                     __invalid_input_fcontexts_missing_target_failed: true
                   when: >-
-                    'missing required arguments' in
-                    (ansible_failed_result | default({}) | to_json)
+                    'missing required arguments: target' in __invalid_input_failure_messages and
+                    'selinux_fcontexts' in __invalid_input_failure_messages
 
             - name: Assert missing target in selinux_fcontexts was rejected
               ansible.builtin.assert:
@@ -153,8 +167,9 @@
                   ansible.builtin.set_fact:
                     __invalid_input_fcontexts_ftype_failed: true
                   when: >-
-                    'must be one of' in
-                    (ansible_failed_result | default({}) | to_json)
+                    'value of ftype must be one of' in __invalid_input_failure_messages and
+                    'invalid_ftype' in __invalid_input_failure_messages and
+                    'selinux_fcontexts' in __invalid_input_failure_messages
 
             - name: Assert invalid ftype was rejected
               ansible.builtin.assert:
@@ -178,8 +193,9 @@
                   ansible.builtin.set_fact:
                     __invalid_input_fcontexts_state_failed: true
                   when: >-
-                    'must be one of' in
-                    (ansible_failed_result | default({}) | to_json)
+                    'value of state must be one of' in __invalid_input_failure_messages and
+                    'not_a_valid_state' in __invalid_input_failure_messages and
+                    'selinux_fcontexts' in __invalid_input_failure_messages
 
             - name: Assert invalid state in selinux_fcontexts was rejected
               ansible.builtin.assert:
@@ -202,8 +218,8 @@
                   ansible.builtin.set_fact:
                     __invalid_input_logins_missing_login_failed: true
                   when: >-
-                    'missing required arguments' in
-                    (ansible_failed_result | default({}) | to_json)
+                    'missing required arguments: login' in __invalid_input_failure_messages and
+                    'selinux_logins' in __invalid_input_failure_messages
 
             - name: Assert missing login in selinux_logins was rejected
               ansible.builtin.assert:
@@ -227,8 +243,9 @@
                   ansible.builtin.set_fact:
                     __invalid_input_logins_state_failed: true
                   when: >-
-                    'must be one of' in
-                    (ansible_failed_result | default({}) | to_json)
+                    'value of state must be one of' in __invalid_input_failure_messages and
+                    'not_a_valid_state' in __invalid_input_failure_messages and
+                    'selinux_logins' in __invalid_input_failure_messages
 
             - name: Assert invalid state in selinux_logins was rejected
               ansible.builtin.assert:
@@ -251,8 +268,8 @@
                   ansible.builtin.set_fact:
                     __invalid_input_ports_missing_ports_failed: true
                   when: >-
-                    'missing required arguments' in
-                    (ansible_failed_result | default({}) | to_json)
+                    'missing required arguments: ports' in __invalid_input_failure_messages and
+                    'selinux_ports' in __invalid_input_failure_messages
 
             - name: Assert missing ports in selinux_ports was rejected
               ansible.builtin.assert:
@@ -274,8 +291,8 @@
                   ansible.builtin.set_fact:
                     __invalid_input_ports_missing_setype_failed: true
                   when: >-
-                    'missing required arguments' in
-                    (ansible_failed_result | default({}) | to_json)
+                    'missing required arguments: setype' in __invalid_input_failure_messages and
+                    'selinux_ports' in __invalid_input_failure_messages
 
             - name: Assert missing setype in selinux_ports was rejected
               ansible.builtin.assert:
@@ -299,8 +316,9 @@
                   ansible.builtin.set_fact:
                     __invalid_input_ports_proto_failed: true
                   when: >-
-                    'must be one of' in
-                    (ansible_failed_result | default({}) | to_json)
+                    'value of proto must be one of' in __invalid_input_failure_messages and
+                    'not_a_valid_proto' in __invalid_input_failure_messages and
+                    'selinux_ports' in __invalid_input_failure_messages
 
             - name: Assert invalid proto in selinux_ports was rejected
               ansible.builtin.assert:
@@ -324,8 +342,9 @@
                   ansible.builtin.set_fact:
                     __invalid_input_modules_state_failed: true
                   when: >-
-                    'must be one of' in
-                    (ansible_failed_result | default({}) | to_json)
+                    'value of state must be one of' in __invalid_input_failure_messages and
+                    'not_a_valid_state' in __invalid_input_failure_messages and
+                    'selinux_modules' in __invalid_input_failure_messages
 
             - name: Assert invalid state in selinux_modules was rejected
               ansible.builtin.assert:
@@ -347,6 +366,10 @@
                 - name: Mark invalid priority rejected
                   ansible.builtin.set_fact:
                     __invalid_input_modules_priority_failed: true
+                  when: >-
+                    "argument 'priority'" in __invalid_input_failure_messages and
+                    'selinux_modules' in __invalid_input_failure_messages and
+                    'convert to int' in __invalid_input_failure_messages
 
             - name: Assert non-integer priority in selinux_modules was rejected
               ansible.builtin.assert:
@@ -368,6 +391,10 @@
                 - name: Mark invalid ignore_module_cache rejected
                   ansible.builtin.set_fact:
                     __invalid_input_modules_ignore_cache_failed: true
+                  when: >-
+                    "argument 'ignore_module_cache'" in __invalid_input_failure_messages and
+                    'selinux_modules' in __invalid_input_failure_messages and
+                    'convert to bool' in __invalid_input_failure_messages
 
             - name: Assert non-boolean ignore_module_cache in selinux_modules was rejected
               ansible.builtin.assert:
@@ -388,6 +415,9 @@
                 - name: Mark invalid selinux_all_purge rejected
                   ansible.builtin.set_fact:
                     __invalid_input_all_purge_type_failed: true
+                  when: >-
+                    "argument 'selinux_all_purge'" in __invalid_input_failure_messages and
+                    'convert to bool' in __invalid_input_failure_messages
 
             - name: Assert invalid selinux_all_purge type was rejected
               ansible.builtin.assert:
@@ -407,6 +437,9 @@
                 - name: Mark invalid selinux_booleans_purge rejected
                   ansible.builtin.set_fact:
                     __invalid_input_booleans_purge_type_failed: true
+                  when: >-
+                    "argument 'selinux_booleans_purge'" in __invalid_input_failure_messages and
+                    'convert to bool' in __invalid_input_failure_messages
 
             - name: Assert invalid selinux_booleans_purge type was rejected
               ansible.builtin.assert:
@@ -426,6 +459,9 @@
                 - name: Mark invalid selinux_fcontexts_purge rejected
                   ansible.builtin.set_fact:
                     __invalid_input_fcontexts_purge_type_failed: true
+                  when: >-
+                    "argument 'selinux_fcontexts_purge'" in __invalid_input_failure_messages and
+                    'convert to bool' in __invalid_input_failure_messages
 
             - name: Assert invalid selinux_fcontexts_purge type was rejected
               ansible.builtin.assert:
@@ -445,6 +481,9 @@
                 - name: Mark invalid selinux_ports_purge rejected
                   ansible.builtin.set_fact:
                     __invalid_input_ports_purge_type_failed: true
+                  when: >-
+                    "argument 'selinux_ports_purge'" in __invalid_input_failure_messages and
+                    'convert to bool' in __invalid_input_failure_messages
 
             - name: Assert invalid selinux_ports_purge type was rejected
               ansible.builtin.assert:
@@ -464,6 +503,9 @@
                 - name: Mark invalid selinux_logins_purge rejected
                   ansible.builtin.set_fact:
                     __invalid_input_logins_purge_type_failed: true
+                  when: >-
+                    "argument 'selinux_logins_purge'" in __invalid_input_failure_messages and
+                    'convert to bool' in __invalid_input_failure_messages
 
             - name: Assert invalid selinux_logins_purge type was rejected
               ansible.builtin.assert:
@@ -489,9 +531,9 @@
               ansible.builtin.set_fact:
                 __invalid_input_state_choice_failed: true
               when: >-
-                'selinux_state must be null, disabled, enforcing, or
-                permissive' in
-                (ansible_failed_result | default({}) | to_json)
+                'selinux_state must be null, disabled, enforcing, or permissive'
+                in __invalid_input_failure_messages and
+                'got not_a_valid_state' in __invalid_input_failure_messages
 
         - name: Assert invalid selinux_state value was rejected
           ansible.builtin.assert:
@@ -537,8 +579,10 @@
               ansible.builtin.set_fact:
                 __invalid_input_reboot_ok_string_failed: true
               when: >-
-                'must be null or a boolean' in
-                (ansible_failed_result | default({}) | to_json)
+                'selinux_transactional_update_reboot_ok must be null or a boolean'
+                in __invalid_input_failure_messages and
+                ('got str' in __invalid_input_failure_messages or
+                 'got AnsibleUnicode' in __invalid_input_failure_messages)
 
         - name: Assert selinux_transactional_update_reboot_ok as a string was rejected
           ansible.builtin.assert:
@@ -560,8 +604,8 @@
               ansible.builtin.set_fact:
                 __invalid_input_reboot_ok_int_failed: true
               when: >-
-                'must be null or a boolean' in
-                (ansible_failed_result | default({}) | to_json)
+                'selinux_transactional_update_reboot_ok must be null or a boolean' in __invalid_input_failure_messages and
+                'got int' in __invalid_input_failure_messages
 
         - name: Assert selinux_transactional_update_reboot_ok as an integer was rejected
           ansible.builtin.assert:
@@ -586,8 +630,7 @@
               ansible.builtin.set_fact:
                 __invalid_input_fcontexts_no_setype_failed: true
               when: >-
-                'setype is required' in
-                (ansible_failed_result | default({}) | to_json)
+                'selinux_fcontexts[0].setype is required when state is present' in __invalid_input_failure_messages
 
         - name: Assert selinux_fcontexts entry missing setype was rejected
           ansible.builtin.assert:
@@ -637,8 +680,7 @@
               ansible.builtin.set_fact:
                 __invalid_input_logins_no_seuser_failed: true
               when: >-
-                'seuser is required' in
-                (ansible_failed_result | default({}) | to_json)
+                'selinux_logins[0].seuser is required when state is present' in __invalid_input_failure_messages
 
         - name: Assert selinux_logins entry missing seuser was rejected
           ansible.builtin.assert:
@@ -686,8 +728,7 @@
               ansible.builtin.set_fact:
                 __invalid_input_modules_no_name_or_path_failed: true
               when: >-
-                'must specify at least one of name or path' in
-                (ansible_failed_result | default({}) | to_json)
+                'selinux_modules[0] must specify at least one of name or path' in __invalid_input_failure_messages
 
         - name: Assert selinux_modules entry missing name and path was rejected
           ansible.builtin.assert:
@@ -710,8 +751,7 @@
               ansible.builtin.set_fact:
                 __invalid_input_modules_disabled_path_only_failed: true
               when: >-
-                'must specify name and must not specify path' in
-                (ansible_failed_result | default({}) | to_json)
+                'selinux_modules[0] must specify name and must not specify path' in __invalid_input_failure_messages
 
         - name: Assert disabled selinux_modules entry with path only was rejected
           ansible.builtin.assert:
