@@ -70,32 +70,53 @@
             that:
               - not __selinux_modules_needs_reload | bool
 
-        - name: Disable and remove the module in check mode
+        - name: Disable the module in check mode
           check_mode: true
           vars:
             selinux_modules:
               - {name: "{{ __test_module }}", state: disabled}
+          block:
+            - name: Run the role in check mode
+              include_tasks: tasks/run_role_with_clear_facts.yml
+
+        - name: Get installed modules after check mode disable
+          command: semodule -lfull
+          register: __modules_after_check_disable
+          changed_when: false
+          check_mode: false
+
+        - name: Check that check mode reported the disable but did not disable
+          assert:
+            that:
+              - __selinux_modules_needs_reload | bool
+              - __modules_after_check_disable.stdout_lines |
+                select('search', __test_module ~ ' ') |
+                reject('search', 'disabled') | list | length == 1
+
+        - name: Remove the module in check mode
+          check_mode: true
+          vars:
+            selinux_modules:
               - {name: "{{ __test_module }}", state: absent}
           block:
             - name: Run the role in check mode
               include_tasks: tasks/run_role_with_clear_facts.yml
 
-        - name: Get installed modules after check mode disable and remove
-          command: semodule -lfull
+        - name: Get installed modules after check mode remove
+          command: semodule -l
           register: __modules_after_check_remove
           changed_when: false
           check_mode: false
 
-        - name: Check that check mode reported the changes but did not make them
+        - name: Check that check mode reported the remove but did not remove
           assert:
             that:
               - __selinux_modules_needs_reload | bool
-              - __modules_after_check_remove.stdout_lines |
-                select('search', __test_module ~ ' ') |
-                reject('search', 'disabled') | list | length == 1
+              - __test_module in __modules_after_check_remove.stdout_lines
       always:
         - name: Cleanup modules
           command: semodule -r {{ __test_module }}
           ignore_errors: true  # noqa ignore-errors
           changed_when: false
           check_mode: false
+          tags: tests::cleanup
