@@ -221,6 +221,10 @@ def semodule_install(module, path, priority, ignore_module_cache, sh):
         if priority != 0:
             semanage.semanage_set_default_priority(sh, priority)
 
+    if module.check_mode:
+        result["changed"] = True
+        return result
+
     if ignore_module_cache:
         try:
             semanage.semanage_set_ignore_module_cache(sh, 1)
@@ -278,10 +282,17 @@ def semodule_enable(module, name, enabled, sh):
         if enabled == m_enabled:
             return result
 
+        if module.check_mode:
+            result["changed"] = True
+            return result
+
         r = semanage.semanage_module_set_enabled(sh, modkey, enabled)
         if r < 0:
             raise ValueError("Could not enable/disable module {name}".format(name=name))
     else:
+        if module.check_mode:
+            result["changed"] = True
+            return result
         if enabled:
             r = semanage.semanage_module_enable(sh, name)
         else:
@@ -327,6 +338,9 @@ def semodule_remove(module, name, priority, sh):
             if name == m_name:
                 r, m_prio = semanage.semanage_module_info_get_priority(sh, m)
                 if priority == 0 or priority == m_prio:
+                    if module.check_mode:
+                        result["changed"] = True
+                        continue
                     semanage.semanage_set_default_priority(sh, m_prio)
                     r = semanage.semanage_module_remove(sh, name)
                     if r < 0:
@@ -338,6 +352,10 @@ def semodule_remove(module, name, priority, sh):
                             )
                     else:
                         result["changed"] = True
+    elif module.check_mode:
+        # the old libsemanage API cannot tell whether the module is installed
+        # without removing it, so report a possible change
+        result["changed"] = True
     else:
         r = semanage.semanage_module_remove(sh, name)
         if r < 0:
@@ -348,7 +366,7 @@ def semodule_remove(module, name, priority, sh):
         else:
             result["changed"] = True
 
-    if result["changed"]:
+    if result["changed"] and not module.check_mode:
         semanage.semanage_commit(sh)
 
     return result

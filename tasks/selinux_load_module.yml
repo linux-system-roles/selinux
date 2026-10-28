@@ -59,6 +59,18 @@
               __selinux_item.ignore_module_cache | d(false) }}"
           register: __selinux_policy_installed
           when: tempdir.path is defined
+
+        # In check mode the tempfile task is skipped, so the module file is
+        # not copied or installed.  Report the change that would be made
+        # instead of reporting no change.
+        - name: Report that the module would be installed in check mode
+          debug:
+            msg: >-
+              Module {{ __selinux_item.path | basename }} would be installed
+              at priority {{ priority }}
+          changed_when: true
+          register: __selinux_policy_install_check
+          when: tempdir is skipped
       always:
         - name: Clean temporary directory {{ tempdir.path | d("") }}
           file:
@@ -101,6 +113,7 @@
     selinux_checksums: "{{ ansible_facts['selinux_checksums'] }}"
     __selinux_modules_needs_reload: "{{ (__selinux_modules_needs_reload | d(false)) or
       (__selinux_policy_installed is defined and __selinux_policy_installed is changed) or
+      (__selinux_policy_install_check is defined and __selinux_policy_install_check is changed) or
       (__selinux_policy_removed is defined and __selinux_policy_removed is changed) or
       (__selinux_policy_enabled is defined and __selinux_policy_enabled is changed) or
       (__selinux_policy_disabled is defined and __selinux_policy_disabled is changed) }}"
