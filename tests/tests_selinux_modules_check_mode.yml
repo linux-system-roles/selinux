@@ -48,7 +48,8 @@
           assert:
             that:
               - __selinux_modules_needs_reload | bool
-              - __test_module not in __modules_after_check_install.stdout_lines
+              - __modules_after_check_install.stdout_lines |
+                select('match', __test_module ~ '(\\s|$)') | list | length == 0
 
         - name: Install the module
           vars:
@@ -90,8 +91,8 @@
             that:
               - __selinux_modules_needs_reload | bool
               - __modules_after_check_disable.stdout_lines |
-                select('search', __test_module ~ ' ') |
-                reject('search', 'disabled') | list | length == 1
+                select('match', '[0-9]+\\s+' ~ __test_module ~ '\\s') |
+                reject('search', '\\sdisabled$') | list | length == 1
 
         - name: Remove the module in check mode
           check_mode: true
@@ -112,7 +113,8 @@
           assert:
             that:
               - __selinux_modules_needs_reload | bool
-              - __test_module in __modules_after_check_remove.stdout_lines
+              - __modules_after_check_remove.stdout_lines |
+                select('match', __test_module ~ '(\\s|$)') | list | length == 1
       always:
         - name: Cleanup modules
           command: semodule -r {{ __test_module }}
