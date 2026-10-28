@@ -243,7 +243,11 @@ module to manage the SELinux mode and policy.</p>
 <p><strong>NOTE:</strong> On EL 8 and later, the role will use the
 <code>update_kernel_param: true</code> of the <code>selinux</code>
 module to update the kernel command line in order to ensure the selinux
-state update is applied and persistent upon reboot.</p>
+state update is applied and persistent upon reboot. Changing
+<code>selinux_state</code> to or from <code>disabled</code> is not yet
+supported on SUSE systems, because the role then adds or removes
+<code>selinux=0</code> on the kernel command line with the
+<code>bootloader</code> role, which does not support them.</p>
 <h2 id="selinux_booleans">selinux_booleans</h2>
 <p>Manage the state of SELinux booleans. This is a <code>list</code> of
 <code>dict</code>, where each <code>dict</code> is in the same format as
