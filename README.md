@@ -211,10 +211,10 @@ supported policydb module version on target systems, i.e. on the oldest system.
 **Note:** Managing modules is idempotent only on Fedora, and EL 8.6 and later.
 You can manage modules on older releases, but it will not be idempotent.
 
-**Note:** In check mode, the role reports the module changes it would make
-without making them. On releases where managing modules is not idempotent,
-check mode reports that a module would be installed even when it is already
-installed.
+**Note:** In check mode, the role reports as changed the tasks that would
+install, enable, disable or remove a module, without making those changes. On
+releases where managing modules is not idempotent, check mode reports that a
+module would be installed even when it is already installed.
 
 ### selinux_transactional_update_reboot_ok
 
