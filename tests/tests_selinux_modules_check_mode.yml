@@ -1,0 +1,124 @@
+---
+- name: Test that check mode reports SELinux module changes without making them
+  hosts: all
+  tags:
+    # SELinux is not active during container builds, this test covers runtime behaviour
+    - tests::booted
+  vars:
+    __test_module: linux-system-roles-selinux-test-a
+  tasks:
+    - name: Ensure facts, test variables used by role
+      set_fact:
+        __selinux_test_facts:
+          - distribution
+          - distribution_version
+    - name: Ensure ansible_facts used by test
+      setup:
+        gather_subset: min
+      when: not ansible_facts.keys() | list |
+        intersect(__selinux_test_facts) == __selinux_test_facts
+    - name: Set when condition for the check mode test
+      set_fact:
+        __run_selinux_modules_check_mode: "{{
+          ansible_facts['distribution'] == 'Fedora' or
+          (ansible_facts['distribution'] in ['CentOS', 'RedHat', 'Rocky'] and
+           ansible_facts['distribution_version'] is version('8.6', '>=')) }}"
+    - name: Run the check mode tests
+      when: __run_selinux_modules_check_mode
+      block:
+        - name: Run the role without modules to install the required packages
+          include_tasks: tasks/run_role_with_clear_facts.yml
+
+        - name: Install a new module in check mode
+          check_mode: true
+          vars:
+            selinux_modules:
+              - {path: "selinux_modules/{{ __test_module }}.pp"}
+          block:
+            - name: Run the role in check mode
+              include_tasks: tasks/run_role_with_clear_facts.yml
+
+        - name: Get installed modules after check mode install
+          command: semodule -l
+          register: __modules_after_check_install
+          changed_when: false
+          check_mode: false
+
+        - name: Check that check mode reported the install but did not install
+          assert:
+            that:
+              - __selinux_modules_needs_reload | bool
+              - __modules_after_check_install.stdout_lines |
+                select('match', __test_module ~ '(\\s|$)') | list | length == 0
+
+        - name: Install the module
+          vars:
+            selinux_modules:
+              - {path: "selinux_modules/{{ __test_module }}.pp"}
+          include_tasks: tasks/run_role_with_clear_facts.yml
+
+        - name: Install the same module again in check mode
+          check_mode: true
+          vars:
+            selinux_modules:
+              - {path: "selinux_modules/{{ __test_module }}.pp"}
+          block:
+            - name: Run the role in check mode
+              include_tasks: tasks/run_role_with_clear_facts.yml
+
+        - name: Check that check mode reports no change for an installed module
+          assert:
+            that:
+              - not __selinux_modules_needs_reload | bool
+
+        - name: Disable the module in check mode
+          check_mode: true
+          vars:
+            selinux_modules:
+              - {name: "{{ __test_module }}", state: disabled}
+          block:
+            - name: Run the role in check mode
+              include_tasks: tasks/run_role_with_clear_facts.yml
+
+        - name: Get installed modules after check mode disable
+          command: semodule -lfull
+          register: __modules_after_check_disable
+          changed_when: false
+          check_mode: false
+
+        - name: Check that check mode reported the disable but did not disable
+          assert:
+            that:
+              - __selinux_modules_needs_reload | bool
+              - __modules_after_check_disable.stdout_lines |
+                select('match', '[0-9]+\\s+' ~ __test_module ~ '\\s') |
+                reject('search', '\\sdisabled$') | list | length == 1
+
+        - name: Remove the module in check mode
+          check_mode: true
+          vars:
+            selinux_modules:
+              - {name: "{{ __test_module }}", state: absent}
+          block:
+            - name: Run the role in check mode
+              include_tasks: tasks/run_role_with_clear_facts.yml
+
+        - name: Get installed modules after check mode remove
+          command: semodule -l
+          register: __modules_after_check_remove
+          changed_when: false
+          check_mode: false
+
+        - name: Check that check mode reported the remove but did not remove
+          assert:
+            that:
+              - __selinux_modules_needs_reload | bool
+              - __modules_after_check_remove.stdout_lines |
+                select('match', __test_module ~ '(\\s|$)') | list | length == 1
+      always:
+        - name: Cleanup modules
+          command: semodule -r {{ __test_module }}
+          ignore_errors: true  # noqa ignore-errors
+          changed_when: false
+          check_mode: false
+          tags: tests::cleanup

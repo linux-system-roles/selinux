@@ -59,6 +59,17 @@
               __selinux_item.ignore_module_cache | d(false) }}"
           register: __selinux_policy_installed
           when: tempdir.path is defined
+
+        # In check mode the tempfile task is skipped, so the module file is
+        # not copied or installed.  Report the change that would be made
+        # instead of reporting no change.
+        - name: >-
+            Report in check mode that this module would be installed
+            {{ __selinux_item.path | basename }}
+          set_fact:
+            __selinux_modules_needs_reload: true
+          changed_when: true
+          when: tempdir is skipped
       always:
         - name: Clean temporary directory {{ tempdir.path | d("") }}
           file:
