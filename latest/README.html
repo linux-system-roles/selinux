@@ -367,6 +367,11 @@ Enterprise Linux 6</p>
 <p><strong>Note:</strong> Managing modules is idempotent only on Fedora,
 and EL 8.6 and later. You can manage modules on older releases, but it
 will not be idempotent.</p>
+<p><strong>Note:</strong> In check mode, the role reports as changed the
+tasks that would install, enable, disable or remove a module, without
+making those changes. On releases where managing modules is not
+idempotent, check mode reports that a module would be installed even
+when it is already installed.</p>
 <h2
 id="selinux_transactional_update_reboot_ok">selinux_transactional_update_reboot_ok</h2>
 <p>This variable is used to handle reboots required by transactional
