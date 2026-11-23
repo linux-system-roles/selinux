@@ -1,6 +1,43 @@
 Changelog
 =========
 
+[1.14.0] - 2026-11-23
+--------------------
+
+### New Features
+
+- feat: Add an option to ignore the SELinux module cache when installing a module (#388)
+- feat: Argument spec implementation for selinux role (#391)
+- feat: Add SLE16 support (#407)
+
+### Bug Fixes
+
+- fix: Fixing the pre-install checksum lookup with conditions and error handling (#394)
+- fix: Reboot transactional systems when packages are staged but not live (#402)
+- fix: report SELinux module changes in check mode (#408)
+
+### Other Changes
+
+- ci: no CI test by default - implement slash commands for CI tests [citest_skip] (#390)
+- ci: ansible-test-milestone is now version 2.23 - update sanity ignore files (#392)
+- ci: allow lsr org members to run ci tests (#393)
+- ci: Run Dependabot monthly and group changes in a single PR (#400)
+- ci: bump tox-lsr version 3.21.0, myrotvorets/set-commit-status-action, support leap-16.0 (#401)
+- ci: use shared actions and lock workflow dependencies (#403)
+- ci: use shared actions and lock workflow dependencies (#404)
+- ci: Use order 10 for centos vault task so that it runs first (#405)
+- test: check invalid inputs for correct error message (#406)
+- docs: add AI policy; update setup-python, codeql actions (#409)
+- ci: retry centos vault repo failures using new package_retry yum/dnf plugin (#410)
+- docs: tag markdown plain text blocks correctly (#411)
+- ci: Use a fixed 5 minute backoff for CentOS vault repos (#412)
+- ci: support Fedora 45, Ansible 2.22; drop Fedora 43 (#413)
+- ci: use ubuntu 24.04 for test envs that use py39 (#414)
+- ci: use ubuntu 26.04 with podman 5.x and disable apparmor restriction (#415)
+- docs: add AGENTS.md with shared developer conventions from .github (#416)
+- docs: remove extra blank lines from .coderabbit.yaml (#417)
+- ci: update tox-lsr for support for tests/module_utils (#418)
+
 [1.13.1] - 2026-09-17
 --------------------
 
